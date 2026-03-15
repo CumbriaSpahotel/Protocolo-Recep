@@ -28,7 +28,7 @@ const getCatMap = () => {
     return (typeof navigation_config !== 'undefined') ? navigation_config : DEFAULT_CAT_MAP;
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
     // Initialize Theme
     const isDark = localStorage.getItem('darkMode') === 'true';
     if (isDark) {
@@ -46,9 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
         protocols.sort((a, b) => new Date(b.published) - new Date(a.published));
         initApp();
     } else {
-        postsList.innerHTML = '<div class="error-msg">Error: data.js no encontrado.</div>';
+        const postsListEl = document.getElementById('posts-list');
+        if (postsListEl) postsListEl.innerHTML = '<div class="error-msg">Error: data.js no encontrado.</div>';
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 
 function initApp() {
     renderNavigation();
@@ -379,7 +386,10 @@ function renderList(items, container, highlightText = '') {
 
         let scope = p.source ? p.source : 'Ambos hoteles';
         if (scope === 'Ambos hoteles') scope = 'Sercotel Guadiana y Cumbria Spa & Hotel';
-        const statusDisplay = p.status || estadoHtml;
+        let statusDisplay = p.status || estadoHtml;
+        if (statusDisplay === 'Activo') statusDisplay = '🟢 Activo';
+        if (statusDisplay === 'En redacción') statusDisplay = '🟠 En redacción';
+        if (statusDisplay === 'En proceso') statusDisplay = '🔴 En proceso';
         const bestDate = p.updated || p.published;
         
         item.innerHTML = `
@@ -471,7 +481,13 @@ function loadProtocol(p, highlightText = '') {
                 <div class="protocol-meta-bar" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #555; font-size: 0.9rem; padding-bottom: 0.5rem;">
                     <span><i class="fas fa-calendar-alt"></i> <b>Última revisión:</b> ${formatDate(p.published)}</span>
                     <span style="color: #ccc;">|</span>
-                    <span><b>Estado:</b> ${p.status || estadoHtml}</span>
+                    <span><b>Estado:</b> ${(() => {
+                        let s = p.status || estadoHtml;
+                        if (s === 'Activo') return '🟢 Activo';
+                        if (s === 'En redacción') return '🟠 En redacción';
+                        if (s === 'En proceso') return '🔴 En proceso';
+                        return s;
+                    })()}</span>
                     <span style="color: #ccc;">|</span>
                     <span><i class="fas fa-hotel"></i> <b>Destinatario:</b> <span style="font-weight: normal;">${scope}</span></span>
                     ${p.section ? `<span style="color: #ccc;">|</span><span><i class="fas fa-folder"></i> <b>Sección:</b> ${p.section}</span>` : ''}

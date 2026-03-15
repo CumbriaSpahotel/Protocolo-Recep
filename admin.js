@@ -74,7 +74,7 @@ function initQuill() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAdmin() {
 
     // Initialize Data
     if (typeof protocols_data !== 'undefined') {
@@ -147,7 +147,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
+    // Location/Section ID auto-generation listeners
+    const editCategory = document.getElementById('edit-category');
+    const editParent = document.getElementById('edit-parent-section');
+    
+    if (editCategory) {
+        editCategory.addEventListener('change', () => {
+            updateParentSections();
+            generateNextId(true);
+        });
+    }
+    
+    if (editParent) {
+        editParent.addEventListener('change', () => {
+            generateNextId(true);
+        });
+    }
     // Sync
     document.getElementById('btn-sync').addEventListener('click', () => {
         location.reload();
@@ -217,7 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const selectedStatus = document.getElementById('edit-status').value;
-        const statusDisplay = selectedStatus || estadoHtml || '⚪ Sin definir';
+        let statusDisplay = selectedStatus || '⚪ Sin definir';
+        if (selectedStatus === 'Activo') statusDisplay = '🟢 Activo';
+        if (selectedStatus === 'En redacción') statusDisplay = '🟠 En redacción';
+        if (selectedStatus === 'En proceso') statusDisplay = '🔴 En proceso';
+        
+        if (!selectedStatus && estadoHtml) statusDisplay = estadoHtml;
 
         let content = '';
         if (isHtmlMode) {
@@ -325,7 +345,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         });
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdmin);
+} else {
+    initAdmin();
+}
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
@@ -474,19 +500,7 @@ function populateCategories() {
         });
     }
 
-    // New: Handle Parent Sections based on Category
-    select.addEventListener('input', () => {
-        updateParentSections();
-        generateNextId();
-    });
-    
-    document.getElementById('edit-parent-section').addEventListener('input', () => {
-        generateNextId();
-    });
-    
-    // Also Keep change for select tags compatibility
-    select.addEventListener('change', generateNextId);
-    document.getElementById('edit-parent-section').addEventListener('change', generateNextId);
+
 }
 
 function updateParentSections(selectedParent = '') {
@@ -518,7 +532,7 @@ function updateParentSections(selectedParent = '') {
     if (selectedParent) parentSelect.value = selectedParent;
 }
 
-function generateNextId() {
+function generateNextId(force = false) {
     const categoryId = document.getElementById('edit-category').value.trim();
     const parentSection = document.getElementById('edit-parent-section').value.trim();
     const sectionInput = document.getElementById('edit-section');
@@ -528,8 +542,8 @@ function generateNextId() {
         return;
     }
     
-    // Only auto-generate if it's a NEW protocol OR if the field is empty (to help fix errors)
-    if (editingIndex !== -1 && sectionInput.value) return;
+    // Only auto-generate if it's a NEW protocol OR if the field is empty OR if forced
+    if (editingIndex !== -1 && sectionInput.value && !force) return;
 
     let highest = 0;
 
