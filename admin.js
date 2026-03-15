@@ -3,6 +3,20 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+// Protección por contraseña
+(function() {
+    const storedPass = sessionStorage.getItem('adminAuth');
+    if (storedPass !== 'Recp2026') {
+        const pass = prompt('Introduce la clave de administrador:');
+        if (pass === 'Recp2026') {
+            sessionStorage.setItem('adminAuth', 'Recp2026');
+        } else {
+            alert('Acceso denegado');
+            window.location.href = 'index.html';
+        }
+    }
+})();
+
 // Sorting state
 let currentSortColumn = 'section';
 let currentSortDirection = 'asc';
@@ -1118,7 +1132,10 @@ function saveToServer(protocolsData, navData, homeData) {
     })
     .catch(err => {
         console.error(err);
-        alert('Error conectando al servidor. ¿Está "node server.js" en ejecución?');
+        const proceed = confirm('Error conectando al servidor. ¿Deseas descargar el archivo "data.js" manualmente para guardar los cambios?');
+        if (proceed) {
+            showDownloadPrompt(payload);
+        }
     });
 }
 

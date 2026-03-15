@@ -120,6 +120,19 @@ function initApp() {
         });
     }
 
+    // Admin Access Protection
+    const adminBtn = document.getElementById('admin-access');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            const pass = prompt('Introduce la clave de acceso:');
+            if (pass === 'Recp2026') {
+                window.location.href = 'admin.html';
+            } else if (pass !== null) {
+                alert('Clave incorrecta');
+            }
+        });
+    }
+
     // Sticky Retractable Header Logic
     let lastScrollY = window.scrollY;
     const topNav = document.querySelector('.top-nav');
