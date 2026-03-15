@@ -41,6 +41,23 @@ app.post('/api/save', (req, res) => {
     }
 });
 
+const { exec } = require('child_process');
+
+app.post('/api/publish', (req, res) => {
+    const commitMsg = `Update protocols: ${new Date().toLocaleString()}`;
+    const command = `git add . && git commit -m "${commitMsg}" && git push origin main`;
+    
+    console.log('🚀 Iniciando publicación en GitHub...');
+    exec(command, { cwd: __dirname }, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`❌ Error en Git: ${error.message}`);
+            return res.status(500).json({ success: false, message: error.message });
+        }
+        console.log(`✅ GitHub actualizado: ${stdout}`);
+        res.json({ success: true, message: 'Publicado en GitHub correctamente' });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Servidor de desarrollo iniciado en http://localhost:${PORT}/admin.html`);
     console.log('Mantén esta ventana abierta mientras editas.');

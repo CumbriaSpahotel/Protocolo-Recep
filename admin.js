@@ -254,6 +254,37 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-close-preview').addEventListener('click', () => {
         document.getElementById('preview-modal').style.display = 'none';
     });
+
+    // GitHub Publish Logic
+    const btnPublish = document.getElementById('btn-publish');
+    if (btnPublish) {
+        btnPublish.addEventListener('click', () => {
+            if (!confirm('Esto subirá todos los cambios guardados a la web pública de GitHub. ¿Continuar?')) return;
+            
+            btnPublish.disabled = true;
+            btnPublish.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+            
+            const publishUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/publish' : '/api/publish';
+            
+            fetch(publishUrl, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('✅ ¡Web actualizada en GitHub!');
+                    } else {
+                        alert('Error al publicar: ' + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error conectando al servidor para publicar.');
+                })
+                .finally(() => {
+                    btnPublish.disabled = false;
+                    btnPublish.innerHTML = '<i class="fab fa-github"></i> Publicar en GitHub';
+                });
+        });
+    }
 });
 
 function switchTab(tabId) {
