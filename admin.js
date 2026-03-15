@@ -255,6 +255,45 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('preview-modal').style.display = 'none';
     });
 
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        // Init theme
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            const icon = themeBtn.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            
+            const icon = themeBtn.querySelector('i');
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+    }
+
+    // Admin Access Protection / Redirection (for consistency)
+    const adminBtn = document.getElementById('admin-access');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            // Already in admin, maybe just scroll to top or alert
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     // GitHub Publish Logic
     const btnPublish = document.getElementById('btn-publish');
     if (btnPublish) {
