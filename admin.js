@@ -309,7 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        showToast('✅ ¡Web actualizada en GitHub!');
+                        showToast('✅ ¡Enviado a GitHub!');
+                        alert('Los cambios se han enviado. GitHub tardará unos 2-3 minutos en actualizar la web pública. Por favor, espera un poco antes de refrescar la página pública.');
                     } else {
                         alert('Error al publicar: ' + data.message);
                     }

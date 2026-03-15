@@ -83,7 +83,21 @@
         </aside>
     </div>
 
-    <script src="data.js?v=4"></script>
-    <script src="app.js?v=4"></script>
+    <script>
+        // Cargador dinámico para evitar que el navegador guarde versiones viejas de los datos
+        (function() {
+            const timestamp = Date.now();
+            const scripts = [
+                'data.js?t=' + timestamp,
+                'app.js?t=' + timestamp
+            ];
+            scripts.forEach(src => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = false; // Carga secuencial obligatoria
+                document.body.appendChild(s);
+            });
+        })();
+    </script>
 </body>
 </html>
