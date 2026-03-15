@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="Imagenes/Logo.png" type="image/png">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content" style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="Imagenes/Logo.png" alt="Logo" style="height: 50px; background: white; padding: 5px; border-radius: 4px;">
+                <h1>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
+            </div>
+            <button id="theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.3s;">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <nav class="top-nav">
+        <div class="nav-container" id="top-nav-items">
+            <a href="#" class="nav-link active" data-cat="inicio"><i class="fas fa-th-large"></i> Inicio</a>
+            <!-- Categories will be injected here -->
+        </div>
+    </nav>
+
+    <div class="app-wrapper">
+        <!-- Main Column -->
+        <main class="main-col" id="main-column">
+            <!-- Content will be injected here -->
+            <div class="welcome-card">
+                <h2><i class="fas fa-file-signature"></i> Bienvenido al Blog de Procedimientos de Recepción</h2>
+                <p>Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles. Aquí encontrarás guías prácticas, criterios unificados de atención y recursos útiles para facilitar el trabajo y mantener un estándar profesional en cada turno.</p>
+            </div>
+
+            <div class="latest-section">
+                <h2 class="section-title"><i class="fas fa-edit"></i> Últimas entradas publicadas y modificaciones</h2>
+                <div id="posts-list">
+                    <!-- Posts will be injected here -->
+                    <div class="nav-loading">Cargando protocolos...</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar Column -->
+        <aside class="sidebar-col">
+            <!-- Search Widget -->
+            <div class="sidebar-widget">
+                <h3 class="widget-title"><i class="fas fa-search"></i> Buscar en el blog</h3>
+                <div class="sidebar-search">
+                    <input type="text" id="search-input" placeholder="Escribe una palabra y pulsa Enter">
+                </div>
+            </div>
+
+            <div class="sidebar-widget">
+                <h3 class="widget-title"><i class="fas fa-edit"></i> REALIZO O MODIFICO UNA ENTRADA</h3>
+                <div class="attention-grid">
+                    <a href="#" id="btn-critical-errors" class="btn-chip btn-red"><i class="fas fa-exclamation-circle"></i> Errores Críticos</a>
+                    <a href="#" id="btn-announcements" class="btn-chip btn-blue"><i class="fas fa-bullhorn"></i> Comunicados</a>
+                    <a href="admin.html" class="btn-chip btn-green"><i class="fas fa-pen-to-square"></i> Realizo o modifico una entrada</a>
+                </div>
+            </div>
+
+
+            <!-- Quote/Graphic Widget -->
+            <div class="sidebar-widget graphic-box">
+                <h5>CLAVES PARA OPTIMIZAR EL TIEMPO EN RECEPCIÓN SIN PERDER LA CALMA</h5>
+                <p>1. Prioriza lo urgente: lo que impacta directamente al cliente</p>
+                <p>Atender check-in y check-out de forma rápida y amable.</p>
+                <p>Resolver problemas de habitación, llaves, pagos o servicios con agilidad.</p>
+            </div>
+        </aside>
+    </div>
+
+    <script src="data.js?v=3"></script>
+    <script src="app.js?v=3"></script>
+</body>
+</html>

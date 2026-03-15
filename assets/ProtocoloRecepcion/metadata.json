@@ -1,0 +1,12 @@
+{
+  "title": "ProtocoloRecepcion",
+  "remainingCapacity": "19986",
+  "totalItems": "14",
+  "totalItemsAccuracy": "EXACT",
+  "timeInfo": {
+    "startMs": "1697526170000",
+    "endMs": "1754644398000",
+    "creationMs": "1747337651000",
+    "newestOperationTimeMs": "1754644448054"
+  }
+}
