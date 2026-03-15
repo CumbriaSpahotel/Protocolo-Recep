@@ -345,6 +345,91 @@ function initAdmin() {
                 });
         });
     }
+
+    // --- Unified Settings & UI Initializers ---
+    if (typeof initSettingsEditors === 'function') initSettingsEditors();
+    if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
+    
+    // UI add buttons
+    const btnAddMenu = document.getElementById('btn-add-menu');
+    if (btnAddMenu) {
+        btnAddMenu.addEventListener('click', () => {
+            const currentRows = document.querySelectorAll('#menus-container .menu-row').length;
+            if (typeof addMenuRow === 'function') addMenuRow(currentRows + 1, '', 'fa-folder');
+        });
+    }
+    const btnAddCritical = document.getElementById('btn-add-critical');
+    if (btnAddCritical) {
+        btnAddCritical.addEventListener('click', () => {
+            if (typeof addAlertRow === 'function') addAlertRow(document.getElementById('alerts-critical-container'), '', 'Hoy', '');
+        });
+    }
+    const btnAddAnnounce = document.getElementById('btn-add-announcement');
+    if (btnAddAnnounce) {
+        btnAddAnnounce.addEventListener('click', () => {
+            if (typeof addAlertRow === 'function') addAlertRow(document.getElementById('alerts-announcements-container'), '', 'Hoy', '');
+        });
+    }
+    const btnAddNews = document.getElementById('btn-add-news');
+    if (btnAddNews) {
+        btnAddNews.addEventListener('click', () => {
+            if (typeof addNewsRow === 'function') addNewsRow(document.getElementById('featured-news-container'), '', '');
+        });
+    }
+    const btnAddGraphic = document.getElementById('btn-add-graphic-line');
+    if (btnAddGraphic) {
+        btnAddGraphic.addEventListener('click', () => {
+            if (typeof addGraphicLineRow === 'function') addGraphicLineRow(document.getElementById('graphic-lines-container'), '');
+        });
+    }
+    
+    // Save Menus Config
+    const btnSaveMenus = document.getElementById('btn-save-menus');
+    if (btnSaveMenus) {
+        btnSaveMenus.addEventListener('click', () => {
+            try {
+                const parsedNav = collectMenus();
+                if (typeof navigation_config !== 'undefined') {
+                    Object.keys(navigation_config).forEach(key => delete navigation_config[key]);
+                    Object.assign(navigation_config, parsedNav);
+                }
+                saveToServer(adminProtocols, parsedNav, typeof home_config !== 'undefined' ? home_config : undefined);
+                showToast('Configuración de menús guardada');
+                populateCategories(); 
+            } catch(e) {
+                alert('Error al guardar menús: ' + e.message);
+            }
+        });
+    }
+
+    // Save Home Config
+    const btnSaveInicio = document.getElementById('btn-save-inicio');
+    if (btnSaveInicio) {
+        btnSaveInicio.addEventListener('click', () => {
+            try {
+                const parsedHome = collectInicio();
+                saveToServer(adminProtocols, typeof navigation_config !== 'undefined' ? navigation_config : undefined, parsedHome);
+                showToast('Configuración de inicio guardada');
+            } catch(e) {
+                alert('Error al guardar inicio: ' + e.message);
+            }
+        });
+    }
+
+    // Icon Bank Listeners
+    const btnCloseIconBank = document.getElementById('btn-close-icon-bank');
+    if (btnCloseIconBank) {
+        btnCloseIconBank.addEventListener('click', () => {
+            document.getElementById('icon-bank-modal').style.display = 'none';
+        });
+    }
+
+    const iconSearch = document.getElementById('icon-search');
+    if (iconSearch) {
+        iconSearch.addEventListener('input', (e) => {
+            if (typeof renderIconBank === 'function') renderIconBank(e.target.value);
+        });
+    }
 }
 
 if (document.readyState === 'loading') {
@@ -1015,71 +1100,7 @@ function collectInicio() {
     return currHome;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initSettingsEditors();
-    setupDragAndDrop();
-    
-    // UI add buttons
-    const btnAddMenu = document.getElementById('btn-add-menu');
-    if (btnAddMenu) {
-        btnAddMenu.addEventListener('click', () => {
-            const currentRows = document.querySelectorAll('#menus-container .menu-row').length;
-            addMenuRow(currentRows + 1, '', 'fa-folder');
-        });
-    }
-    const btnAddCritical = document.getElementById('btn-add-critical');
-    if (btnAddCritical) {
-        btnAddCritical.addEventListener('click', () => {
-            addAlertRow(document.getElementById('alerts-critical-container'), '', 'Hoy', '');
-        });
-    }
-    const btnAddAnnounce = document.getElementById('btn-add-announcement');
-    if (btnAddAnnounce) {
-        btnAddAnnounce.addEventListener('click', () => {
-            addAlertRow(document.getElementById('alerts-announcements-container'), '', 'Hoy', '');
-        });
-    }
-    const btnAddNews = document.getElementById('btn-add-news');
-    if (btnAddNews) {
-        btnAddNews.addEventListener('click', () => {
-            addNewsRow(document.getElementById('featured-news-container'), '', '');
-        });
-    }
-    const btnAddGraphic = document.getElementById('btn-add-graphic-line');
-    if (btnAddGraphic) {
-        btnAddGraphic.addEventListener('click', () => {
-            addGraphicLineRow(document.getElementById('graphic-lines-container'), '');
-        });
-    }
-    
-    // Save Menus Config
-    document.getElementById('btn-save-menus').addEventListener('click', () => {
-        try {
-            const parsedNav = collectMenus();
-            // Update global navigation_config so the rest of the app sees the changes immediately
-            if (typeof navigation_config !== 'undefined') {
-                Object.keys(navigation_config).forEach(key => delete navigation_config[key]);
-                Object.assign(navigation_config, parsedNav);
-            }
-            saveToServer(adminProtocols, parsedNav, typeof home_config !== 'undefined' ? home_config : undefined);
-            showToast('Configuración de menús guardada');
-            populateCategories(); // refresh active categories in new protocol UI
-        } catch(e) {
-            alert('Error al guardar menús: ' + e.message);
-        }
-    });
 
-    // Save Home Config
-    document.getElementById('btn-save-inicio').addEventListener('click', () => {
-        try {
-            const parsedHome = collectInicio();
-            saveToServer(adminProtocols, typeof navigation_config !== 'undefined' ? navigation_config : undefined, parsedHome);
-            showToast('Configuración de inicio guardada');
-        } catch(e) {
-            alert('Error al guardar inicio: ' + e.message);
-        }
-    });
-});
 
 function deleteProtocol(index) {
     if (confirm('¿Estás seguro de que deseas eliminar este protocolo?')) {
@@ -1301,19 +1322,4 @@ function renderIconBank(filterText) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Icon Bank Listeners
-    const btnCloseIconBank = document.getElementById('btn-close-icon-bank');
-    if (btnCloseIconBank) {
-        btnCloseIconBank.addEventListener('click', () => {
-            document.getElementById('icon-bank-modal').style.display = 'none';
-        });
-    }
 
-    const iconSearch = document.getElementById('icon-search');
-    if (iconSearch) {
-        iconSearch.addEventListener('input', (e) => {
-            renderIconBank(e.target.value);
-        });
-    }
-});
