@@ -229,8 +229,9 @@ function renderNavigation() {
             
             link.innerHTML = `${iconHtml} ${cat.name}`;
             
-            // Special handling for external submenus
-            if (['9', '11', '12', '15'].includes(id)) {
+            // Special handling for submenus (hardcoded or dynamic)
+            const hasSubsections = cat.subsections && Object.keys(cat.subsections).length > 0;
+            if (['9', '11', '12', '15'].includes(id) || hasSubsections) {
                 link.innerHTML += ` <i class="fas fa-caret-down"></i>`;
                 
                 const dropdown = document.createElement('div');
@@ -261,6 +262,18 @@ function renderNavigation() {
                         <a href="#" class="internal-nav" data-search="calidad en destino"><i class="fas fa-trophy"></i> Calidad en destino</a>
                         <a href="https://nataliogc.github.io/menus-cocteles/" target="_blank"><i class="fas fa-lock"></i> Acceso Restringido (Menú Cóctel)</a>
                     `;
+                }
+
+                // Add dynamic subsections if they exist
+                if (cat.subsections) {
+                    Object.entries(cat.subsections).forEach(([subId, subName]) => {
+                        const subLink = document.createElement('a');
+                        subLink.href = '#';
+                        subLink.className = 'internal-nav';
+                        subLink.dataset.search = subId;
+                        subLink.innerHTML = `<i class="fas fa-angle-right" style="opacity:0.5;"></i> ${subName}`;
+                        dropdown.appendChild(subLink);
+                    });
                 }
                 
                 // Set up internal navigation links
@@ -760,6 +773,9 @@ function renderSidebar() {
                 const highlight = typeof line === 'string' ? false : line.highlight;
                 boxHtml += `<p style="${highlight ? 'font-weight:bold; color:var(--primary);' : ''}">${text}</p>`;
             });
+        }
+        if (home_config.graphic_box.custom_html) {
+            boxHtml += `<div class="custom-graphic-html" style="margin-top:10px; font-size: 0.85rem;">${home_config.graphic_box.custom_html}</div>`;
         }
         graphicBox.innerHTML = boxHtml;
     }

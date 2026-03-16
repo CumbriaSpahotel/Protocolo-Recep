@@ -543,11 +543,17 @@ function renderAdminTable(data) {
         const dateVal = formatAdminDate(p.published);
         const sourceVal = p.source || 'Ambos';
 
+        let statusIcon = '';
+        if (p.status === 'Activo') statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
+        else if (p.status === 'En redacción') statusIcon = '<span style="color: #fd7e14; margin-right: 5px;" title="En redacción"><i class="fas fa-edit"></i></span>';
+        else if (p.status === 'En proceso') statusIcon = '<span style="color: #dc3545; margin-right: 5px;" title="En proceso"><i class="fas fa-spinner fa-spin"></i></span>';
+        else if (p.title && p.title.includes('🟢')) statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
+
         tr.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="background: #f1f3f5; color: #0a6aa1; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-family: monospace; font-size: 0.95rem; border: 1px solid #dee2e6; min-width: 45px; text-align: center;">${secVal}</span>
-                    <strong style="font-size: 1rem; color: #333;">${p.title || 'Sin Título'}</strong>
+                    <strong style="font-size: 1rem; color: #333; display: flex; align-items: center;">${statusIcon} ${p.title || 'Sin Título'}</strong>
                 </div>
             </td>
             <td>
@@ -839,7 +845,7 @@ function renderMenuUI(navObj) {
     const sortedEntries = Object.entries(navObj).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
     
     sortedEntries.forEach(([id, cat], index) => {
-        addMenuRow(id, cat.name, cat.icon);
+        addMenuRow(id, cat.name, cat.icon, cat.subsections || {});
     });
 }
 
@@ -847,41 +853,84 @@ function updateMenuOrder() {
     const rows = document.querySelectorAll('#menus-container .menu-row');
     rows.forEach((row, index) => {
         const idInput = row.querySelector('.menu-id');
-        if (idInput) idInput.value = index + 1;
+        const oldId = idInput?.value;
+        const newId = (index + 1).toString();
+        
+        if (idInput) idInput.value = newId;
+        
+        // Update sub-ids if they changed
+        if (oldId && oldId !== newId) {
+            const subInputs = row.querySelectorAll('.sub-id');
+            subInputs.forEach(subIn => {
+                const subPart = subIn.value.split('.')[1] || '1';
+                subIn.value = `${newId}.${subPart}`;
+            });
+        }
     });
 }
 
-function addMenuRow(id, name, icon) {
+function addMenuRow(id, name, icon, subsections = {}) {
     const container = document.getElementById('menus-container');
     const row = document.createElement('div');
     row.className = 'menu-row';
     row.draggable = true;
-    row.style = 'display:grid; grid-template-columns: 50px 80px 1fr 280px 50px; gap: 15px; align-items: end; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: grab; position: relative;';
+    row.style = 'display:flex; flex-direction:column; gap: 10px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: grab; position: relative; margin-bottom: 15px;';
     
     row.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; height: 38px; color: #ccc;">
-            <i class="fas fa-grip-lines"></i>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Sección</label>
-            <input type="text" class="menu-id" value="${id}" readonly style="width:100%; padding:8px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-weight:bold; cursor: default;">
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Nombre de la Sección</label>
-            <input type="text" class="menu-name" value="${name}" placeholder="Ej: Operativa Diaria" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;" title="Nombre visible en la pestaña">
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Icono (Emoji o Clase)</label>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <span class="icon-preview-box" style="width: 40px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 1.2rem; color: var(--accent-blue, #0a6aa1);">${icon.startsWith('fa-') ? `<i class="fas ${icon}"></i>` : icon}</span>
-                <input type="text" class="menu-icon" value="${icon}" style="flex:1; min-width:60px; padding:8px; border:1px solid #ccc; border-radius:4px;" oninput="this.previousElementSibling.innerHTML = this.value.startsWith('fa-') ? '<i class=\\'fas ' + this.value + '\\'></i>' : this.value">
-                <button type="button" class="btn-icon-picker" style="background:#0a6aa1; color:white; border:none; border-radius:4px; padding:8px 12px; cursor:pointer; flex-shrink: 0;" onclick="openIconBank(this.previousElementSibling)" title="Buscar Icono"><i class="fas fa-icons"></i></button>
+        <div class="menu-row-main" style="display:grid; grid-template-columns: 30px 80px 1fr 200px 100px 40px; gap: 12px; align-items: end; width: 100%;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 38px; color: #ccc;">
+                <i class="fas fa-grip-lines"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform:uppercase;">Sección</label>
+                <input type="text" class="menu-id" value="${id}" readonly style="width:100%; padding:8px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-weight:bold; cursor: default;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform:uppercase;">Nombre de la Categoría</label>
+                <input type="text" class="menu-name" value="${name}" placeholder="Ej: Operativa Diaria" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform:uppercase;">Icono</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span class="icon-preview-box" style="width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 1.1rem; color: #0a6aa1;">${icon.startsWith('fa-') ? `<i class="fas ${icon}"></i>` : icon}</span>
+                    <input type="text" class="menu-icon" value="${icon}" style="flex:1; width:0; padding:8px; border:1px solid #ccc; border-radius:4px;" oninput="this.previousElementSibling.innerHTML = this.value.startsWith('fa-') ? '<i class=\\'fas ' + this.value + '\\'></i>' : this.value">
+                    <button type="button" class="btn-icon-picker" style="background:#f0f4f7; color:#0a6aa1; border:1px solid #0a6aa1; border-radius:4px; height:38px; width:38px; cursor:pointer; flex-shrink: 0;" onclick="openIconBank(this.previousElementSibling)" title="Buscar Icono"><i class="fas fa-icons"></i></button>
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button type="button" class="btn-add-sub" style="background:var(--accent); color:white; border:none; border-radius:4px; padding:8px 10px; cursor:pointer; width:100%; font-size:0.85rem; height:38px; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fas fa-plus-circle"></i> Subsección</button>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button type="button" class="btn-delete-row" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; border-radius:4px; height:38px; width:38px; cursor:pointer;" onclick="if(confirm('¿Eliminar toda la categoría y sus subsecciones?')) { this.closest('.menu-row').remove(); updateMenuOrder(); }" title="Eliminar Sección"><i class="fas fa-trash"></i></button>
             </div>
         </div>
-        <div style="display: flex; align-items: flex-end; padding-bottom: 2px;">
-            <button type="button" class="btn-delete-row" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:8px 12px; cursor:pointer; width:100%;" onclick="this.closest('.menu-row').remove(); updateMenuOrder();" title="Eliminar Sección"><i class="fas fa-trash"></i></button>
+        
+        <div class="subsections-container" style="margin-left: 42px; border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Subrows go here -->
         </div>
     `;
+
+    const subContainer = row.querySelector('.subsections-container');
+    const btnAddSub = row.querySelector('.btn-add-sub');
+
+    // Render existing subsections
+    Object.entries(subsections).sort((a,b) => {
+        const pA = parseInt(a[0].split('.')[1] || '0');
+        const pB = parseInt(b[0].split('.')[1] || '0');
+        return pA - pB;
+    }).forEach(([subId, subName]) => {
+        addSubRow(subContainer, subId, subName);
+    });
+
+    if (btnAddSub) {
+        btnAddSub.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const parentId = row.querySelector('.menu-id').value;
+            const count = subContainer.querySelectorAll('.sub-row').length + 1;
+            addSubRow(subContainer, `${parentId}.${count}`, '');
+        };
+    }
 
     // Drag and Drop Events
     row.addEventListener('dragstart', () => {
@@ -897,6 +946,20 @@ function addMenuRow(id, name, icon) {
 
     container.appendChild(row);
 }
+
+function addSubRow(container, id, name) {
+    const row = document.createElement('div');
+    row.className = 'sub-row';
+    row.style = 'display: grid; grid-template-columns: 80px 1fr 40px; gap: 10px; align-items: center; background: #fdfdfd; padding: 5px 10px; border: 1px solid #f0f0f0; border-radius: 4px;';
+    
+    row.innerHTML = `
+        <input type="text" class="sub-id" value="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
+        <input type="text" class="sub-name" value="${name}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
+        <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1rem;" onclick="this.parentElement.remove()" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#bbb'"><i class="fas fa-times-circle"></i></button>
+    `;
+    container.appendChild(row);
+}
+
 
 // Add global dragover listener to container
 // Add global dragover listener to container
@@ -972,6 +1035,9 @@ function renderInicioUI(homeObj) {
     if (homeObj?.graphic_box) {
         const homeGraphicTitle = document.getElementById('home-graphic-title');
         if (homeGraphicTitle) homeGraphicTitle.value = homeObj.graphic_box.title || '';
+        
+        const homeGraphicCustomHtml = document.getElementById('home-graphic-custom-html');
+        if (homeGraphicCustomHtml) homeGraphicCustomHtml.value = homeObj.graphic_box.custom_html || '';
     }
     const graphicLinesContainer = document.getElementById('graphic-lines-container');
     if (graphicLinesContainer) {
@@ -1034,13 +1100,29 @@ function collectMenus() {
         const id = row.querySelector('.menu-id').value.trim();
         const name = row.querySelector('.menu-name').value.trim();
         const icon = row.querySelector('.menu-icon').value.trim();
+        
         if (id && name) {
-            newNav[id] = { name, icon };
+            const subsectionsObj = {};
+            const subRows = row.querySelectorAll('.sub-row');
+            subRows.forEach(sub => {
+                const sId = sub.querySelector('.sub-id').value.trim();
+                const sName = sub.querySelector('.sub-name').value.trim();
+                if (sId && sName) {
+                    subsectionsObj[sId] = sName;
+                }
+            });
+            
+            newNav[id] = { 
+                name, 
+                icon,
+                subsections: subsectionsObj
+            };
         }
     });
     document.getElementById('edit-menus-json').value = JSON.stringify(newNav, null, 2);
     return newNav;
 }
+
 
 function collectInicio() {
     const currHome = JSON.parse(document.getElementById('edit-home-json').value || '{}');
@@ -1087,6 +1169,7 @@ function collectInicio() {
     // 4. Caja Gráfica
     currHome.graphic_box = {
         title: document.getElementById('home-graphic-title').value.trim(),
+        custom_html: document.getElementById('home-graphic-custom-html').value.trim(),
         lines: []
     };
     const graphicRows = document.querySelectorAll('#graphic-lines-container .graphic-line-row');
