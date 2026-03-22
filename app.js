@@ -31,17 +31,44 @@ const getCatMap = () => {
 function init() {
     // Initialize Theme
     const isDark = localStorage.getItem('darkMode') === 'true';
+    const themeBtn = document.getElementById('theme-toggle');
+    const icon = themeBtn ? themeBtn.querySelector('i') : null;
+
     if (isDark) {
         document.body.classList.add('dark-mode');
-        const icon = document.querySelector('#theme-toggle i');
-        if (icon) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+        if (themeBtn) {
+            themeBtn.style.backgroundColor = '#34495e';
+            themeBtn.style.color = '#f1c40f';
+            if (icon) {
+                icon.className = 'fas fa-moon';
+            }
+        }
+    } else {
+        if (themeBtn) {
+            themeBtn.style.backgroundColor = '#f1c40f';
+            themeBtn.style.color = '#2c3e50';
+            if (icon) {
+                icon.className = 'fas fa-sun';
+            }
         }
     }
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
         protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
+        
+        // Calculate and show last update date
+        if (protocols.length > 0) {
+            const latestDate = protocols.reduce((max, p) => {
+                const date = new Date(p.updated || p.published || 0);
+                return date > max ? date : max;
+            }, new Date(0));
+            
+            const dateEl = document.getElementById('last-update-date');
+            if (dateEl) {
+                dateEl.textContent = formatDate(latestDate);
+            }
+        }
+
         // Sort by date descending
         protocols.sort((a, b) => new Date(b.published) - new Date(a.published));
         initApp();
@@ -100,11 +127,17 @@ function initApp() {
             
             const icon = themeBtn.querySelector('i');
             if (isDark) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+                themeBtn.style.backgroundColor = '#34495e';
+                themeBtn.style.color = '#f1c40f';
+                if (icon) {
+                    icon.className = 'fas fa-moon';
+                }
             } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+                themeBtn.style.backgroundColor = '#f1c40f';
+                themeBtn.style.color = '#2c3e50';
+                if (icon) {
+                    icon.className = 'fas fa-sun';
+                }
             }
         });
     }
@@ -131,6 +164,12 @@ function initApp() {
     const adminBtn = document.getElementById('admin-access');
     if (adminBtn) {
         adminBtn.addEventListener('click', () => {
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (isLocalhost) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
             const pass = prompt('Introduce la clave de acceso:');
             if (pass === 'Recp2026') {
                 window.location.href = 'admin.html';
