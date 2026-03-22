@@ -76,4 +76,5 @@ app.post('/api/publish', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Servidor de desarrollo iniciado en http://localhost:${PORT}/admin.html`);
     console.log('Mantén esta ventana abierta mientras editas.');
+    open(`http://localhost:${PORT}/admin.html`);
 });

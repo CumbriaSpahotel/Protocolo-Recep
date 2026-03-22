@@ -5,7 +5,14 @@ let isHtmlMode = false;
 
 // Protección por contraseña
 (function() {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const storedPass = sessionStorage.getItem('adminAuth');
+    
+    if (isLocalhost) {
+        sessionStorage.setItem('adminAuth', 'Recp2026');
+        return;
+    }
+
     if (storedPass !== 'Recp2026') {
         const pass = prompt('Introduce la clave de administrador:');
         if (pass === 'Recp2026') {
