@@ -422,8 +422,9 @@ function renderHome() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderList(items, container, highlightText = '') {
-    container.innerHTML = '';
+function renderList(items, container, options = {}) {
+    const { highlightText = '', append = false } = options;
+    if (!append) container.innerHTML = '';
     if (items.length === 0) {
         container.innerHTML = '<div class="no-results" style="padding: 2rem; text-align: center; color: var(--text-muted);">No se encontraron artículos con esos términos.</div>';
         return;
@@ -432,28 +433,31 @@ function renderList(items, container, highlightText = '') {
     items.forEach(p => {
         const item = document.createElement('div');
         item.className = 'post-item';
+        // Add a numeric data attribute for potential sorting/filtering
+        item.dataset.section = p.section || '';
         
         let excerpt = stripHtml(p.content).substring(0, 180) + '...';
         let originalTitle = p.title;
         let cleanTitle = originalTitle;
-        let estadoHtml = '⚪ Sin definir';
+        let statusBadge = { emoji: '⚪', text: 'Sin definir', class: 'status-none' };
+        
         const emojiRegex = /\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/;
         const emojiMatch = originalTitle.match(emojiRegex);
 
         if (emojiMatch) {
            const emoji = emojiMatch[1];
            let statusText = 'Desconocido';
-           if (emoji === '🟢') statusText = 'Activo';
-           else if (emoji === '🟠' || emoji === '🟡') statusText = 'En redacción';
-           else if (emoji === '🔴') statusText = 'En proceso';
-           else statusText = emoji;
+           let statusClass = 'status-unknown';
            
-           estadoHtml = `${emoji} <span style="color: var(--text-muted); font-weight: normal;">${statusText}</span>`;
+           if (emoji === '🟢') { statusText = 'Activo'; statusClass = 'status-active'; }
+           else if (emoji === '🟠' || emoji === '🟡') { statusText = 'En redacción'; statusClass = 'status-draft'; }
+           else if (emoji === '🔴') { statusText = 'En proceso'; statusClass = 'status-process'; }
+           
+           statusBadge = { emoji, text: statusText, class: statusClass };
            cleanTitle = originalTitle.replace(emojiMatch[0], '').trim();
         }
 
         let displayTitle = cleanTitle;
-
         if (highlightText) {
             const regex = new RegExp(`(${highlightText})`, 'gi');
             displayTitle = displayTitle.replace(regex, '<span class="highlight">$1</span>');
@@ -462,25 +466,28 @@ function renderList(items, container, highlightText = '') {
 
         let scope = p.source ? p.source : 'Ambos hoteles';
         if (scope === 'Ambos hoteles') scope = 'Sercotel Guadiana y Cumbria Spa & Hotel';
-        let statusDisplay = p.status || estadoHtml;
-        if (statusDisplay === 'Activo') statusDisplay = '🟢 Activo';
-        if (statusDisplay === 'En redacción') statusDisplay = '🟠 En redacción';
-        if (statusDisplay === 'En proceso') statusDisplay = '🔴 En proceso';
+        
         const bestDate = p.updated || p.published;
         
         item.innerHTML = `
-            <div class="post-meta" style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.8rem; color: #555; font-size: 0.85rem; margin-bottom: 0.5rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem;">
-                <span><i class="fas fa-calendar-alt"></i> <b>Última revisión:</b> ${formatDate(bestDate)}</span>
-                <span style="color: #ccc;">|</span>
-                <span><b>Estado:</b> ${statusDisplay}</span>
-                <span style="color: #ccc;">|</span>
-                <span><i class="fas fa-hotel"></i> <b>Destinatario:</b> <span style="font-weight: normal;">${scope}</span></span>
-                ${p.section ? `<span style="color: #ccc;">|</span><span><i class="fas fa-folder"></i> <b>Sección:</b> ${p.section}</span>` : ''}
+            <div class="post-card-content">
+                <div class="post-header-meta">
+                    <div class="post-section-tag">${p.section ? `<i class="fas fa-hashtag"></i> ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
+                    <div class="post-status-pill ${statusBadge.class}">${statusBadge.emoji} ${statusBadge.text}</div>
+                    <div class="post-date"><i class="far fa-clock"></i> ${formatDate(bestDate)}</div>
+                </div>
+                
+                <h3 class="post-title">${displayTitle}</h3>
+                <p class="post-excerpt" style="line-clamp: 2; -webkit-line-clamp: 2;">${excerpt}</p>
+                
+                <div class="post-footer">
+                    <div class="post-scope"><i class="fas fa-map-marker-alt"></i> ${scope}</div>
+                    <div class="post-action">Leer documento <i class="fas fa-chevron-right"></i></div>
+                </div>
             </div>
-            <h3 style="margin-top: 0.8rem;">${displayTitle}</h3>
-            <p class="post-excerpt">${excerpt}</p>
         `;
-        item.querySelector('h3').addEventListener('click', () => {
+        
+        item.addEventListener('click', () => {
             viewHistory.push({ type: 'protocol', payload: p });
             loadProtocol(p, highlightText);
         });
@@ -500,12 +507,46 @@ function renderCategory(name, id) {
     
     const catProtocols = protocols.filter(p => {
         if (!p.section) return false;
-        const pId = p.section.split('.')[0];
+        const parts = p.section.split('.');
+        const pId = parts[0];
         // Match by ID if possible, otherwise fallback to name match
-        return pId === id || (CAT_MAP[pId] && CAT_MAP[pId].name === name);
+        return pId === id || (CAT_MAP[pId] && CAT_MAP[pId].name === name) || (p.categories && p.categories.includes(name));
     });
+
+    // Sort numerically by section
+    catProtocols.sort((a, b) => a.section.localeCompare(b.section, undefined, { numeric: true }));
     
-    renderList(catProtocols, document.getElementById('posts-list'));
+    const postsList = document.getElementById('posts-list');
+    postsList.innerHTML = ''; // Clear once
+
+    // Grouping logic for better organization (e.g. 1.1, 1.2)
+    const groups = {};
+    catProtocols.forEach(p => {
+        const parts = p.section.split('.');
+        const groupKey = parts.slice(0, 2).join('.'); // e.g. "1.1"
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push(p);
+    });
+
+    const sortedGroupKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    
+    if (catProtocols.length === 0) {
+        postsList.innerHTML = '<div class="no-results" style="padding: 2rem; text-align: center; color: var(--text-muted);"><i class="fas fa-folder-open fa-3x" style="opacity:0.2; margin-bottom:1rem;"></i><p>No se encontraron protocolos en esta categoría.</p></div>';
+    } else {
+        sortedGroupKeys.forEach(groupKey => {
+            // Find if this group has a representative title (the shortest section number in the group)
+            const shortest = groups[groupKey].sort((a,b) => a.section.length - b.section.length)[0];
+            const groupTitle = shortest ? shortest.title.replace(/\{.*?\}/, '').trim() : `Sección ${groupKey}`;
+            
+            const groupHeader = document.createElement('div');
+            groupHeader.className = 'category-group-header';
+            groupHeader.innerHTML = `<h3><i class="fas fa-layer-group"></i> ${groupKey}. ${groupTitle}</h3>`;
+            postsList.appendChild(groupHeader);
+            
+            renderList(groups[groupKey], postsList, { append: true });
+        });
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
