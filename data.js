@@ -882,14 +882,14 @@ const protocols_data = [
   },
   {
     "title": "💧 Procedimientos Spa ",
-    "section": "10.2",
+    "section": "11.2",
     "source": "Cumbria Bienestar",
     "status": "Activo",
     "published": "2025-08-03T06:56:00Z",
-    "updated": "2026-03-15T23:25:43.879Z",
+    "updated": "2026-03-22T22:15:37.225Z",
     "content": "<!-- Pega este bloque entero en un gadget HTML/JavaScript (Diseño → Añadir gadget → HTML/JavaScript) -->\n<style>\n  @import url('https://fonts.googleapis.com/css2?family=Parisienne&family=Dancing+Script:wght@400;700&family=Montserrat:wght@400;600&display=swap');\n  :root {\n    --bg-gradient: linear-gradient(135deg, #234d20, #2e5af0);\n    --overlay: rgba(35,77,32,0.3);\n    --accent: rgb(165,140,95);\n    --light-bg: #f7f3ec;\n    --text-dark: #333333;\n  }\n  .cb-wrapper {\n    max-width: 800px;\n    margin: 0 auto;\n  }\n  .cb-header {\n    background: var(--bg-gradient);\n    color: #fff;\n    padding: 32px;\n    text-align: center;\n    font-family: 'Dancing Script', cursive;\n    position: relative;\n    border-radius: 8px;\n    overflow: hidden;\n  }\n  .cb-header::before {\n    content: '';\n    position: absolute;\n    inset: 0;\n    background: var(--overlay);\n  }\n  .cb-header h1 {\n    position: relative;\n    margin: 0;\n    font-size: 2.8rem;\n  }\n  .cb-header p {\n    position: relative;\n    margin: 12px 0 0;\n    font-size: 1.2rem;\n  }\n  .cb-illustration {\n    width: 100%;\n    max-height: 300px;\n    object-fit: cover;\n    border-radius: 8px;\n    margin: 24px 0;\n  }\n  .cb-content {\n    padding: 16px;\n    font-family: 'Montserrat', sans-serif;\n    color: var(--text-dark);\n    font-size: 1.1rem;\n    background: #fff;\n    border-radius: 8px;\n  }\n  .cb-content h2 {\n    font-family: Georgia, serif;\n    color: var(--accent);\n    margin-top: 2em;\n    font-size: 2rem;\n  }\n  .cb-content .intro {\n    background: var(--light-bg);\n    border-left: 4px solid var(--accent);\n    padding: 16px;\n    margin-bottom: 1.5em;\n    font-size: 1.2rem;\n  }\n  .cb-content ul {\n    padding-left: 1.5em;\n    margin-bottom: 1em;\n    line-height: 1.6;\n  }\n  .cb-content ul li {\n    margin-bottom: 0.75em;\n  }\n  .iframe-pdf {\n    width: 100%;\n    height: 600px;\n    border: none;\n    margin-top: 24px;\n    border-radius: 8px;\n    box-shadow: 0 4px 8px rgba(0,0,0,0.1);\n  }\n</style>\n\n<div class=\"cb-wrapper\">\n  <div class=\"cb-header\">\n    <h1>Bienvenidos a Su Refugio de Bienestar</h1>\n    <p>En Cumbria y Guadiana, el verdadero confort va más allá de su habitación</p>\n  </div>\n\n  <!-- Etiqueta <img> corregida aquí -->\n  <img \n    src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjFsKg36sY42iBUHggGEhhbnW9IIfPh2gB_4ONKPB7TeNT63s0dIFEbg4SRVp7uo1rcwTXhTAb3Ig5jn8M_McwYXjO_83CGCE8nls-UIQ_lde-YyU-TaJnyq60zsAbftFuBoiAPb1Bwxe8IKt2lcEaCJG3_5KVezv3ECg_uElnJ8GBe9to9G6-kjAUxxJVB/s320/DSC02355.JPG\"\n    alt=\"Ilustración Recepción Cumbria Bienestar\"\n    class=\"cb-illustration\"\n  />\n\n  <div class=\"cb-content\">\n    <h2>Bienvenidos a Su Refugio de Bienestar</h2>\n    <div class=\"intro\">\n      En Cumbria y Guadiana, creemos que el verdadero confort va más allá de su habitación. Hemos creado un entorno donde le esperan experiencias de bienestar inolvidables. Nuestro objetivo es que cada huésped descubra y disfrute de nuestro spa desde el momento de su llegada, mejorando su bienestar y añadiendo una capa extra de lujo a su estancia.\n    </div>\n\n    <h2>Instrucciones para el Equipo de Recepción</h2>\n    <ul>\n      <li><strong>Cálida Bienvenida:</strong>  \n        Salude a los huéspedes con un auténtico:  \n        “Buenos días/tardes, [Nombre]. ¿Cómo fue su llegada?”  \n        Esto establece un tono amigable y acogedor.</li>\n\n      <li><strong>Una Suave Introducción al Spa:</strong>  \n        En lugar de enumerar servicios, invítelos a explorar la experiencia:  \n        “Le invitamos a descubrir nuestro tranquilo spa, diseñado para ayudarle a relajarse y rejuvenecer durante su estancia. Ofrecemos desde rápidos momentos de frescura hasta completos viajes de bienestar, exclusivamente para nuestros huéspedes.”</li>\n\n      <li><strong>Reserva sin Esfuerzo:</strong>  \n        Facilite increíblemente el siguiente paso:  \n        “Puedo gestionar su visita ahora mismo para el horario que mejor le convenga.”</li>\n\n      <li><strong>Inspiración Visual:</strong>  \n        Proporcione un folleto con un código QR, diciendo:  \n        “Aquí tiene un folleto con un código QR. Escanéelo para ver breves vídeos que le darán una idea de las serenas experiencias que ofrece nuestro spa.”</li>\n\n      <li><strong>Fomentando una Visita:</strong>  \n        Concluya con una suave llamada a la acción:  \n        “¿Le reservo un momento de tranquilidad para esta tarde, o quizás mañana por la mañana?”</li>\n    </ul>\n\n    <!-- PDF embebido directamente -->\n    <iframe\n      class=\"iframe-pdf\"\n      src=\"https://drive.google.com/file/d/1FyOdD00w0DrYqrRwppsplXjLm7RDHCxq/preview\"\n      allowfullscreen>\n    </iframe>\n  </div>\n</div>",
     "categories": [
-      "10ª Sección"
+      "11ª Sección"
     ]
   }
 ];
@@ -903,7 +903,9 @@ const navigation_config = {
   "2": {
     "name": "Operativa Diaria",
     "icon": "fa-calendar-check",
-    "subsections": {}
+    "subsections": {
+      "2.1": "📝Otros Manuales Básicos de Recepción"
+    }
   },
   "3": {
     "name": "Reservas y Tarifas",
