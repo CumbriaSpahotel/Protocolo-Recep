@@ -489,7 +489,7 @@ function renderList(items, container, options = {}) {
         let excerpt = stripHtml(p.content).substring(0, 180) + '...';
         let originalTitle = p.title;
         let cleanTitle = originalTitle;
-        let statusBadge = { emoji: '⚪', text: 'Sin definir', class: 'status-none' };
+        let statusBadge = null;
         
         const emojiRegex = /\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/;
         const emojiMatch = originalTitle.match(emojiRegex);
@@ -523,7 +523,7 @@ function renderList(items, container, options = {}) {
             <div class="post-card-content">
                 <div class="post-header-meta">
                     <div class="post-section-tag">${p.section ? `<i class="fas fa-hashtag"></i> ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
-                    <div class="post-status-pill ${statusBadge.class}">${statusBadge.emoji} ${statusBadge.text}</div>
+                    ${statusBadge ? `<div class="post-status-pill ${statusBadge.class}">${statusBadge.emoji} ${statusBadge.text}</div>` : ''}
                     <div class="post-date"><i class="far fa-clock"></i> ${formatDate(bestDate)}</div>
                 </div>
                 
