@@ -1162,15 +1162,32 @@ function collectMenus() {
                     subsectionsObj[sId] = sName;
                 }
             });
+
+            const linksArr = [];
+            const linkRows = row.querySelectorAll('.external-link-row');
+            linkRows.forEach(lrow => {
+                const lIcon = lrow.querySelector('.link-icon').value.trim();
+                const lText = lrow.querySelector('.link-text').value.trim();
+                const lUrl = lrow.querySelector('.link-url').value.trim();
+                if (lText && lUrl) {
+                    linksArr.push({ icon: lIcon, text: lText, url: lUrl });
+                }
+            });
             
             newNav[id] = { 
                 name, 
                 icon,
-                subsections: subsectionsObj
+                subsections: subsectionsObj,
+                links: linksArr
             };
         }
     });
     document.getElementById('edit-menus-json').value = JSON.stringify(newNav, null, 2);
+    // Update global config if present
+    if (typeof navigation_config !== 'undefined') {
+        Object.keys(navigation_config).forEach(k => delete navigation_config[k]);
+        Object.assign(navigation_config, newNav);
+    }
     return newNav;
 }
 

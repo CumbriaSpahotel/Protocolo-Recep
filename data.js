@@ -901,39 +901,46 @@ const navigation_config = {
   "1": {
     "name": "Turnos",
     "icon": "fa-clipboard-check",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "2": {
     "name": "Operativa Diaria",
     "icon": "fa-calendar-check",
     "subsections": {
       "2.1": "📝Otros Manuales Básicos de Recepción"
-    }
+    },
+    "links": []
   },
   "3": {
     "name": "Reservas y Tarifas",
     "icon": "fa-file-invoice-dollar",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "4": {
     "name": "Estancia, Caja y Salidas",
     "icon": "fa-walking",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "5": {
     "name": "Gestión de Grupos",
     "icon": "fa-users-cog",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "6": {
     "name": "Coordinación Interna",
     "icon": "fa-sync-alt",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "7": {
     "name": "Seguridad y Emergencias",
     "icon": "fa-shield-alt",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "8": {
     "name": "Sistemas y Plataformas",
@@ -941,37 +948,50 @@ const navigation_config = {
     "subsections": {
       "8.1": "Sercotel Guadiana",
       "8.2": "Cumbria Spa&Hotel"
-    }
+    },
+    "links": []
   },
   "9": {
     "name": "Manuales Básicos",
     "icon": "fa-book",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "10": {
     "name": "Gestión de Personal",
     "icon": "fa-user-tie",
-    "subsections": {}
+    "subsections": {},
+    "links": [
+      {
+        "icon": "fa-link",
+        "text": "☁️🕗 Cuadrante Online",
+        "url": "https://nataliogc.github.io/turnosweb/live.html"
+      }
+    ]
   },
   "11": {
     "name": "Cumbria Bienstar",
     "icon": "fa-spa",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "12": {
     "name": "Noticias",
     "icon": "fa-newspaper",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "13": {
     "name": "Restaurante",
     "icon": "fa-utensils",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   },
   "14": {
     "name": "Otros",
     "icon": "fa-plus",
-    "subsections": {}
+    "subsections": {},
+    "links": []
   }
 };
 

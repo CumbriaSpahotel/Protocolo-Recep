@@ -9,19 +9,50 @@ let viewHistory = [{ type: 'home' }];
 
 // Fallback configuration if not found in data.js
 const DEFAULT_CAT_MAP = {
-    '1': { name: 'Operativa Diaria', icon: 'fa-calendar-check' },
-    '2': { name: 'Reservas y Tarifas', icon: 'fa-file-invoice-dollar' },
-    '3': { name: 'Estancia, Caja y Salidas', icon: 'fa-walking' },
-    '4': { name: 'Gestión de Grupos', icon: 'fa-users-cog' },
-    '5': { name: 'Coordinación Interna', icon: 'fa-sync-alt' },
-    '6': { name: 'Seguridad y Emergencias', icon: 'fa-shield-alt' },
-    '7': { name: 'Sistemas y Plataformas', icon: 'fa-desktop' },
-    '8': { name: 'Manuales Básicos', icon: 'fa-book' },
-    '9': { name: 'Gestión de Personal', icon: 'fa-user-tie' },
-    '10': { name: 'Spa y Piscina', icon: 'fa-swimming-pool' },
-    '11': { name: 'Noticias', icon: 'fa-newspaper' },
-    '12': { name: 'Restaurante', icon: 'fa-utensils' },
-    '13': { name: 'Otros', icon: 'fa-plus' }
+    '1': { name: 'Operativa Diaria', icon: 'fa-calendar-check', subsections: {} },
+    '2': { name: 'Reservas y Tarifas', icon: 'fa-file-invoice-dollar', subsections: {} },
+    '3': { name: 'Estancia, Caja y Salidas', icon: 'fa-walking', subsections: {} },
+    '4': { name: 'Gestión de Grupos', icon: 'fa-users-cog', subsections: {} },
+    '5': { name: 'Coordinación Interna', icon: 'fa-sync-alt', subsections: {} },
+    '6': { name: 'Seguridad y Emergencias', icon: 'fa-shield-alt', subsections: {} },
+    '7': { name: 'Sistemas y Plataformas', icon: 'fa-desktop', subsections: {} },
+    '8': { name: 'Manuales Básicos', icon: 'fa-book', subsections: {} },
+    '9': { 
+        name: 'Gestión de Personal', icon: 'fa-user-tie', 
+        subsections: {},
+        links: [
+            { icon: 'fa-cloud', text: 'Cuadrante Online', url: 'https://nataliogc.github.io/turnosweb/live.html' },
+            { icon: 'fa-exchange-alt', text: 'Solicitud de Camb Turno', url: 'https://procedimientoshotelguadiana.blogspot.com/2025/11/112-solicitu-de-cambio-de-turnos.html' },
+            { icon: 'fa-umbrella-beach', text: 'Vacaciones del Personal', url: 'https://1drv.ms/x/c/7cdc5f6b199a606e/EWBW8z40KJtLlTyY-y6rLzUBLMk2FZGVYBhZlDpC04lFCQ?e=dZ7txS' },
+            { icon: 'far fa-clock', text: 'Cuadrante Original', url: 'https://procedimientoshotelguadiana.blogspot.com/2025/08/111-gestion-cuadrantes-de-turnos.html' },
+            { icon: 'fa-lock', text: 'Selección de Personal', url: 'https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?usp=sharing' }
+        ]
+    },
+    '10': { name: 'Spa y Piscina', icon: 'fa-swimming-pool', subsections: {} },
+    '11': { 
+        name: 'Noticias', icon: 'fa-newspaper', 
+        subsections: { 'Comunicados': 'Comunicados' },
+        links: [
+            { icon: 'fa-newspaper', text: 'Noticias', url: 'https://nataliogc.github.io/Noticias/' }
+        ]
+    },
+    '12': { 
+        name: 'Restaurante', icon: 'fa-utensils', 
+        subsections: { 'Catálogo de Menús': 'Catálogo de Menús' },
+        links: [
+            { icon: 'fa-download', text: 'Descarga Menús', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/EspwQwoBy05Fu9q4XbKzGUsBNVdzDdnFam7JpqtDB7h1dg?e=we0DeU' },
+            { icon: 'fa-file-invoice', text: 'Presupuesto Menú Eventos', url: 'https://nataliogc.github.io/menus-eventos/l' },
+            { icon: 'fa-glass-martini-alt', text: 'Menú Cóctel', url: 'https://nataliogc.github.io/menus-cocteles/' }
+        ]
+    },
+    '13': { name: 'Otros', icon: 'fa-plus', subsections: {} },
+    '15': { 
+        name: 'Calidad', icon: 'fa-trophy', 
+        subsections: { 'calidad en destino': 'Calidad en destino' },
+        links: [
+            { icon: 'fa-lock', text: 'Acceso Restringido (Menú Cóctel)', url: 'https://nataliogc.github.io/menus-cocteles/' }
+        ]
+    }
 };
 
 const getCatMap = () => {
@@ -268,44 +299,37 @@ function renderNavigation() {
             
             link.innerHTML = `${iconHtml} ${cat.name}`;
             
-            // Special handling for submenus (hardcoded or dynamic)
+            // Special handling for submenus (dynamic)
             const hasSubsections = cat.subsections && Object.keys(cat.subsections).length > 0;
-            if (['9', '11', '12', '15'].includes(id) || hasSubsections) {
+            const hasLinks = cat.links && cat.links.length > 0;
+            
+            if (hasSubsections || hasLinks) {
                 link.innerHTML += ` <i class="fas fa-caret-down"></i>`;
                 
                 const dropdown = document.createElement('div');
                 dropdown.className = 'dropdown-content';
                 
-                if (id === '9') {
-                    dropdown.innerHTML = `
-                        <a href="https://nataliogc.github.io/turnosweb/live.html" target="_blank"><i class="fas fa-cloud"></i> Cuadrante Online</a>
-                        <a href="https://procedimientoshotelguadiana.blogspot.com/2025/11/112-solicitu-de-cambio-de-turnos.html" target="_blank"><i class="fas fa-exchange-alt"></i> Solicitud de Camb Turno</a>
-                        <a href="https://1drv.ms/x/c/7cdc5f6b199a606e/EWBW8z40KJtLlTyY-y6rLzUBLMk2FZGVYBhZlDpC04lFCQ?e=dZ7txS" target="_blank"><i class="fas fa-umbrella-beach"></i> Vacaciones del Personal</a>
-                        <a href="https://procedimientoshotelguadiana.blogspot.com/2025/08/111-gestion-cuadrantes-de-turnos.html" target="_blank"><i class="far fa-clock"></i> Cuadrante Original</a>
-                        <a href="https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?usp=sharing" target="_blank"><i class="fas fa-lock"></i> Selección de Personal</a>
-                    `;
-                } else if (id === '11') {
-                    dropdown.innerHTML = `
-                        <a href="#" class="internal-nav" data-search="Comunicados"><i class="fas fa-bullhorn"></i> Comunicados</a>
-                        <a href="https://nataliogc.github.io/Noticias/" target="_blank"><i class="fas fa-newspaper"></i> Noticias</a>
-                    `;
-                } else if (id === '12') {
-                    dropdown.innerHTML = `
-                        <a href="https://1drv.ms/f/c/7cdc5f6b199a606e/EspwQwoBy05Fu9q4XbKzGUsBNVdzDdnFam7JpqtDB7h1dg?e=we0DeU" target="_blank"><i class="fas fa-download"></i> Descarga Menús</a>
-                        <a href="#" class="internal-nav" data-search="Catálogo de Menús"><i class="fas fa-book-open"></i> Catálogo de Menús</a>
-                        <a href="https://nataliogc.github.io/menus-eventos/l" target="_blank"><i class="fas fa-file-invoice"></i> Presupuesto Menú Eventos</a>
-                        <a href="https://nataliogc.github.io/menus-cocteles/" target="_blank"><i class="fas fa-glass-martini-alt"></i> Menú Cóctel</a>
-                    `;
-                } else if (id === '15') {
-                    dropdown.innerHTML = `
-                        <a href="#" class="internal-nav" data-search="calidad en destino"><i class="fas fa-trophy"></i> Calidad en destino</a>
-                        <a href="https://nataliogc.github.io/menus-cocteles/" target="_blank"><i class="fas fa-lock"></i> Acceso Restringido (Menú Cóctel)</a>
-                    `;
+                // Add explicit links (External)
+                if (hasLinks) {
+                    cat.links.forEach(l => {
+                        const a = document.createElement('a');
+                        a.href = l.url;
+                        a.target = "_blank";
+                        const isImageIcon = l.icon && (l.icon.startsWith('http') || l.icon.startsWith('assets/'));
+                        const iconHtml = isImageIcon 
+                            ? `<img src="${l.icon}" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;">`
+                            : `<i class="fas ${l.icon || 'fa-link'}"></i> `;
+                        a.innerHTML = `${iconHtml}${l.text}`;
+                        dropdown.appendChild(a);
+                    });
                 }
 
-                // Add dynamic subsections if they exist
-                if (cat.subsections) {
+                // Add dynamic subsections if they exist (Internal)
+                if (hasSubsections) {
                     Object.entries(cat.subsections).forEach(([subId, subName]) => {
+                        // Avoid duplicates if a link with same name exists
+                        if (hasLinks && cat.links.some(l => l.text === subName)) return;
+
                         const subLink = document.createElement('a');
                         subLink.href = '#';
                         subLink.className = 'internal-nav';
