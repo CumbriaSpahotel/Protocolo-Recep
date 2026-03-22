@@ -905,20 +905,32 @@ function addMenuRow(id, name, icon, subsections = {}) {
                 </div>
             </div>
             <div style="display: flex; align-items: flex-end;">
-                <button type="button" class="btn-add-sub" style="background:var(--accent); color:white; border:none; border-radius:4px; padding:8px 10px; cursor:pointer; width:100%; font-size:0.85rem; height:38px; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fas fa-plus-circle"></i> Subsección</button>
-            </div>
-            <div style="display: flex; align-items: flex-end;">
                 <button type="button" class="btn-delete-row" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; border-radius:4px; height:38px; width:38px; cursor:pointer;" onclick="if(confirm('¿Eliminar toda la categoría y sus subsecciones?')) { this.closest('.menu-row').remove(); updateMenuOrder(); }" title="Eliminar Sección"><i class="fas fa-trash"></i></button>
             </div>
         </div>
         
-        <div class="subsections-container" style="margin-left: 42px; border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
-            <!-- Subrows go here -->
+        <div style="display: flex; gap: 20px; margin-left: 42px; margin-top: 10px;">
+            <div style="flex: 1;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform:uppercase; margin-bottom: 5px; display: block;">Subsecciones Internas (Protocolos)</label>
+                <div class="subsections-container" style="border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Subrows go here -->
+                </div>
+                <button type="button" class="btn-add-sub" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.8rem; margin-top:8px; display:flex; align-items:center; gap:5px;"><i class="fas fa-plus-circle"></i> Añadir Subsección Interna</button>
+            </div>
+            <div style="flex: 1;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform:uppercase; margin-bottom: 5px; display: block;">Enlaces Externos (URLs)</label>
+                <div class="links-container" style="border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Link rows go here -->
+                </div>
+                <button type="button" class="btn-add-external" style="background:none; border:none; color:#27ae60; cursor:pointer; font-size:0.8rem; margin-top:8px; display:flex; align-items:center; gap:5px;"><i class="fas fa-external-link-alt"></i> Añadir Enlace Externo</button>
+            </div>
         </div>
     `;
 
     const subContainer = row.querySelector('.subsections-container');
+    const linksContainer = row.querySelector('.links-container');
     const btnAddSub = row.querySelector('.btn-add-sub');
+    const btnAddExternal = row.querySelector('.btn-add-external');
 
     // Render existing subsections
     Object.entries(subsections).sort((a,b) => {
@@ -929,15 +941,30 @@ function addMenuRow(id, name, icon, subsections = {}) {
         addSubRow(subContainer, subId, subName);
     });
 
+    // Render existing external links if any
+    const existingLinks = (typeof navigation_config !== 'undefined' && navigation_config[id]) ? navigation_config[id].links : [];
+    if (existingLinks && Array.isArray(existingLinks)) {
+        existingLinks.forEach(link => {
+            addExternalLinkRow(linksContainer, link.icon, link.text, link.url);
+        });
+    }
+
     if (btnAddSub) {
         btnAddSub.onclick = (e) => {
             e.preventDefault();
-            e.stopPropagation();
             const parentId = row.querySelector('.menu-id').value;
             const count = subContainer.querySelectorAll('.sub-row').length + 1;
             addSubRow(subContainer, `${parentId}.${count}`, '');
         };
     }
+
+    if (btnAddExternal) {
+        btnAddExternal.onclick = (e) => {
+            e.preventDefault();
+            addExternalLinkRow(linksContainer, 'fa-link', '', '');
+        };
+    }
+
 
     // Drag and Drop Events
     row.addEventListener('dragstart', () => {
@@ -963,6 +990,23 @@ function addSubRow(container, id, name) {
         <input type="text" class="sub-id" value="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
         <input type="text" class="sub-name" value="${name}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
         <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1rem;" onclick="this.parentElement.remove()" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#bbb'"><i class="fas fa-times-circle"></i></button>
+    `;
+    container.appendChild(row);
+}
+
+function addExternalLinkRow(container, icon, text, url) {
+    const row = document.createElement('div');
+    row.className = 'external-link-row';
+    row.style = 'display: grid; grid-template-columns: 80px 1fr 1fr 30px; gap: 5px; align-items: center; background: #fff; padding: 5px; border: 1px solid #eef2f5; border-radius: 4px; margin-bottom: 5px;';
+    
+    row.innerHTML = `
+        <div style="display:flex; gap:3px;">
+            <span class="icon-preview-box" style="width: 28px; height: 28px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; color: #27ae60;">${icon.startsWith('fa-') ? `<i class="fas ${icon}"></i>` : icon}</span>
+            <input type="text" class="link-icon" value="${icon}" title="Icono FontAwesome" style="width:0; flex:1; padding:3px; border:1px solid #ccc; border-radius:4px; font-size: 0.75rem;" oninput="this.previousElementSibling.innerHTML = this.value.startsWith('fa-') ? '<i class=\\'fas ' + this.value + '\\'></i>' : this.value">
+        </div>
+        <input type="text" class="link-text" value="${text}" placeholder="Texto del enlace" style="width:100%; padding:5px 8px; border:1px solid #ddd; border-radius:4px; font-size: 0.85rem;">
+        <input type="text" class="link-url" value="${url}" placeholder="URL (http...)" style="width:100%; padding:5px 8px; border:1px solid #ddd; border-radius:4px; font-size: 0.85rem;">
+        <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
     `;
     container.appendChild(row);
 }

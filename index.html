@@ -13,21 +13,21 @@
 </head>
 <body>
     <header class="main-header">
-        <div class="header-content" style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px;">
+        <div class="header-content" style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; min-width: 250px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="Imagenes/Logo.png" alt="Logo" style="height: 35px; background: white; padding: 3px; border-radius: 4px;">
-                    <h1 style="margin: 0; font-size: 1.1rem; letter-spacing: 0.5px;">MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
+                    <img src="Imagenes/Logo.png" alt="Logo" style="height: 32px; background: white; padding: 2px; border-radius: 4px;">
+                    <h1 style="margin: 0; font-size: 1rem; letter-spacing: 0.3px;">MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
                 </div>
-                <div id="last-update-container" style="font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-left: 53px; font-weight: 500;">
+                <div id="last-update-container" style="font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-left: 47px; font-weight: 500;">
                     <i class="far fa-clock"></i> Última actualización: <span id="last-update-date">Cargando...</span>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button id="admin-access" class="admin-btn" aria-label="Acceso administrador" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 1rem; cursor: pointer; padding: 0.6rem; border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <button id="admin-access" class="admin-btn" aria-label="Acceso administrador" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;">
                     <i class="fas fa-cog"></i>
                 </button>
-                <button id="theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background: #f1c40f; border: none; color: #2c3e50; font-size: 1.2rem; cursor: pointer; padding: 0.6rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+                <button id="theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background: #f1c40f; border: none; color: #2c3e50; font-size: 1.1rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;">
                     <i class="fas fa-sun"></i>
                 </button>
             </div>
