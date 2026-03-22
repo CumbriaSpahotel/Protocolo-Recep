@@ -324,19 +324,69 @@ function renderNavigation() {
                     });
                 }
 
-                // Add dynamic subsections if they exist (Internal)
+                // Add dynamic subsections with nesting support
                 if (hasSubsections) {
-                    Object.entries(cat.subsections).forEach(([subId, subName]) => {
-                        // Avoid duplicates if a link with same name exists
-                        if (hasLinks && cat.links.some(l => l.text === subName)) return;
-
-                        const subLink = document.createElement('a');
-                        subLink.href = '#';
-                        subLink.className = 'internal-nav';
-                        subLink.dataset.search = subId;
-                        subLink.innerHTML = `<i class="fas fa-angle-right" style="opacity:0.5;"></i> ${subName}`;
-                        dropdown.appendChild(subLink);
+                    const sortedSubs = Object.entries(cat.subsections).sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric:true}));
+                    
+                    const subMap = new Map();
+                    // First pass: identify parents and children
+                    sortedSubs.forEach(([subId, subName]) => {
+                        const parts = subId.split('.');
+                        const parentId = parts.length > 2 ? parts.slice(0, parts.length - 1).join('.') : null;
+                        subMap.set(subId, { id: subId, name: subName, parent: parentId, children: [] });
                     });
+                    
+                    // Second pass: build tree
+                    const rootSubs = [];
+                    subMap.forEach(item => {
+                        if (item.parent && subMap.has(item.parent)) {
+                            subMap.get(item.parent).children.push(item);
+                        } else {
+                            rootSubs.push(item);
+                        }
+                    });
+
+                    // Helper function to render items recursively
+                    const renderSubItem = (item, parentEl) => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'sub-dropdown-wrapper';
+                        
+                        const a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'internal-nav';
+                        a.dataset.search = item.id;
+                        
+                        // Handle icon/emoji from protocols data if possible, or just default
+                        // In the menu we usually don't have the full protocol object here, 
+                        // so we try to find it in the global protocols array for the icon
+                        const pData = protocols.find(p => p.section === item.id);
+                        let iconHtml = '<i class="fas fa-angle-right" style="opacity:0.3;"></i> ';
+                        
+                        if (pData) {
+                            const emojiMatch = pData.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                            if (emojiMatch) {
+                                iconHtml = `<span style="margin-right:8px; font-size:1.1rem;">${emojiMatch[1]}</span>`;
+                            }
+                        }
+                        
+                        const cleanName = item.name.replace(/\{.*?\}/, '').trim();
+                        a.innerHTML = `<span style="display:flex; align-items:center;">${iconHtml}${cleanName}</span>`;
+                        
+                        if (item.children.length > 0) {
+                            a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6;"></i>`;
+                            const nestedDropdown = document.createElement('div');
+                            nestedDropdown.className = 'dropdown-content nested';
+                            item.children.forEach(child => renderSubItem(child, nestedDropdown));
+                            wrapper.appendChild(a);
+                            wrapper.appendChild(nestedDropdown);
+                        } else {
+                            wrapper.appendChild(a);
+                        }
+                        
+                        parentEl.appendChild(wrapper);
+                    };
+
+                    rootSubs.forEach(item => renderSubItem(item, dropdown));
                 }
                 
                 // Set up internal navigation links
