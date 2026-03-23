@@ -436,7 +436,7 @@ function toggleHomeComponents(isHome) {
 
 function renderHome() {
     toggleHomeComponents(true);
-    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    document.querySelector('.app-wrapper').classList.add('reading-mode');
     
     // Manual Operativo de Recepción - Centro de Procedimientos
     const welcomeTitle = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.title : 'Manual Operativo de Recepción';
@@ -448,26 +448,40 @@ function renderHome() {
             <p class="welcome-desc">${welcomeText}</p>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-box">
-                <i class="fas fa-file-alt"></i>
-                <div class="stat-info">
-                    <span class="stat-label">Documentos</span>
-                    <span class="stat-count">${protocols.length}</span>
+        <div class="dashboard-grid">
+            <!-- Búsqueda Global -->
+            <div class="dashboard-card search-card premium-shadow">
+                <h3 class="dash-title"><i class="fas fa-search"></i> BÚSQUEDA GLOBAL</h3>
+                <div class="dash-search-container">
+                    <input type="text" id="dash-search-input" placeholder="Escriba aquí para buscar..." onkeyup="if(event.key === 'Enter') handleSearch(this.value)">
+                    <button class="dash-search-btn" onclick="handleSearch(document.getElementById('dash-search-input').value)">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-history"></i>
-                <div class="stat-info">
-                    <span class="stat-label">Última Actualización</span>
-                    <span class="stat-count" id="home-last-date">Hoy</span>
+
+            <!-- Comunicados -->
+            <div class="dashboard-card alerts-card premium-shadow">
+                <h3 class="dash-title"><i class="fas fa-bell"></i> COMUNICADOS</h3>
+                <div class="dash-alerts-grid">
+                    <div class="dash-alert-btn red" onclick="renderAlertsList('critical')">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>ERRORES</span>
+                        <span class="dash-badge" id="dash-critical-count">0</span>
+                    </div>
+                    <div class="dash-alert-btn blue" onclick="renderAlertsList('announcements')">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>COMUNICADOS</span>
+                        <span class="dash-badge" id="dash-announcements-count">0</span>
+                    </div>
                 </div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-shield-check"></i>
-                <div class="stat-info">
-                    <span class="stat-label">Estado Manual</span>
-                    <span class="stat-count">Auditado</span>
+
+            <!-- Destacados -->
+            <div class="dashboard-card featured-card premium-shadow">
+                <h3 class="dash-title"><i class="fas fa-star"></i> DESTACADOS</h3>
+                <div id="dash-featured-content" class="dash-news-list">
+                    <div class="loading-news">Cargando noticias...</div>
                 </div>
             </div>
         </div>
