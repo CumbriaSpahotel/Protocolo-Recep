@@ -50,33 +50,35 @@
                 <p>Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles. Aquí encontrarás guías prácticas, criterios unificados de atención y recursos útiles para facilitar el trabajo y mantener un estándar profesional en cada turno.</p>
             </div>
 
-            <div class="latest-section">
-                <h2 class="section-title"><i class="fas fa-edit"></i> Últimas entradas publicadas y modificaciones</h2>
-                <div id="posts-list">
-                    <!-- Posts will be injected here -->
-                    <div class="nav-loading">Cargando protocolos...</div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Sidebar Column -->
+    <div class="app-wrapper" style="max-width: 1400px; margin: 0 auto;">
         <aside class="sidebar-col">
-            <!-- Search Widget -->
+            <!-- Sidebar widgets -->
             <div class="sidebar-widget">
                 <h3 class="widget-title"><i class="fas fa-search"></i> Buscar en el blog</h3>
                 <div class="sidebar-search">
-                    <input type="text" id="search-input" placeholder="Escribe una palabra y pulsa Enter">
+                    <input type="text" id="search-input" placeholder="Buscar procedimientos...">
+                    <i class="fas fa-search" style="position: absolute; right: 1rem; top: 1.1rem; color: #999;"></i>
                 </div>
             </div>
 
             <div class="sidebar-widget">
                 <h3 class="widget-title"><i class="fas fa-bullhorn"></i> COMUNICADOS Y ALERTAS</h3>
                 <div class="attention-grid">
-                    <a href="#" id="btn-critical-errors" class="btn-chip btn-red"><i class="fas fa-exclamation-circle"></i> Errores Críticos</a>
-                    <a href="#" id="btn-announcements" class="btn-chip btn-blue"><i class="fas fa-bullhorn"></i> Comunicados</a>
+                    <a href="#" class="btn-chip btn-red" id="btn-critical">
+                        <i class="fas fa-exclamation-triangle"></i> ERRORES <span class="badge" id="critical-badge">0</span>
+                    </a>
+                    <a href="#" class="btn-chip btn-blue" id="btn-announcements">
+                        <i class="fas fa-bullhorn"></i> AVISOS <span class="badge" id="announcements-badge">0</span>
+                    </a>
                 </div>
             </div>
 
+            <div class="sidebar-widget">
+                <h5 class="widget-title"><i class="fas fa-star"></i> DESTACADOS</h5>
+                <ul class="news-list" id="featured-news-list" style="list-style: none; padding: 0; margin: 0;">
+                    <!-- News items will be rendered here -->
+                </ul>
+            </div>
 
             <!-- Quote/Graphic Widget -->
             <div class="sidebar-widget graphic-box">
@@ -86,6 +88,22 @@
                 <p>Resolver problemas de habitación, llaves, pagos o servicios con agilidad.</p>
             </div>
         </aside>
+
+        <main class="main-col" id="main-column">
+            <!-- Content will be injected here -->
+            <div class="welcome-card">
+                <h2><i class="fas fa-file-signature"></i> Bienvenido al Blog de Procedimientos de Recepción</h2>
+                <p>Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles. Aquí encontrarás guías prácticas, criterios unificados de atención y recursos útiles para facilitar el trabajo y mantener un estándar profesional en cada turno.</p>
+            </div>
+
+            <div class="latest-section">
+                <h2 class="section-title"><i class="fas fa-edit"></i> Últimas entradas publicadas y modificaciones</h2>
+                <div id="posts-list">
+                    <!-- Posts will be injected here -->
+                    <div class="nav-loading">Cargando protocolos...</div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>

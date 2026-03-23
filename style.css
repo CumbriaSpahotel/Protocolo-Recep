@@ -264,28 +264,27 @@ body.dark-mode .top-nav {
     font-size: 0.9rem;
 }
 
-/* Layout */
+/* Layout - Dashboard View (Sidebar on left) */
 .app-wrapper {
     width: 100%;
     padding: 0 1rem;
     box-sizing: border-box;
-    margin: 1rem auto;
+    margin: 1.5rem auto;
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 320px 1fr;
     gap: 1.5rem;
     transition: all 0.3s ease;
 }
 
-/* Reading mode layout changes */
+/* Maintain application structure even in reading view */
 .app-wrapper.reading-mode {
-    display: block; /* Switch off grid to allow full width naturally */
-    max-width: 98vw; /* almost full screen width */
-    margin: 2rem auto;
-    padding: 0 1rem; /* minimal padding */
+    display: grid; 
+    grid-template-columns: 320px 1fr;
+    max-width: 1400px;
 }
 
 .app-wrapper.reading-mode .sidebar-col {
-    display: none;
+    display: flex;
 }
 
 /* Main Content Area */
@@ -601,17 +600,33 @@ body.dark-mode .top-nav {
 /* Full content view */
 .protocol-full {
     background: var(--white);
-    border-radius: 12px;
     padding: 3rem;
+    border-radius: 12px;
     box-shadow: var(--shadow);
+    border: 1px solid var(--border);
     animation: fadeIn 0.4s ease-out;
-    transition: var(--transition);
 }
 
 .protocol-full-header {
-    border-bottom: 2px solid var(--accent-blue);
+    text-align: left;
+    border-bottom: 2px solid #f0f0f0;
     padding-bottom: 1.5rem;
     margin-bottom: 2rem;
+}
+
+.protocol-full-header h1 {
+    font-size: 2.2rem;
+    color: var(--accent-blue);
+    margin: 0.5rem 0 1rem 0;
+    line-height: 1.2;
+}
+
+.protocol-meta-bar {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    flex-wrap: wrap;
 }
 
 .protocol-full-body {
