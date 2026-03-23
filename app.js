@@ -429,7 +429,8 @@ function setActiveNav(el) {
 }
 
 function renderHome() {
-    // Reading mode logic removed to keep sidebar visible
+    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    
     const welcomeTitle = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.title : 'Bienvenido al Blog de Procedimientos de Recepción';
     const welcomeText = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.text : 'Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles.';
 
@@ -546,6 +547,7 @@ function renderList(items, container, options = {}) {
 
 function renderCategory(name, id) {
     const CAT_MAP = getCatMap();
+    document.querySelector('.app-wrapper').classList.remove('reading-mode');
 
     mainColumn.innerHTML = `
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
@@ -599,6 +601,9 @@ function renderCategory(name, id) {
 }
 
 function loadProtocol(p, highlightText = '') {
+    // Hide sidebar for reading
+    document.querySelector('.app-wrapper').classList.add('reading-mode');
+
     let content = p.content;
     let originalTitle = p.title;
 
@@ -726,6 +731,7 @@ function goBack() {
 
 // Interactive Schema (Operational Guide)
 function renderOperationalGuide() {
+    document.querySelector('.app-wrapper').classList.remove('reading-mode');
     const CAT_MAP = getCatMap();
     
     mainColumn.innerHTML = `

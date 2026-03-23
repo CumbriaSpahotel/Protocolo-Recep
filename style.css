@@ -264,27 +264,28 @@ body.dark-mode .top-nav {
     font-size: 0.9rem;
 }
 
-/* Layout - Dashboard View (Sidebar on left) */
+/* Layout */
 .app-wrapper {
     width: 100%;
     padding: 0 1rem;
     box-sizing: border-box;
-    margin: 1.5rem auto;
+    margin: 1rem auto;
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 1fr 320px;
     gap: 1.5rem;
     transition: all 0.3s ease;
 }
 
-/* Maintain application structure even in reading view */
+/* Reading mode layout changes */
 .app-wrapper.reading-mode {
-    display: grid; 
-    grid-template-columns: 320px 1fr;
-    max-width: 1400px;
+    display: block; /* Switch off grid to allow full width naturally */
+    max-width: 98vw; /* almost full screen width */
+    margin: 2rem auto;
+    padding: 0 1rem; /* minimal padding */
 }
 
 .app-wrapper.reading-mode .sidebar-col {
-    display: flex;
+    display: none;
 }
 
 /* Main Content Area */
