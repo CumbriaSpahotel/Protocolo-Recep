@@ -872,6 +872,17 @@ const navigation_config = {
     "subsections": {},
     "links": []
   },
+  "1.4": {
+    "name": "Tareas de apoyo a otros departamentos",
+    "description": "En momentos de baja actividad apoyamos a otros departamentos.",
+    "subsections": {
+      "1.4.1": "🍽️ Restaurante",
+      "1.4.2": "🧹 Pisos",
+      "1.4.3": "🔧 Mantenimiento"
+    },
+    "icon": "fa-hands-helping",
+    "links": []
+  },
   "2": {
     "name": "Operativa Diaria",
     "icon": "fa-calendar-check",
