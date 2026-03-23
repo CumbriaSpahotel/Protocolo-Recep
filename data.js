@@ -863,12 +863,14 @@ const navigation_config = {
   "1": {
     "name": "Turnos",
     "icon": "fa-clipboard-check",
+    "description": "Primeros pasos y acceso directo a los apartados esenciales del manual.",
     "subsections": {},
     "links": []
   },
   "2": {
     "name": "Operativa Diaria",
     "icon": "fa-calendar-check",
+    "description": "Turnos, tareas comunes y operativa del día a día en recepción.",
     "subsections": {
       "2.1": "📝Otros Manuales Básicos de Recepción"
     },
@@ -877,36 +879,42 @@ const navigation_config = {
   "3": {
     "name": "Reservas y Tarifas",
     "icon": "fa-file-invoice-dollar",
+    "description": "Todo lo relacionado con la gestión de reservas, tarifas (individuales y grupos), canales online, revisión y control.",
     "subsections": {},
     "links": []
   },
   "4": {
     "name": "Estancia, Caja y Salidas",
     "icon": "fa-walking",
+    "description": "Protocolos específicos para la gestión de estancia, caja de facturación y salidas de huéspedes.",
     "subsections": {},
     "links": []
   },
   "5": {
     "name": "Gestión de Grupos",
     "icon": "fa-users-cog",
+    "description": "Procedimientos específicos para la gestión de reservas de grupos y eventos.",
     "subsections": {},
     "links": []
   },
   "6": {
     "name": "Coordinación Interna",
     "icon": "fa-sync-alt",
+    "description": "Protocolos de comunicación entre departamentos y coordinación interna.",
     "subsections": {},
     "links": []
   },
   "7": {
     "name": "Seguridad y Emergencias",
     "icon": "fa-shield-alt",
+    "description": "Manuales de seguridad, emergencias y evacuación del hotel.",
     "subsections": {},
     "links": []
   },
   "8": {
     "name": "Sistemas y Plataformas",
     "icon": "fa-desktop",
+    "description": "Guías de uso de sistemas, plataformas informáticas y herramientas digitales.",
     "subsections": {
       "8.1": "Sercotel Guadiana",
       "8.2": "Cumbria Spa&Hotel"
@@ -916,12 +924,14 @@ const navigation_config = {
   "9": {
     "name": "Manuales Básicos",
     "icon": "fa-book",
+    "description": "Manuales básicos de consulta rápida para operativa general.",
     "subsections": {},
     "links": []
   },
   "10": {
     "name": "Gestión de Personal",
     "icon": "fa-user-tie",
+    "description": "Gestión de personal, cuadrantes, vacaciones y solicitudes.",
     "subsections": {},
     "links": [
       {
@@ -934,18 +944,21 @@ const navigation_config = {
   "11": {
     "name": "Cumbria Bienstar",
     "icon": "fa-spa",
+    "description": "Protocolos de servicios de Spa, Piscina y Bienestar.",
     "subsections": {},
     "links": []
   },
   "12": {
     "name": "Noticias",
     "icon": "fa-newspaper",
+    "description": "Comunicados oficiales y noticias de interés para el equipo.",
     "subsections": {},
     "links": []
   },
   "13": {
     "name": "Restaurante",
     "icon": "fa-utensils",
+    "description": "Coordinación con el Restaurante y gestión de consumos.",
     "subsections": {},
     "links": []
   },
@@ -970,7 +983,8 @@ const home_config = {
         },
         {
           "title": "Registro de No shows obligatorio",
-          "date": "Hoy"
+          "date": "Hoy",
+          "id": ""
         }
       ]
     },
@@ -985,7 +999,8 @@ const home_config = {
         },
         {
           "title": "Revisar cuadrante de turnos",
-          "date": "Ayer"
+          "date": "Ayer",
+          "id": ""
         }
       ]
     }
@@ -994,9 +1009,15 @@ const home_config = {
     "title": "Bienvenido al Blog de Procedimientos de Recepción",
     "text": "Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles. Aquí encontrarás guías prácticas, criterios unificados de atención y recursos útiles para facilitar el trabajo y mantener un estándar profesional en cada turno."
   },
-  "featured_news": [],
+  "featured_news": [
+    {
+      "text": "hol",
+      "link": ""
+    }
+  ],
   "graphic_box": {
     "title": "CLAVES PARA OPTIMIZAR EL TIEMPO",
+    "custom_html": "",
     "lines": [
       {
         "text": "1. Prioriza lo urgente: lo que impacta al cliente",

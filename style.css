@@ -264,53 +264,103 @@ body.dark-mode .top-nav {
     font-size: 0.9rem;
 }
 
-/* Layout */
+/* Modern Layout - Left Sidebar Dashboard */
 .app-wrapper {
     width: 100%;
-    padding: 0 1rem;
+    padding: 2rem;
     box-sizing: border-box;
-    margin: 1rem auto;
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
+    grid-template-columns: 320px 1fr;
+    gap: 2.5rem;
     transition: all 0.3s ease;
+    align-items: start;
 }
 
-/* Reading mode layout changes */
+/* Hide sidebar in reading mode */
 .app-wrapper.reading-mode {
-    display: block; /* Switch off grid to allow full width naturally */
-    max-width: 98vw; /* almost full screen width */
-    margin: 2rem auto;
-    padding: 0 1rem; /* minimal padding */
+    grid-template-columns: 1fr;
 }
 
 .app-wrapper.reading-mode .sidebar-col {
     display: none;
 }
 
+/* Sidebar behavior - Sticky and Sleek */
+.sidebar-col {
+    position: sticky;
+    top: 100px;
+    height: auto;
+    z-index: 10;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1100px) {
+    .app-wrapper {
+        grid-template-columns: 100%;
+        padding: 1rem;
+    }
+    .sidebar-col {
+        position: static;
+        order: 2;
+    }
+}
+
+/* Premium Shadow & Glass Elements */
+.premium-shadow {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.7) !important;
+}
+
 /* Main Content Area */
 .main-col {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
+    min-width: 0; /* Prevents overflow in flex/grid */
 }
 
-/* Welcome Card */
+/* Re-styling Welcome for Dashboard */
 .welcome-card {
-    background: var(--white);
-    border-radius: 8px;
-    padding: 1.5rem;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    transition: var(--transition);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    border-radius: 24px;
+    padding: 3.5rem;
+    box-shadow: 0 20px 50px rgba(30, 60, 114, 0.2);
+    position: relative;
+    overflow: hidden;
+    color: white;
+    margin-bottom: 2rem;
 }
 
-.welcome-card h2 {
-    color: var(--accent-blue);
-    margin-top: 0;
+.welcome-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    filter: blur(80px);
+}
+
+.welcome-title {
+    font-size: 2.8rem;
+    color: white;
+    margin-bottom: 1.25rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    letter-spacing: -1px;
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.welcome-desc {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-width: 850px;
+    font-weight: 400;
 }
 
 .welcome-card p {
@@ -473,35 +523,147 @@ body.dark-mode .top-nav {
     font-size: 0.85rem;
     color: var(--accent-blue);
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    max-width: 700px;
+    line-height: 1.6;
 }
 
-/* Sidebar */
-.sidebar-col {
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-box {
+    background: var(--white);
+    padding: 1.8rem;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-.sidebar-widget {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
+.stat-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    border-color: var(--accent-blue);
 }
 
-.widget-title {
-    font-size: 1.1rem;
-    margin-bottom: 1.2rem;
+.stat-box i {
+    font-size: 1.5rem;
+    color: white;
+    background: var(--accent-blue);
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--accent-blue);
+    justify-content: center;
+    border-radius: 18px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 8px 16px rgba(0, 150, 255, 0.15);
 }
 
+.stat-box:nth-child(2) i {
+    background: #7c4dff;
+}
+
+.stat-box:nth-child(3) i {
+    background: #00c853;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+
+.stat-count {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+/* Quick Access Grid */
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.quick-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+    border-color: var(--accent-blue);
+}
+
+.quick-icon {
+    width: 65px;
+    height: 65px;
+    background: #f1f7ff;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--accent-blue);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.quick-card:hover .quick-icon {
+    background: var(--accent-blue);
+    color: white;
+}
+
+.quick-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.quick-info p {
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Dashboard Content */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+/* For mobile, cards fill width */
+@media (max-width: 600px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
 .badge {
     background-color: var(--accent-red);
     color: white;

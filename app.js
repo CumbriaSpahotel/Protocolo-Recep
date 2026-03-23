@@ -427,10 +427,99 @@ function setActiveNav(el) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     el.classList.add('active');
 }
+function toggleHomeComponents(isHome) {
+    const efficiencyWidget = document.getElementById('sidebar-efficiency-widget');
+    if (efficiencyWidget) {
+        efficiencyWidget.style.display = isHome ? 'block' : 'none';
+    }
+}
+
 function renderHome() {
-    // Filter protocols strictly: only last 30 days based on edit or publish date
-    const now = new Date();
-    const limitDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    toggleHomeComponents(true);
+    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    
+    // Manual Operativo de Recepción - Centro de Procedimientos
+    const welcomeTitle = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.title : 'Manual Operativo de Recepción';
+    const welcomeText = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.text : 'Bienvenido al sistema centralizado de procedimientos y normativas de trabajo.';
+
+    mainColumn.innerHTML = `
+        <div class="welcome-card premium-shadow">
+            <h1 class="welcome-title"><i class="fas fa-hotel"></i> ${welcomeTitle}</h1>
+            <p class="welcome-desc">${welcomeText}</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-box">
+                <i class="fas fa-file-alt"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Documentos</span>
+                    <span class="stat-count">${protocols.length}</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-history"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Última Actualización</span>
+                    <span class="stat-count" id="home-last-date">Hoy</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-shield-check"></i>
+                <div class="stat-info">
+                    <span class="stat-label">Estado Manual</span>
+                    <span class="stat-count">Auditado</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-access-section">
+            <h2 class="section-title"><i class="fas fa-rocket"></i> Accesos Rápidos</h2>
+            <div class="quick-access-grid">
+                <div class="quick-card" onclick="renderCategory('Turnos', '1')">
+                    <div class="quick-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="quick-info">
+                        <h3>Turnos</h3>
+                        <p>Gestión de cuadrantes y cambios</p>
+                    </div>
+                </div>
+                <div class="quick-card" onclick="renderCategory('Reservas y Tarifas', '3')">
+                    <div class="quick-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="quick-info">
+                        <h3>Reservas</h3>
+                        <p>Control de tarifas y canales</p>
+                    </div>
+                </div>
+                <div class="quick-card" onclick="renderCategory('Estancia, Caja y Salidas', '4')">
+                    <div class="quick-icon"><i class="fas fa-cash-register"></i></div>
+                    <div class="quick-info">
+                        <h3>Caja y Salidas</h3>
+                        <p>Facturación y cierre de turno</p>
+                    </div>
+                </div>
+                <div class="quick-card" onclick="renderCategory('Gestión de Grupos', '5')">
+                    <div class="quick-icon"><i class="fas fa-users-cog"></i></div>
+                    <div class="quick-info">
+                        <h3>Grupos</h3>
+                        <p>Eventos y reservas grupales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-updates-box">
+            <h2 class="section-title"><i class="fas fa-clock"></i> Actualizaciones y Novedades</h2>
+            <div id="posts-list" class="posts-grid"></div>
+        </div>
+    `;
+
+    // Fill last update date if available
+    const lastUpdateEl = document.getElementById('last-update-date');
+    const homeDateEl = document.getElementById('home-last-date');
+    if (lastUpdateEl && homeDateEl) {
+        homeDateEl.textContent = lastUpdateEl.textContent;
+    }
+
+    const list = document.getElementById('posts-list');
     
     // Sort taking into account when it was last modified/updated
     const sorted = [...protocols].sort((a, b) => {
@@ -439,16 +528,8 @@ function renderHome() {
         return dateB - dateA;
     });
     
-    // Strictly filter out posts older than 30 days
-    const recent = sorted.filter(p => new Date(p.updated || p.published) >= limitDate);
-
-    const postsToShow = recent;
-
-    if (postsToShow.length === 0) {
-        list.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);"><i class="fas fa-inbox fa-3x" style="margin-bottom: 1rem; opacity: 0.5;"></i><p>No hay artículos publicados ni modificados en los últimos 30 días.</p></div>';
-    } else {
-        renderList(postsToShow, list);
-    }
+    // Show top 8 recent
+    renderList(sorted.slice(0, 8), list);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -526,8 +607,9 @@ function renderList(items, container, options = {}) {
 }
 
 function renderCategory(name, id) {
+    toggleHomeComponents(false);
     const CAT_MAP = getCatMap();
-    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    document.querySelector('.app-wrapper').classList.add('reading-mode');
 
     mainColumn.innerHTML = `
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
@@ -581,6 +663,7 @@ function renderCategory(name, id) {
 }
 
 function loadProtocol(p, highlightText = '') {
+    toggleHomeComponents(false);
     // Hide sidebar for reading
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
@@ -711,7 +794,8 @@ function goBack() {
 
 // Interactive Schema (Operational Guide)
 function renderOperationalGuide() {
-    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    toggleHomeComponents(false);
+    document.querySelector('.app-wrapper').classList.add('reading-mode');
     const CAT_MAP = getCatMap();
     
     mainColumn.innerHTML = `
@@ -749,7 +833,7 @@ function renderOperationalGuide() {
         const sectionEl = document.createElement('div');
         sectionEl.className = 'guide-section';
         
-        const description = SECTION_DESCS[catId] || `Protocolos y procedimientos relativos a ${cat.name}.`;
+        const description = cat.description || SECTION_DESCS[catId] || `Protocolos y procedimientos relativos a ${cat.name}.`;
 
         let protocolsHtml = '';
         sectionProtocols.forEach(p => {
@@ -922,7 +1006,7 @@ function renderAlertsList(type) {
     }
 
     const alertConfig = home_config.alerts[type];
-    document.querySelector('.app-wrapper').classList.remove('reading-mode');
+    document.querySelector('.app-wrapper').classList.add('reading-mode');
 
     mainColumn.innerHTML = `
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
