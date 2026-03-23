@@ -464,7 +464,7 @@ function renderHome() {
             <div class="dashboard-card alerts-card premium-shadow">
                 <h3 class="dash-title"><i class="fas fa-bell"></i> COMUNICADOS</h3>
                 <div class="dash-alerts-grid">
-                    <div class="dash-alert-btn red" onclick="renderAlertsList('critical')">
+                    <div class="dash-alert-btn red" onclick="renderAlertsList('critical_errors')">
                         <i class="fas fa-exclamation-triangle"></i>
                         <span>ERRORES</span>
                         <span class="dash-badge" id="dash-critical-count">0</span>
@@ -522,10 +522,43 @@ function renderHome() {
 
         <div class="recent-updates-box">
             <h2 class="section-title"><i class="fas fa-clock"></i> Actualizaciones y Novedades</h2>
-            <div id="posts-list" class="posts-grid"></div>
+            <div id="home-updates-list"></div>
         </div>
     `;
 
+    // Populate Dashboard Data from home_config
+    if (typeof home_config !== 'undefined') {
+        const critCount = home_config.alerts?.critical_errors?.items?.length || 0;
+        const annCount = home_config.alerts?.announcements?.items?.length || 0;
+        
+        const critEl = document.getElementById('dash-critical-count');
+        const annEl = document.getElementById('dash-announcements-count');
+        
+        if (critEl) critEl.textContent = critCount;
+        if (annEl) annEl.textContent = annCount;
+        
+        // News list
+        const newsListEl = document.getElementById('dash-featured-content');
+        if (newsListEl) {
+            if (home_config.featured_news && home_config.featured_news.length > 0) {
+                let newsHtml = '<ul class="dash-news-items">';
+                home_config.featured_news.forEach(item => {
+                    newsHtml += `
+                        <li class="dash-news-item">
+                            <a href="${item.link || '#'}" ${item.link ? 'target="_blank"' : ''}>
+                                <i class="fas fa-chevron-right"></i> ${item.text}
+                            </a>
+                        </li>`;
+                });
+                newsHtml += '</ul>';
+                newsListEl.innerHTML = newsHtml;
+            } else {
+                newsListEl.innerHTML = '<div class="no-news">No hay destacados.</div>';
+            }
+        }
+    }
+
+    renderRecentUpdates();
     // Fill last update date if available
     const lastUpdateEl = document.getElementById('last-update-date');
     const homeDateEl = document.getElementById('home-last-date');
