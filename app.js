@@ -427,27 +427,7 @@ function setActiveNav(el) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     el.classList.add('active');
 }
-
 function renderHome() {
-    document.querySelector('.app-wrapper').classList.remove('reading-mode');
-    
-    const welcomeTitle = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.title : 'Bienvenido al Blog de Procedimientos de Recepción';
-    const welcomeText = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.text : 'Este espacio está dedicado a la organización, formación y protocolos diarios del equipo de recepción en nuestros hoteles.';
-
-    mainColumn.innerHTML = `
-        <div class="welcome-card">
-            <h2><i class="fas fa-file-signature"></i> ${welcomeTitle}</h2>
-            <p>${welcomeText}</p>
-        </div>
-
-        <div class="latest-section">
-            <h2 class="section-title"><i class="fas fa-edit"></i> Últimas entradas publicadas y modificaciones</h2>
-            <div id="posts-list"></div>
-        </div>
-    `;
-    
-    const list = document.getElementById('posts-list');
-    
     // Filter protocols strictly: only last 30 days based on edit or publish date
     const now = new Date();
     const limitDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
