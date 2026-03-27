@@ -142,6 +142,7 @@ function selectFileAndUpload() {
                     }
                 }
                 showToast('📎 Documento adjuntado!');
+                refreshAttachmentsSummary();
             } else {
                 alert('Error al subir archivo: ' + result.message);
             }
@@ -226,6 +227,102 @@ function insertInternalLink(p) {
     
     document.getElementById('modal-links').style.display = 'none';
     showToast('🔗 Vínculo a apartado insertado');
+    refreshAttachmentsSummary();
+}
+
+/**
+ * Escanea el editor y muestra un resumen de archivos y vínculos internos
+ */
+function refreshAttachmentsSummary() {
+    const summaryPanel = document.getElementById('attachments-management');
+    if (!summaryPanel) return;
+    
+    const container = document.getElementById('attachments-list');
+    container.innerHTML = '';
+    
+    const content = !isHtmlMode 
+        ? quill.root.innerHTML 
+        : document.getElementById('html-editor').value;
+        
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const allLinks = doc.querySelectorAll('a');
+    
+    const docsFound = [];
+    const internalFound = [];
+    
+    allLinks.forEach(a => {
+        const href = a.getAttribute('href') || '';
+        const text = a.innerText.trim() || 'Sin texto';
+        
+        if (href.includes('documentos/')) {
+            docsFound.push({ href, text });
+        } else if (href.startsWith('#section/')) {
+            internalFound.push({ href, text });
+        }
+    });
+    
+    if (docsFound.length === 0 && internalFound.length === 0) {
+        summaryPanel.style.display = 'none';
+        return;
+    }
+    
+    summaryPanel.style.display = 'block';
+    
+    // Render
+    docsFound.forEach(d => renderSummaryItem(d, 'fa-file-pdf', '#c62828', container));
+    internalFound.forEach(i => renderSummaryItem(i, 'fa-link', '#6c5ce7', container));
+}
+
+function renderSummaryItem(item, icon, color, parent) {
+    const div = document.createElement('div');
+    div.style.background = '#fff';
+    div.style.border = `1px solid ${color}33`; // low opacity border
+    div.style.borderRadius = '6px';
+    div.style.padding = '8px 12px';
+    div.style.fontSize = '0.8rem';
+    div.style.display = 'flex';
+    div.style.alignItems = 'center';
+    div.style.gap = '8px';
+    
+    div.innerHTML = `
+        <i class="fas ${icon}" style="color:${color}"></i>
+        <span style="font-weight:600; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.text}</span>
+        <i class="fas fa-times" style="color: #999; cursor: pointer; padding: 2px 5px;" title="Eliminar del contenido"></i>
+    `;
+    
+    // Deletion support (EXPERIMENTAL: simplistic regex remove - USE WITH CAUTION)
+    div.querySelector('.fa-times').onclick = () => {
+        if (!confirm('¿Seguro que quieres quitar este elemento del contenido?')) return;
+        
+        if (!isHtmlMode) {
+             // In Quill, we just search for the link and remove it by finding the node
+             const links = quill.root.querySelectorAll('a');
+             links.forEach(l => {
+                 if (l.getAttribute('href') === item.href) {
+                     l.replaceWith(l.innerText); // keep text, remove link? Or just remove entirely?
+                     // Let's remove link but keep text maybe? The user might prefer deleting entirely.
+                     // l.remove(); 
+                     l.replaceWith(''); // remove completely as it's an 'attachment' record
+                 }
+             });
+        } else {
+            const htmlArea = document.getElementById('html-editor');
+            const currentHtml = htmlArea.value;
+            // find exact <a href="...">text</a>? Hard to find perfectly with regex if same text exists
+            // Since we know the href, we can try to find the full tag
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(currentHtml, 'text/html');
+            const links = doc.querySelectorAll('a');
+            links.forEach(l => {
+                if (l.getAttribute('href') === item.href) l.remove();
+            });
+            htmlArea.value = doc.body.innerHTML; 
+        }
+        refreshAttachmentsSummary();
+    };
+    
+    parent.appendChild(div);
 }
 
 function initAdmin() {
@@ -970,6 +1067,9 @@ function openEditor(index = -1) {
             quill.clipboard.dangerouslyPasteHTML(rawContent);
         }
     }
+    
+    // Refresh attachments list if panel exists
+    if (typeof refreshAttachmentsSummary === 'function') refreshAttachmentsSummary();
 }
 
 function initSettingsEditors() {

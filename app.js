@@ -826,7 +826,46 @@ function loadProtocol(p, highlightText = '') {
                 <div style="width: 150px; height: 2px; background-color: #b8955c; margin-top: 0.5rem;"></div>
             </header>
             <div class="protocol-full-body">
-                ${content}
+                ${(() => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(content, 'text/html');
+                    const links = Array.from(doc.querySelectorAll('a'));
+                    
+                    const cards = links.filter(a => {
+                        const href = a.getAttribute('href') || '';
+                        return href.startsWith('#section/') || href.includes('documentos/');
+                    });
+                    
+                    if (cards.length === 0) return content;
+                    
+                    // Re-sort cards: #section first, then documentos
+                    cards.sort((a,b) => {
+                        const ha = a.getAttribute('href');
+                        const hb = b.getAttribute('href');
+                        if (ha.startsWith('#section/') && !hb.startsWith('#section/')) return -1;
+                        if (!ha.startsWith('#section/') && hb.startsWith('#section/')) return 1;
+                        return 0;
+                    });
+                    
+                    // Remove from original content to avoid duplication
+                    cards.forEach(c => c.remove());
+                    
+                    const mainContent = doc.body.innerHTML;
+                    
+                    // Footer with cards
+                    let footer = `
+                        <div class="protocol-footer-links" style="margin-top: 3rem; padding-top: 2rem; border-top: 2px dashed #eee;">
+                            <h3 style="color: #666; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-layer-group"></i> Recursos y Vínculos Relacionados
+                            </h3>
+                            <div class="cards-container" style="display: flex; flex-direction: column; gap: 4px;">
+                                ${cards.map(c => c.outerHTML).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    return mainContent + footer;
+                })()}
             </div>
         </article>
     `;
