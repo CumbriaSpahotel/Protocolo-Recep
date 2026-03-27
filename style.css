@@ -995,14 +995,92 @@ body.dark-mode .top-nav {
     color: var(--accent-red);
 }
 
+.protocol-full-body a[href*="documentos/"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    background: #fdfdfd;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 14px 22px;
+    margin: 15px 0;
+    text-decoration: none !important;
+    color: #2c3e50 !important;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border-left: 5px solid #c62828;
+    max-width: 100%;
+}
+
+.protocol-full-body a[href*="documentos/"]:hover {
+    background: #fff;
+    border-color: #0a6aa1;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 106, 161, 0.1);
+    border-left-color: #0a6aa1;
+}
+
 .protocol-full-body a[href*="documentos/"]::before {
     content: "\f15b";
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
-    margin-right: 6px;
-    font-size: 0.9em;
+    background: #fff0f0;
+    min-width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #c62828;
+    font-size: 1.25rem;
+    transition: all 0.3s;
+}
+
+.protocol-full-body a[href*="documentos/"]:hover::before {
+    background: #eef7ff;
+    color: #0a6aa1;
+    transform: rotate(-10deg);
+}
+
+.protocol-full-body a[href*="documentos/"]::after {
+    content: "Descargar archivo";
     display: inline-block;
-    color: #c62828; /* Rojo para documentos tipo PDF/Word */
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #888;
+    background: #f1f3f5;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-left: 15px;
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+}
+
+.protocol-full-body a[href*="documentos/"]:hover::after {
+    background: #0a6aa1;
+    color: #fff;
+}
+
+/* Dark Mode support */
+body.dark-mode .protocol-full-body a[href*="documentos/"] {
+    background: #252a31;
+    border-color: #3d4653;
+    color: #eee !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .protocol-full-body a[href*="documentos/"]::before {
+    background: #1a1e24;
+}
+
+body.dark-mode .protocol-full-body a[href*="documentos/"]::after {
+    background: #1a1e24;
+    color: #999;
 }
 
 /* Fix for embedded tables with tiny fonts */

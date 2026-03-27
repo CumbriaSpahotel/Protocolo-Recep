@@ -302,8 +302,10 @@ function renderNavigation() {
             // Special handling for submenus (dynamic)
             const hasSubsections = cat.subsections && Object.keys(cat.subsections).length > 0;
             const hasLinks = cat.links && cat.links.length > 0;
+            const directProtocols = protocols.filter(p => p.section === id);
+            const hasProtocols = directProtocols.length > 0;
             
-            if (hasSubsections || hasLinks) {
+            if (hasSubsections || hasLinks || hasProtocols) {
                 link.innerHTML += ` <i class="fas fa-caret-down"></i>`;
                 
                 const dropdown = document.createElement('div');
@@ -357,8 +359,6 @@ function renderNavigation() {
                         a.dataset.search = item.id;
                         
                         // Handle icon/emoji from protocols data if possible, or just default
-                        // In the menu we usually don't have the full protocol object here, 
-                        // so we try to find it in the global protocols array for the icon
                         const pData = protocols.find(p => p.section === item.id);
                         let iconHtml = '<i class="fas fa-angle-right" style="opacity:0.3;"></i> ';
                         
@@ -372,11 +372,41 @@ function renderNavigation() {
                         const cleanName = item.name.replace(/\{.*?\}/, '').trim();
                         a.innerHTML = `<span style="display:flex; align-items:center;">${iconHtml}${cleanName}</span>`;
                         
-                        if (item.children.length > 0) {
+                        // Check for direct protocols in this section
+                        const sectionProtocols = protocols.filter(p => p.section === item.id);
+                        const hasChildren = item.children.length > 0;
+                        const hasProtocols = sectionProtocols.length > 0;
+
+                        if (hasChildren || hasProtocols) {
                             a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6;"></i>`;
                             const nestedDropdown = document.createElement('div');
                             nestedDropdown.className = 'dropdown-content nested';
+                            
+                            // 1. Render children sub-sections
                             item.children.forEach(child => renderSubItem(child, nestedDropdown));
+                            
+                            // 2. Render protocols of this specific section
+                            sectionProtocols.forEach(p => {
+                                const pA = document.createElement('a');
+                                pA.href = '#';
+                                pA.className = 'protocol-nav-link';
+                                
+                                let pIcon = '<i class="far fa-file-alt" style="margin-right:8px; opacity:0.6;"></i>';
+                                const pEmojiMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                                if (pEmojiMatch) {
+                                    pIcon = `<span style="margin-right:8px; font-size:1rem;">${pEmojiMatch[1]}</span>`;
+                                }
+                                
+                                const pCleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+                                pA.innerHTML = `<span style="display:flex; align-items:center;">${pIcon}${pCleanTitle}</span>`;
+                                pA.onclick = (e) => {
+                                    e.preventDefault();
+                                    viewHistory.push({ type: 'protocol', payload: p });
+                                    loadProtocol(p);
+                                };
+                                nestedDropdown.appendChild(pA);
+                            });
+                            
                             wrapper.appendChild(a);
                             wrapper.appendChild(nestedDropdown);
                         } else {
@@ -387,6 +417,30 @@ function renderNavigation() {
                     };
 
                     rootSubs.forEach(item => renderSubItem(item, dropdown));
+                }
+
+                // Add direct protocols for this category (at the end)
+                if (hasProtocols) {
+                    directProtocols.forEach(p => {
+                        const pA = document.createElement('a');
+                        pA.href = '#';
+                        pA.className = 'protocol-nav-link';
+                        
+                        let pIcon = '<i class="far fa-file-alt" style="margin-right:8px; opacity:0.6;"></i>';
+                        const emojiMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                        if (emojiMatch) {
+                            pIcon = `<span style="margin-right:8px; font-size:1rem;">${emojiMatch[1]}</span>`;
+                        }
+                        
+                        const pCleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+                        pA.innerHTML = `<span style="display:flex; align-items:center;">${pIcon}${pCleanTitle}</span>`;
+                        pA.onclick = (e) => {
+                            e.preventDefault();
+                            viewHistory.push({ type: 'protocol', payload: p });
+                            loadProtocol(p);
+                        };
+                        dropdown.appendChild(pA);
+                    });
                 }
                 
                 // Set up internal navigation links
@@ -791,6 +845,29 @@ function loadProtocol(p, highlightText = '') {
     articleLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (!href) return;
+
+        // Vínculos internos entre apartados (e.g. #section/1.1)
+        if (href.startsWith('#section/')) {
+            link.classList.add('internal-link');
+            // Añadir icono si no lo tiene
+            if (!link.innerHTML.includes('fa-') && !link.innerHTML.includes('📊')) {
+                link.innerHTML = `<i class="fas fa-external-link-alt" style="font-size: 0.8em; margin-right: 5px; opacity: 0.7;"></i> ${link.innerHTML}`;
+            }
+
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = href.split('/')[1];
+                const targetProtocol = protocols.find(p => p.section === sectionId);
+                if (targetProtocol) {
+                    viewHistory.push({ type: 'protocol', payload: targetProtocol });
+                    loadProtocol(targetProtocol);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('El apartado vinculado no se encuentra disponible.');
+                }
+            });
+            return;
+        }
 
         // If it's a link to the old or new blog
         if (href.includes('operativarecepcion2024.blogspot.com') || href.includes('procedimientoshotelguadiana.blogspot.com')) {

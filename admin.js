@@ -154,6 +154,80 @@ function selectFileAndUpload() {
     input.click();
 }
 
+/**
+ * Módulo para vincular apartados internos
+ */
+function openLinkModal() {
+    const modal = document.getElementById('modal-links');
+    modal.style.display = 'flex';
+    document.getElementById('internal-link-search').value = '';
+    renderLinkList('');
+    document.getElementById('internal-link-search').focus();
+}
+
+function renderLinkList(filter = '') {
+    const container = document.getElementById('internal-link-list');
+    container.innerHTML = '';
+    
+    const filtered = adminProtocols.filter(p => 
+        p.title.toLowerCase().includes(filter.toLowerCase()) || 
+        (p.section && p.section.includes(filter))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No se encontraron resultados.</div>';
+        return;
+    }
+
+    filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.style.padding = '12px 15px';
+        item.style.borderBottom = '1px solid #eee';
+        item.style.cursor = 'pointer';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.className = 'link-item-selectable';
+        
+        const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+        item.innerHTML = `
+            <div>
+                <div style="font-weight: 600;">${cleanTitle}</div>
+                <div style="font-size: 0.8rem; color: #777;">Sección: ${p.section || 's/s'}</div>
+            </div>
+            <button class="btn-primary" style="padding: 5px 10px; font-size: 0.75rem;">Vincular</button>
+        `;
+        
+        item.onclick = () => insertInternalLink(p);
+        container.appendChild(item);
+    });
+}
+
+function insertInternalLink(p) {
+    const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+    const linkText = `Ver más información: ${cleanTitle}`;
+    const sectionId = p.section;
+    
+    if (!isHtmlMode) {
+        // En Quill, los atributos data- se pierden a veces si no hay un blot personalizado,
+        // así que usaremos un formato de link reconocible para el app.js del frontal.
+        // Formato: #section/1.1
+        const range = quill.getSelection(true) || { index: 0 };
+        quill.insertText(range.index, linkText, 'link', `#section/${sectionId}`);
+        quill.setSelection(range.index + linkText.length);
+    } else {
+        const htmlArea = document.getElementById('html-editor');
+        const linkHtml = `<a href="#section/${sectionId}" class="internal-link">📊 ${linkText}</a>`;
+        const start = htmlArea.selectionStart;
+        const end = htmlArea.selectionEnd;
+        const text = htmlArea.value;
+        htmlArea.value = text.slice(0, start) + linkHtml + text.slice(end);
+    }
+    
+    document.getElementById('modal-links').style.display = 'none';
+    showToast('🔗 Vínculo a apartado insertado');
+}
+
 function initAdmin() {
 
     // Initialize Data
@@ -253,6 +327,27 @@ function initAdmin() {
     if (btnAttachGeneral) {
         btnAttachGeneral.addEventListener('click', selectFileAndUpload);
     }
+
+    // Modal Link Events
+    const btnLinkInternal = document.getElementById('btn-link-internal');
+    if (btnLinkInternal) {
+        btnLinkInternal.addEventListener('click', openLinkModal);
+    }
+
+    const btnCloseLinks = document.getElementById('btn-close-links-modal');
+    if (btnCloseLinks) {
+        btnCloseLinks.addEventListener('click', () => {
+            document.getElementById('modal-links').style.display = 'none';
+        });
+    }
+
+    const searchLinks = document.getElementById('internal-link-search');
+    if (searchLinks) {
+        searchLinks.addEventListener('input', (e) => {
+            renderLinkList(e.target.value);
+        });
+    }
+
     // Toggle HTML Mode
     document.getElementById('btn-toggle-html').addEventListener('click', () => {
         const htmlEditor = document.getElementById('html-editor');
