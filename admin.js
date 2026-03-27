@@ -740,14 +740,40 @@ function initAdmin() {
     if (btnSaveMenus) {
         btnSaveMenus.addEventListener('click', () => {
             try {
-                const parsedNav = collectMenus();
+                const { newNav, idMap } = collectMenus();
+
+                // --- Safety check: warn if protocols would be renumbered ---
+                if (Object.keys(idMap).length > 0) {
+                    // Count affected protocols
+                    const affectedProtocols = adminProtocols.filter(p => {
+                        if (!p.section) return false;
+                        const parts = p.section.split('.');
+                        return idMap[p.section] || idMap[parts[0]];
+                    });
+
+                    const changesList = Object.entries(idMap)
+                        .map(([old, nw]) => `Sección ${old} → ${nw}`)
+                        .join('\n');
+
+                    const confirmed = confirm(
+                        `⚠️ ATENCIÓN: Este cambio de orden renumeraría ${affectedProtocols.length} protocolo(s).\n\n` +
+                        `Cambios detectados:\n${changesList}\n\n` +
+                        `❓ ¿Deseas aplicar la renumeración de protocolos?\n\n` +
+                        `Pulsa ACEPTAR para renumerar. Pulsa CANCELAR para guardar solo los nombres/iconos/descripciones sin cambiar los números de sección.`
+                    );
+
+                    if (confirmed) {
+                        syncProtocolsWithNewIds(idMap);
+                    }
+                }
+
                 if (typeof navigation_config !== 'undefined') {
                     Object.keys(navigation_config).forEach(key => delete navigation_config[key]);
-                    Object.assign(navigation_config, parsedNav);
+                    Object.assign(navigation_config, newNav);
                 }
-                saveToServer(adminProtocols, parsedNav, typeof home_config !== 'undefined' ? home_config : undefined);
+                saveToServer(adminProtocols, newNav, typeof home_config !== 'undefined' ? home_config : undefined);
                 showToast('Configuración de menús guardada');
-                populateCategories(); 
+                populateCategories();
             } catch(e) {
                 alert('Error al guardar menús: ' + e.message);
             }
@@ -1572,18 +1598,13 @@ function collectMenus() {
         }
     });
 
-    // --- Sync Protocols with New IDs ---
-    if (Object.keys(idMap).length > 0) {
-        syncProtocolsWithNewIds(idMap);
-    }
-
     document.getElementById('edit-menus-json').value = JSON.stringify(newNav, null, 2);
     // Update global config if present
     if (typeof navigation_config !== 'undefined') {
         Object.keys(navigation_config).forEach(k => delete navigation_config[k]);
         Object.assign(navigation_config, newNav);
     }
-    return newNav;
+    return { newNav, idMap };
 }
 
 /**

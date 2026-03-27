@@ -1744,6 +1744,49 @@ function getKeyPoints(html, maxPoints = 3) {
     return paras.length > 0 ? paras : null;
 }
 
+// Extract sentences from protocol that contain the search terms, with highlights
+function getContextSnippets(html, searchTerms, maxSnippets = 3) {
+    if (!html || !searchTerms || searchTerms.length === 0) return null;
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const fullText = temp.textContent || temp.innerText || '';
+    
+    // Split into sentences (by . ; : or newline)
+    const rawSentences = fullText
+        .replace(/\n+/g, ' ')
+        .split(/(?<=[.;:\n])\s+|\n/)
+        .map(s => s.trim())
+        .filter(s => s.length > 15 && s.length < 300);
+    
+    const results = [];
+    const usedSentences = new Set();
+    
+    // For each search term, find sentences that contain it
+    for (const term of searchTerms) {
+        if (term.length < 3) continue;
+        for (const sentence of rawSentences) {
+            if (results.length >= maxSnippets) break;
+            if (usedSentences.has(sentence)) continue;
+            if (sentence.toLowerCase().includes(term.toLowerCase())) {
+                // Highlight all matching terms within the sentence
+                let highlighted = sentence;
+                searchTerms.forEach(t => {
+                    if (t.length < 3) return;
+                    try {
+                        const regex = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        highlighted = highlighted.replace(regex, '<mark style="background:#fff3cd; color:#856404; border-radius:3px; padding:0 2px; font-weight:700;">$1</mark>');
+                    } catch(e) {}
+                });
+                results.push(highlighted);
+                usedSentences.add(sentence);
+            }
+        }
+        if (results.length >= maxSnippets) break;
+    }
+    
+    return results.length > 0 ? results : null;
+}
+
 function generateBotResponse(userInput) {
     const input = userInput.toLowerCase();
     
@@ -1811,16 +1854,24 @@ function generateBotResponse(userInput) {
             const catId = p.section ? String(p.section).split('.')[0] : null;
             const catName = catId && CAT_MAP[catId] ? CAT_MAP[catId].name : null;
             
-            // Build key-points summary
-            const keyPoints = getKeyPoints(p.info_html || p.content);
+            // Build context snippets: sentences containing the search terms
+            const snippets = getContextSnippets(p.info_html || p.content, searchTerms);
             let summaryHtml = '';
-            if (keyPoints && keyPoints.length > 0) {
-                summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#555; line-height:1.5;">${
-                    keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')
+            if (snippets && snippets.length > 0) {
+                summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#444; line-height:1.6;">${
+                    snippets.map(s => `<li>${s}</li>`).join('')
                 }</ul>`;
             } else {
-                const fallback = getExcerpt(p.info_html || p.content, 130);
-                summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
+                // Fallback to key points if no direct mention found
+                const keyPoints = getKeyPoints(p.info_html || p.content);
+                if (keyPoints && keyPoints.length > 0) {
+                    summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#555; line-height:1.5;">${
+                        keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')
+                    }</ul>`;
+                } else {
+                    const fallback = getExcerpt(p.info_html || p.content, 130);
+                    summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
+                }
             }
             
             const linkHtml = `
