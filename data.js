@@ -666,14 +666,15 @@ const protocols_data = [
     ]
   },
   {
-    "title": "3.3. 👪 Gestión reservas grupo {🔴}",
-    "section": "",
-    "source": "",
+    "title": "👪 Gestión reservas grupos",
+    "section": "5.1",
+    "source": "Ambos hoteles",
+    "status": "En proceso",
     "published": "2025-09-29T13:43:00Z",
-    "updated": "2026-03-22T22:54:10.975Z",
-    "content": "<!--Encabezado: Logo + Título alineados (SIN CAMBIOS)-->\n<div style=\"align-items: center; display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;\">\n  <img alt=\"Hotel Sercotel Guadiana\" src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEioM9tNsQr1l77BaGhL6WirB2r9MrNe5FuZ7yXEQpAmy9f_oOosw73-ydI4aSW7HMh8F7xjcgKs_YSAeMhiXI1XRSbp1KDAVuVFPQibKvwaoXJLtkcfLE-IuJHsBvSBvMOL0pGEuCGtSh9GXbR6uSVQfSUp-PDOR-TfWVWBmjarliAu9VBMeUTOZzpYR8rR/s1024/a-photograph-of-a-sleek-modern-tablet-di_o5-fXx_8RAu8nyulFGU8Bg_WYXFbcFcTXiZ5HB5kcgMdQ.jpeg\" style=\"height: 160px;\" />\n  <h1 style=\"color: #2c2c2c; font-family: Georgia, serif; font-size: 34px; margin: 0px; text-align: center;\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLL2hnB0oOZQJUlwiovLpDo8pTlP0BOb8espT3OCgjiGaAaeYc0jWwYehujllCwXPz0N6EjgA8a8Bhw5oBSSLOqpN58z4eNYPt83SbnE2-2rK9bQV2STHkZWESTIZpA3tIgAK4mFLazs8tStC75bOk81nGSMO4A1D1PFG1uuXe6PndFBIE3Ui4l-VPMxA/s357/images.png\" style=\"clear: left; display: inline; margin-bottom: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"141\" data-original-width=\"357\" height=\"126\" src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLL2hnB0oOZQJUlwiovLpDo8pTlP0BOb8espT3OCgjiGaAaeYc0jWwYehujllCwXPz0N6EjgA8a8Bhw5oBSSLOqpN58z4eNYPt83SbnE2-2rK9bQV2STHkZWESTIZpA3tIgAK4mFLazs8tStC75bOk81nGSMO4A1D1PFG1uuXe6PndFBIE3Ui4l-VPMxA/s320/images.png\" width=\"320\" /></a>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</h1>\n</div>\n\n<p style=\"color:#7a7a7a; font-size:0.98em; margin-bottom:0.5em;\">\n  Última revisión: 21 de Junio 25 &nbsp; | &nbsp; \n  <b>Estado:</b> 🔴 No iniciado &nbsp; | &nbsp;\n  <b>Ámbito:</b> Ambos hoteles\n</p>\n<!--Línea decorativa-->\n<hr style=\"border: 2px solid rgb(165, 140, 95); margin: 10px auto 30px; width: 100px;\" />\n\n<!--Introducción destacada (opcional mantener)-->\n<div style=\"background-color: #f7f3ec; border-left: 5px solid rgb(165, 140, 95); margin-bottom: 30px; padding: 15px;\">\n  <span style=\"color: #4a4a4a; font-family: Georgia, serif; font-size: 19px;\">✨&nbsp;Para garantizar una experiencia fluida, la gestión de grupos requiere preparación previa y documentación completa antes de la llegada.</span>\n</div>\n\n<!--===== SUSTITUCIÓN: Contenido “Grupos” basado en procedimiento =====-->\n\n\n\n<!--===== FIN Sustitución =====-->\n\n<!--Pie de página / cierre (SIN CAMBIOS)-->\n<div style=\"border-top: 1px solid rgb(204, 204, 204); color: #7a7a7a; font-size: 15px; font-style: italic; margin-top: 40px; padding-top: 20px; text-align: center;\">\n  Manual de recepción – Para uso interno del Hotel Sercotel Guadiana · Coordinación y trabajo en equipo para mejorar la experiencia de nuestros huéspedes\n</div>\n",
+    "updated": "2026-03-27T12:23:17.644Z",
+    "content": "<!--Encabezado: Logo + Título alineados (SIN CAMBIOS)-->\n<div style=\"align-items: center; display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;\">\n  <img alt=\"Hotel Sercotel Guadiana\" src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEioM9tNsQr1l77BaGhL6WirB2r9MrNe5FuZ7yXEQpAmy9f_oOosw73-ydI4aSW7HMh8F7xjcgKs_YSAeMhiXI1XRSbp1KDAVuVFPQibKvwaoXJLtkcfLE-IuJHsBvSBvMOL0pGEuCGtSh9GXbR6uSVQfSUp-PDOR-TfWVWBmjarliAu9VBMeUTOZzpYR8rR/s1024/a-photograph-of-a-sleek-modern-tablet-di_o5-fXx_8RAu8nyulFGU8Bg_WYXFbcFcTXiZ5HB5kcgMdQ.jpeg\" style=\"height: 160px;\" />\n  <h1 style=\"color: #2c2c2c; font-family: Georgia, serif; font-size: 34px; margin: 0px; text-align: center;\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLL2hnB0oOZQJUlwiovLpDo8pTlP0BOb8espT3OCgjiGaAaeYc0jWwYehujllCwXPz0N6EjgA8a8Bhw5oBSSLOqpN58z4eNYPt83SbnE2-2rK9bQV2STHkZWESTIZpA3tIgAK4mFLazs8tStC75bOk81nGSMO4A1D1PFG1uuXe6PndFBIE3Ui4l-VPMxA/s357/images.png\" style=\"clear: left; display: inline; margin-bottom: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"141\" data-original-width=\"357\" height=\"126\" src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLL2hnB0oOZQJUlwiovLpDo8pTlP0BOb8espT3OCgjiGaAaeYc0jWwYehujllCwXPz0N6EjgA8a8Bhw5oBSSLOqpN58z4eNYPt83SbnE2-2rK9bQV2STHkZWESTIZpA3tIgAK4mFLazs8tStC75bOk81nGSMO4A1D1PFG1uuXe6PndFBIE3Ui4l-VPMxA/s320/images.png\" width=\"320\" /></a>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</h1>\n</div>\n\n\n<!--Línea decorativa-->\n<hr style=\"border: 2px solid rgb(165, 140, 95); margin: 10px auto 30px; width: 100px;\" />\n\n<!--Introducción destacada (opcional mantener)-->\n<div style=\"background-color: #f7f3ec; border-left: 5px solid rgb(165, 140, 95); margin-bottom: 30px; padding: 15px;\">\n  <span style=\"color: #4a4a4a; font-family: Georgia, serif; font-size: 19px;\">✨&nbsp;Para garantizar una experiencia fluida, la gestión de grupos requiere preparación previa y documentación completa antes de la llegada.</span>\n</div>\n\n<!--===== SUSTITUCIÓN: Contenido “Grupos” basado en procedimiento =====-->\n\n\n\n<!--===== FIN Sustitución =====-->\n\n<!--Pie de página / cierre (SIN CAMBIOS)-->\n<div style=\"border-top: 1px solid rgb(204, 204, 204); color: #7a7a7a; font-size: 15px; font-style: italic; margin-top: 40px; padding-top: 20px; text-align: center;\">\n  Manual de recepción – Para uso interno del Hotel Sercotel Guadiana · Coordinación y trabajo en equipo para mejorar la experiencia de nuestros huéspedes\n</div>\n",
     "categories": [
-      "General"
+      "5ª Sección"
     ]
   },
   {
@@ -872,17 +873,6 @@ const navigation_config = {
     "subsections": {},
     "links": []
   },
-  "1.4": {
-    "name": "Tareas de apoyo a otros departamentos",
-    "description": "En momentos de baja actividad apoyamos a otros departamentos.",
-    "subsections": {
-      "1.4.1": "🍽️ Restaurante",
-      "1.4.2": "🧹 Pisos",
-      "1.4.3": "🔧 Mantenimiento"
-    },
-    "icon": "fa-hands-helping",
-    "links": []
-  },
   "2": {
     "name": "Operativa Diaria",
     "icon": "fa-calendar-check",
@@ -982,6 +972,17 @@ const navigation_config = {
     "name": "Otros",
     "icon": "fa-plus",
     "subsections": {},
+    "links": []
+  },
+  "1.4": {
+    "name": "Tareas de apoyo a otros departamentos",
+    "description": "En momentos de baja actividad apoyamos a otros departamentos.",
+    "subsections": {
+      "1.4.1": "🍽️ Restaurante",
+      "1.4.2": "🧹 Pisos",
+      "1.4.3": "🔧 Mantenimiento"
+    },
+    "icon": "fa-hands-helping",
     "links": []
   }
 };

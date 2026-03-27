@@ -60,25 +60,98 @@ const iconBank = [
 
 function initQuill() {
     if (!quill) {
+        // Register custom icons
+        const Icons = Quill.import('ui/icons');
+        Icons['attachment'] = '<i class="fas fa-paperclip" style="font-size: 15px;"></i>';
+
         quill = new Quill('#quill-editor', {
             theme: 'snow',
             modules: {
-                toolbar: [
-                    [{ 'font': [] }, { 'size': [] }],
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    [{ 'header': 1 }, { 'header': 2 }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
-                    [{ 'direction': 'rtl' }, { 'align': [] }],
-                    ['link', 'image', 'video', 'formula'],
-                    ['blockquote', 'code-block'],
-                    ['clean']
-                ]
+                toolbar: {
+                    container: [
+                        [{ 'font': [] }, { 'size': [] }],
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'script': 'sub'}, { 'script': 'super' }],
+                        [{ 'header': 1 }, { 'header': 2 }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'direction': 'rtl' }, { 'align': [] }],
+                        ['link', 'image', 'video', 'attachment'],
+                        ['blockquote', 'code-block'],
+                        ['clean']
+                    ],
+                    handlers: {
+                        'attachment': function() {
+                            selectFileAndUpload();
+                        }
+                    }
+                }
             }
         });
     }
+}
+
+function selectFileAndUpload() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar');
+    
+    input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        // Show a temporary tooltip or loading indicator if possible
+        const range = quill.getSelection(true);
+        const fileName = file.name;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            // Determine API URL based on environment
+            const uploadUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/upload' : '/api/upload';
+            
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const fileUrl = result.url;
+                
+                if (!isHtmlMode) {
+                    // Visual/Quill mode
+                    const range = quill.getSelection(true) || { index: 0 };
+                    quill.insertText(range.index, fileName, 'link', fileUrl);
+                    quill.setSelection(range.index + fileName.length);
+                } else {
+                    // Pure HTML mode
+                    const htmlArea = document.getElementById('html-editor');
+                    if (htmlArea) {
+                        const linkHtml = `<a href="${fileUrl}">${fileName}</a>`;
+                        const start = htmlArea.selectionStart;
+                        const end = htmlArea.selectionEnd;
+                        const text = htmlArea.value;
+                        htmlArea.value = text.slice(0, start) + linkHtml + text.slice(end);
+                        htmlArea.focus();
+                        htmlArea.selectionStart = start + linkHtml.length;
+                        htmlArea.selectionEnd = start + linkHtml.length;
+                    }
+                }
+                showToast('📎 Documento adjuntado!');
+            } else {
+                alert('Error al subir archivo: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error subiendo archivo:', error);
+            alert('Error conectando con el servidor para la subida.');
+        }
+    };
+
+    input.click();
 }
 
 function initAdmin() {
@@ -174,6 +247,12 @@ function initAdmin() {
     document.getElementById('btn-sync').addEventListener('click', () => {
         location.reload();
     });
+
+    // General Attach Button (Works in both modes)
+    const btnAttachGeneral = document.getElementById('btn-attach-general');
+    if (btnAttachGeneral) {
+        btnAttachGeneral.addEventListener('click', selectFileAndUpload);
+    }
     // Toggle HTML Mode
     document.getElementById('btn-toggle-html').addEventListener('click', () => {
         const htmlEditor = document.getElementById('html-editor');

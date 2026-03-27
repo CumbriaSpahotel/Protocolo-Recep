@@ -355,3 +355,21 @@ body {
 .toast.show {
     transform: translateY(0);
 }
+
+/* Estilos para el botón de adjuntos en Quill */
+.ql-snow .ql-toolbar button.ql-attachment {
+    width: 28px;
+    height: 24px;
+    padding: 3px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ql-snow .ql-toolbar button.ql-attachment i {
+    color: #444;
+}
+
+.ql-snow .ql-toolbar button.ql-attachment:hover i {
+    color: var(--accent);
+}

@@ -2,10 +2,33 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const open = require('open');
+const open = require('open').default;
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
+
+// Configurar almacenamiento de documentos
+const uploadDir = path.join(__dirname, 'documentos');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'documentos/');
+    },
+    filename: (req, file, cb) => {
+        // Limpiar el nombre del archivo para evitar problemas con espacios o tildes
+        const safeName = file.originalname.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9.-]/g, '_');
+        cb(null, Date.now() + '-' + safeName);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
 
 app.use(cors());
 app.use(express.static(__dirname));
@@ -37,6 +60,24 @@ app.post('/api/save', (req, res) => {
         res.json({ success: true, message: 'Datos guardados correctamente' });
     } catch (e) {
         console.error(e);
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No se ha seleccionado ningún archivo' });
+        }
+        
+        console.log(`📁 Archivo subido: ${req.file.filename}`);
+        res.json({ 
+            success: true, 
+            url: `documentos/${req.file.filename}`,
+            name: req.file.originalname 
+        });
+    } catch (e) {
+        console.error('❌ Error en upload:', e);
         res.status(500).json({ success: false, message: e.message });
     }
 });

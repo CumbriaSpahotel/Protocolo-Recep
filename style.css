@@ -984,6 +984,27 @@ body.dark-mode .top-nav {
     font-size: 1.1rem;
 }
 
+.protocol-full-body a {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.protocol-full-body a:hover {
+    color: var(--accent-red);
+}
+
+.protocol-full-body a[href*="documentos/"]::before {
+    content: "\f15b";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-right: 6px;
+    font-size: 0.9em;
+    display: inline-block;
+    color: #c62828; /* Rojo para documentos tipo PDF/Word */
+}
+
 /* Fix for embedded tables with tiny fonts */
 .protocol-full-body table {
     width: 100% !important;

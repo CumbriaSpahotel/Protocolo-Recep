@@ -164,7 +164,10 @@
                 <div class="editor-body">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;">
                         <label style="font-weight: 600; margin: 0;">Contenido del Protocolo</label>
-                        <button type="button" id="btn-toggle-html" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 10px;"><i class="fas fa-code"></i> Editar en HTML puro</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" id="btn-attach-general" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 10px; background: #0a6aa1 !important; color: white;"><i class="fas fa-paperclip"></i> Adjuntar Documento</button>
+                            <button type="button" id="btn-toggle-html" class="btn-secondary" style="font-size: 0.85rem; padding: 5px 10px;"><i class="fas fa-code"></i> Editar en HTML puro</button>
+                        </div>
                     </div>
                     <div id="quill-editor" style="height: 500px; background: white;"></div>
                     <textarea id="html-editor" style="display: none; width: 100%; height: 500px; background: #282c34; color: #abb2bf; font-family: monospace; padding: 15px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" spellcheck="false"></textarea>
