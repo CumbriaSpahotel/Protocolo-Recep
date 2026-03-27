@@ -707,7 +707,7 @@ function initAdmin() {
     if (btnAddMenu) {
         btnAddMenu.addEventListener('click', () => {
             const currentRows = document.querySelectorAll('#menus-container .menu-row').length;
-            if (typeof addMenuRow === 'function') addMenuRow(currentRows + 1, '', 'fa-folder');
+            if (typeof addMenuRow === 'function') addMenuRow(currentRows + 1, '', 'fa-folder', {}, '');
         });
     }
     const btnAddCritical = document.getElementById('btn-add-critical');
@@ -903,6 +903,11 @@ function renderAdminTable(data) {
         const dateVal = formatAdminDate(p.published);
         const sourceVal = p.source || 'Ambos';
 
+        // Resolve category name from navigation_config
+        const navConf = typeof navigation_config !== 'undefined' ? navigation_config : {};
+        const catId = p.section ? String(p.section).split('.')[0] : null;
+        const catName = catId && navConf[catId] ? navConf[catId].name : null;
+
         let statusIcon = '';
         if (p.status === 'Activo') statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
         else if (p.status === 'En redacción') statusIcon = '<span style="color: #fd7e14; margin-right: 5px;" title="En redacción"><i class="fas fa-edit"></i></span>';
@@ -912,7 +917,10 @@ function renderAdminTable(data) {
         tr.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="background: #f1f3f5; color: #0a6aa1; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-family: monospace; font-size: 0.95rem; border: 1px solid #dee2e6; min-width: 45px; text-align: center;">${secVal}</span>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                        <span style="background: #f1f3f5; color: #0a6aa1; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-family: monospace; font-size: 0.95rem; border: 1px solid #dee2e6; min-width: 45px; text-align: center;">${secVal}</span>
+                        ${catName ? `<span style="font-size:0.62rem; color:#999; font-weight:600; text-transform:uppercase; letter-spacing:0.02em; text-align:center; line-height:1.2; max-width:90px; word-break:break-word; white-space:normal;">${catName}</span>` : ''}
+                    </div>
                     <strong style="font-size: 1rem; color: #333; display: flex; align-items: center;">${statusIcon} ${p.title || 'Sin Título'}</strong>
                 </div>
             </td>
@@ -929,6 +937,7 @@ function renderAdminTable(data) {
         `;
         tbody.appendChild(tr);
     });
+
 }
 
 function populateCategories() {
@@ -1208,7 +1217,7 @@ function renderMenuUI(navObj) {
     const sortedEntries = Object.entries(navObj).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
     
     sortedEntries.forEach(([id, cat], index) => {
-        addMenuRow(id, cat.name, cat.icon, cat.subsections || {});
+        addMenuRow(id, cat.name, cat.icon, cat.subsections || {}, cat.description || '');
     });
 }
 
@@ -1232,7 +1241,7 @@ function updateMenuOrder() {
     });
 }
 
-function addMenuRow(id, name, icon, subsections = {}) {
+function addMenuRow(id, name, icon, subsections = {}, description = '') {
     const container = document.getElementById('menus-container');
     const row = document.createElement('div');
     row.className = 'menu-row';
@@ -1263,6 +1272,11 @@ function addMenuRow(id, name, icon, subsections = {}) {
             <div style="display: flex; align-items: flex-end;">
                 <button type="button" class="btn-delete-row" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; border-radius:4px; height:38px; width:38px; cursor:pointer;" onclick="if(confirm('¿Eliminar toda la categoría y sus subsecciones?')) { this.closest('.menu-row').remove(); updateMenuOrder(); }" title="Eliminar Sección"><i class="fas fa-trash"></i></button>
             </div>
+        </div>
+
+        <div style="margin-left: 42px; margin-top: 6px;">
+            <label style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform:uppercase; margin-bottom: 5px; display: block;"><i class="fas fa-align-left" style="margin-right:4px;"></i>Descripción (Guía Operativa)</label>
+            <textarea class="menu-description" rows="2" placeholder="Texto descriptivo que aparece bajo el título de la sección en la Guía Operativa..." style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.88rem; resize:vertical; font-family:inherit; color:#444;">${description}</textarea>
         </div>
         
         <div style="display: flex; gap: 20px; margin-left: 42px; margin-top: 10px;">
@@ -1545,9 +1559,13 @@ function collectMenus() {
                 }
             });
             
+            const descInput = row.querySelector('.menu-description');
+            const description = descInput ? descInput.value.trim() : '';
+
             newNav[id] = { 
                 name, 
                 icon,
+                description: description || undefined,
                 subsections: subsectionsObj,
                 links: linksArr
             };
