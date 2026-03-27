@@ -667,6 +667,27 @@ function renderHome() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function renderRecentUpdates() {
+    const listEl = document.getElementById('home-updates-list');
+    if (!listEl) return;
+    
+    if (typeof home_config === 'undefined' || !home_config.recent_updates || home_config.recent_updates.length === 0) {
+        listEl.innerHTML = '<div class="no-updates">No hay actualizaciones recientes registradas.</div>';
+        return;
+    }
+    
+    listEl.innerHTML = home_config.recent_updates.map(item => `
+        <div class="update-item" style="padding: 1rem; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 1rem;">
+            <div class="update-badge" style="background: var(--accent-blue); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; white-space: nowrap;">
+                ${item.date || 'Reciente'}
+            </div>
+            <div class="update-content" style="font-size: 0.95rem; color: #444; line-height: 1.4;">
+                ${item.text}
+            </div>
+        </div>
+    `).join('');
+}
+
 function renderList(items, container, options = {}) {
     const { highlightText = '', append = false } = options;
     if (!append) container.innerHTML = '';
