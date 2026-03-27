@@ -86,6 +86,7 @@ function init() {
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
         protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
+        window.protocols = protocols; // Make protocols globally accessible
         
         // Calculate and show last update date
         if (protocols.length > 0) {
@@ -99,6 +100,11 @@ function init() {
                 dateEl.textContent = formatDate(latestDate);
             }
         }
+
+        // Hash-based routing initialization
+        window.addEventListener('hashchange', handleHashRouting);
+        // Delay routing slightly to ensure DOM is ready
+        setTimeout(handleHashRouting, 100);
 
         // Sort by date descending
         protocols.sort((a, b) => new Date(b.published) - new Date(a.published));
@@ -302,7 +308,13 @@ function renderNavigation() {
             // Special handling for submenus (dynamic)
             const hasSubsections = cat.subsections && Object.keys(cat.subsections).length > 0;
             const hasLinks = cat.links && cat.links.length > 0;
-            const directProtocols = protocols.filter(p => p.section === id);
+            const allCategoryProtocols = protocols.filter(p => p.section === id || (p.section && p.section.startsWith(id + '.')));
+            // Filter out protocols that belong to an explicit subsection to avoid duplication
+            const directProtocols = allCategoryProtocols.filter(p => {
+                if (p.section === id) return true;
+                const subId = p.section;
+                return !Object.keys(cat.subsections || {}).some(sid => subId === sid || subId.startsWith(sid + "."));
+            });
             const hasProtocols = directProtocols.length > 0;
             
             if (hasSubsections || hasLinks || hasProtocols) {
@@ -543,34 +555,51 @@ function renderHome() {
         <div class="quick-access-section">
             <h2 class="section-title"><i class="fas fa-rocket"></i> Accesos Rápidos</h2>
             <div class="quick-access-grid">
-                <div class="quick-card" onclick="renderCategory('Turnos', '1')">
-                    <div class="quick-icon"><i class="fas fa-clipboard-list"></i></div>
-                    <div class="quick-info">
-                        <h3>Turnos</h3>
-                        <p>Gestión de cuadrantes y cambios</p>
-                    </div>
-                </div>
-                <div class="quick-card" onclick="renderCategory('Reservas y Tarifas', '3')">
-                    <div class="quick-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                    <div class="quick-info">
-                        <h3>Reservas</h3>
-                        <p>Control de tarifas y canales</p>
-                    </div>
-                </div>
-                <div class="quick-card" onclick="renderCategory('Estancia, Caja y Salidas', '4')">
-                    <div class="quick-icon"><i class="fas fa-cash-register"></i></div>
-                    <div class="quick-info">
-                        <h3>Caja y Salidas</h3>
-                        <p>Facturación y cierre de turno</p>
-                    </div>
-                </div>
-                <div class="quick-card" onclick="renderCategory('Gestión de Grupos', '5')">
-                    <div class="quick-icon"><i class="fas fa-users-cog"></i></div>
-                    <div class="quick-info">
-                        <h3>Grupos</h3>
-                        <p>Eventos y reservas grupales</p>
-                    </div>
-                </div>
+                ${['1', '3', '4', '5'].map(id => {
+                    const cat = getCatMap()[id];
+                    if (!cat) return '';
+                    
+                    const catProtocols = protocols.filter(p => p.section === id || (p.section && p.section.startsWith(id + '.')));
+                    const hasProtocols = catProtocols.length > 0;
+                    
+                    const isImageIcon = cat.icon.startsWith('http') || cat.icon.startsWith('assets/');
+                    const iconHtml = isImageIcon 
+                        ? `<img src="${cat.icon}" class="nav-icon-img" style="width: 32px; height: 32px; object-fit: contain;">`
+                        : `<i class="fas ${cat.icon}"></i>`;
+
+                    return `
+                        <div class="quick-card-wrapper">
+                            <div class="quick-card" onclick="renderCategory('${cat.name}', '${id}')">
+                                <div class="quick-icon">${iconHtml}</div>
+                                <div class="quick-info">
+                                    <h3>${cat.name.replace('Estancia, ', '').replace(' y Salidas', '')}</h3>
+                                    <p>${id === '1' ? 'Gestión de cuadrantes' : id === '3' ? 'Control de tarifas' : id === '4' ? 'Facturación y cierre' : 'Eventos y grupos'}</p>
+                                </div>
+                                ${hasProtocols ? '<i class="fas fa-chevron-right quick-arrow"></i>' : ''}
+                            </div>
+                            ${hasProtocols ? `
+                                <div class="quick-dropdown">
+                                    <div class="quick-dropdown-header">
+                                        <i class="fas fa-list-ul"></i> PROTOCOLOS: ${cat.name.toUpperCase()}
+                                    </div>
+                                    <div class="quick-dropdown-items">
+                                        ${catProtocols.map(p => {
+                                            const pEmojiMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                                            const pIcon = pEmojiMatch ? pEmojiMatch[1] : '📄';
+                                            const pTitle = p.title.replace(/\{.*?\}/, '').trim();
+                                            return `
+                                                <a href="#" class="quick-drop-item" onclick="event.preventDefault(); event.stopPropagation(); viewHistory.push({ type: 'protocol', payload: ${JSON.stringify(p).replace(/"/g, '&quot;')} }); loadProtocol(window.protocols.find(pr => pr.title === '${p.title.replace(/'/g, "\\'")}'))">
+                                                    <span class="q-icon">${pIcon}</span>
+                                                    <span class="q-text">${pTitle}</span>
+                                                </a>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         </div>
 
@@ -578,6 +607,7 @@ function renderHome() {
             <h2 class="section-title"><i class="fas fa-clock"></i> Actualizaciones y Novedades</h2>
             <div id="home-updates-list"></div>
         </div>
+        ${getLegalFooterHtml()}
     `;
 
     // Populate Dashboard Data from home_config
@@ -708,6 +738,7 @@ function renderList(items, container, options = {}) {
 }
 
 function renderCategory(name, id) {
+    location.hash = `category/${id}`;
     toggleHomeComponents(false);
     const CAT_MAP = getCatMap();
     document.querySelector('.app-wrapper').classList.add('reading-mode');
@@ -716,6 +747,7 @@ function renderCategory(name, id) {
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
         <h2 class="section-title"><i class="fas ${CAT_MAP[id] ? CAT_MAP[id].icon : 'fa-folder'}"></i> ${name}</h2>
         <div id="posts-list"></div>
+        ${getLegalFooterHtml()}
     `;
     
     const catProtocols = protocols.filter(p => {
@@ -764,6 +796,8 @@ function renderCategory(name, id) {
 }
 
 function loadProtocol(p, highlightText = '') {
+    const pId = p.section || p.title;
+    location.hash = `protocol/${encodeURIComponent(pId)}`;
     toggleHomeComponents(false);
     // Hide sidebar for reading
     document.querySelector('.app-wrapper').classList.add('reading-mode');
@@ -803,7 +837,12 @@ function loadProtocol(p, highlightText = '') {
     const scope = p.source ? p.source : 'Ambos hoteles';
 
     mainColumn.innerHTML = `
-        <div class="back-btn" onclick="goBack()" id="go-back"><i class="fas fa-arrow-left"></i> Volver</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="back-btn" onclick="goBack()" id="go-back" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Volver</div>
+            <div class="share-btn" onclick="copyProtocolLink('${pId.replace(/'/g, "\\'")}')" title="Copiar enlace directo">
+                <i class="fas fa-share-alt"></i> Copiar Vínculo
+            </div>
+        </div>
         <article class="protocol-full">
             <header class="protocol-full-header" style="text-align: center; border-bottom: none; display: flex; flex-direction: column; align-items: center; padding-bottom: 0; margin-bottom: 2rem;">
                 <h1 style="color: #032d4b; font-size: 2rem; margin-bottom: 1rem; margin-top: 1rem;">
@@ -867,6 +906,42 @@ function loadProtocol(p, highlightText = '') {
                     return mainContent + footer;
                 })()}
             </div>
+            
+            <!-- Comments Section -->
+            <div class="protocol-comments-section" style="margin-top: 4rem; padding: 2rem; background: #fafafa; border-radius: 12px; border: 1px solid #eee;">
+                <h3 style="margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-comments" style="color: var(--accent-blue);"></i> Apartado de Comentarios
+                </h3>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Deja tus observaciones o dudas sobre este protocolo para que el equipo pueda revisarlas.</p>
+                
+                <div id="comments-container-${pId}" class="comments-list" style="margin-bottom: 2rem;">
+                    <!-- Placeholder for the actual comments logic -->
+                    <div style="text-align: center; color: #999; padding: 1rem; font-style: italic; border: 1px dashed #ddd; border-radius: 8px;">
+                        Actualmente no hay comentarios. Sé el primero en escribir.
+                    </div>
+                </div>
+                
+                <div class="comment-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" id="comment-author" placeholder="Tu nombre" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                    </div>
+                    <textarea id="comment-text" placeholder="Escribe tu comentario aquí..." style="width: 100%; min-height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical;"></textarea>
+                    <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="align-self: flex-end; padding: 10px 24px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Publicar Comentario
+                    </button>
+                    <p style="font-size: 0.8rem; color: #888; text-align: right; margin-top: 0.5rem;"><i class="fas fa-info-circle"></i> Los comentarios se guardan localmente en esta versión.</p>
+                </div>
+            </div>
+
+            <!-- Footer Legal Notice -->
+            <footer class="protocol-legal-footer" style="margin-top: 3rem; padding: 1.5rem; border-top: 1px solid #ddd; color: #999; font-size: 0.75rem; line-height: 1.5; text-align: justify; font-style: italic;">
+                <p>
+                    <i class="fas fa-balance-scale" style="margin-right: 5px;"></i>
+                    Esta página es de uso exclusivo del personal autorizado de <strong>Sercotel Guadiana y Cumbria Spa & Hotel</strong>. 
+                    Queda estrictamente prohibido el acceso, uso, reproducción o difusión de su contenido por parte de personas no autorizadas. 
+                    El incumplimiento de esta norma podrá dar lugar a las responsabilidades legales correspondientes.
+                </p>
+            </footer>
         </article>
     `;
     
@@ -965,6 +1040,7 @@ function renderOperationalGuide() {
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
         <h2 class="section-title"><i class="fas fa-map-signs"></i> Esquema Interactivo - Guía Operativa</h2>
         <div class="guide-container" id="guide-container"></div>
+        ${getLegalFooterHtml()}
     `;
 
     const container = document.getElementById('guide-container');
@@ -1226,4 +1302,122 @@ function formatDate(dateStr) {
     const month = (d.getMonth() + 1);
     const year = d.getFullYear().toString().slice(-2);
     return `${day}/${month}/${year}`;
+}
+// Helper for Hash-based routing
+function handleHashRouting() {
+    const hash = window.location.hash.slice(1);
+    if (!hash) {
+        if (viewHistory.length > 1 && viewHistory[viewHistory.length - 1].type !== 'home') {
+            viewHistory = [{ type: 'home' }];
+            renderHome();
+        }
+        return;
+    }
+
+    if (hash.startsWith('protocol/')) {
+        const pId = decodeURIComponent(hash.replace('protocol/', ''));
+        const p = protocols.find(item => item.section === pId || item.title === pId);
+        if (p) {
+            viewHistory.push({ type: 'protocol', payload: p });
+            loadProtocol(p);
+        }
+    } else if (hash.startsWith('category/')) {
+        const id = hash.replace('category/', '');
+        const CAT_MAP = getCatMap();
+        if (CAT_MAP[id]) {
+            viewHistory.push({ type: 'category', id, name: CAT_MAP[id].name });
+            renderCategory(CAT_MAP[id].name, id);
+        }
+    }
+}
+
+// Share function
+function copyProtocolLink(pId) {
+    const url = `${window.location.origin}${window.location.pathname}#protocol/${encodeURIComponent(pId)}`;
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.querySelector('.share-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+        btn.style.color = '#27ae60';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.color = '';
+        }, 2000);
+    });
+}
+
+// Simple Comment Submission (Local for now, can be extended to server)
+function submitComment(pId) {
+    const author = document.getElementById('comment-author').value;
+    const text = document.getElementById('comment-text').value;
+    
+    if (!author || !text) {
+        alert('Por favor, completa tu nombre y el comentario.');
+        return;
+    }
+    
+    const comment = {
+        author,
+        text,
+        date: new Date().toISOString(),
+        id: Date.now()
+    };
+    
+    // For now, let's use localStorage to persist comments on the user's browser
+    const storageKey = `comments_${pId}`;
+    const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    comments.push(comment);
+    localStorage.setItem(storageKey, JSON.stringify(comments));
+    
+    // Clear form
+    document.getElementById('comment-author').value = '';
+    document.getElementById('comment-text').value = '';
+    
+    // Refresh comments list UI
+    renderComments(pId);
+    alert('Comentario guardado localmente en este navegador.');
+}
+
+function renderComments(pId) {
+    const container = document.getElementById(`comments-container-${pId}`);
+    if (!container) return;
+    
+    const storageKey = `comments_${pId}`;
+    const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    
+    if (comments.length === 0) return;
+    
+    container.innerHTML = comments.map(c => `
+        <div class="comment-item" style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #eee; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
+                <strong style="color: var(--accent-blue);"><i class="fas fa-user-circle"></i> ${c.author}</strong>
+                <span style="font-size: 0.75rem; color: #999;">${new Date(c.date).toLocaleString()}</span>
+            </div>
+            <div style="font-size: 0.95rem; color: #444; line-height: 1.4;">${c.text}</div>
+        </div>
+    `).join('');
+}
+
+// Call renderComments when protocol is loaded (needs a tiny delay for DOM to be ready)
+const originalLoadProtocol = loadProtocol;
+loadProtocol = function(p, highlightText = '') {
+    originalLoadProtocol(p, highlightText);
+    const pId = p.section || p.title;
+    setTimeout(() => renderComments(pId), 50);
+};
+
+function getLegalFooterHtml() {
+    return `
+        <footer class="protocol-legal-footer" style="margin-top: 4rem; padding: 2rem 1rem; border-top: 1px solid #ddd; color: #999; font-size: 0.75rem; line-height: 1.6; text-align: center; font-style: italic; width: 100%; box-sizing: border-box;">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <p>
+                    <i class="fas fa-shield-alt" style="margin-right: 5px; opacity: 0.5;"></i>
+                    Esta página es de uso exclusivo del personal autorizado de <strong>Sercotel Guadiana y Cumbria Spa & Hotel</strong>. 
+                    Queda estrictamente prohibido el acceso, uso, reproducción o difusión de su contenido por parte de personas no autorizadas. 
+                    El incumplimiento de esta norma podrá dar lugar a las responsabilidades legales correspondientes.
+                </p>
+                <p style="margin-top: 10px; opacity: 0.6; font-size: 0.7rem;">&copy; ${new Date().getFullYear()} Gestión Documental de Recepción</p>
+            </div>
+        </footer>
+    `;
 }
