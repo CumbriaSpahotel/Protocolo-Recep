@@ -72,7 +72,47 @@ const iconBank = [
     'fa-video', 'fa-globe', 'fa-heart', 'fa-thumbs-up', 'fa-smile', 'fa-walking'
 ];
 
+// --- Custom Quill Blots for HTML Safety ---
+// Allows DIV, ARTICLE and SECTION tags and preserves their classes/styles
+if (typeof Quill !== 'undefined') {
+    const Block = Quill.import('blots/block');
+    const Inline = Quill.import('blots/inline');
+
+    class DivBlot extends Block {
+        static create(value) {
+            let node = super.create();
+            if (value && typeof value === 'string') node.setAttribute('class', value);
+            return node;
+        }
+        static formats(node) {
+            return node.getAttribute('class');
+        }
+    }
+    DivBlot.blotName = 'div';
+    DivBlot.tagName = 'div';
+    Quill.register(DivBlot);
+
+    class ArticleBlot extends Block {}
+    ArticleBlot.blotName = 'article';
+    ArticleBlot.tagName = 'article';
+    Quill.register(ArticleBlot);
+
+    class SectionBlot extends Block {}
+    SectionBlot.blotName = 'section';
+    SectionBlot.tagName = 'section';
+    Quill.register(SectionBlot);
+
+    // Register Attributors to preserve styles and classes
+    const StyleAttributor = Quill.import('attributors/style/size');
+    const ClassAttributor = Quill.import('attributors/class/color');
+    const DirectionAttributor = Quill.import('attributors/style/direction');
+    
+    // We register generic attributors for style/class on blocks
+    const BlockAttribute = Quill.import('attributors/style/align'); // example base
+}
+
 function initQuill() {
+
     if (!quill) {
         // Register custom icons
         const Icons = Quill.import('ui/icons');
@@ -397,6 +437,26 @@ function initAdmin() {
     document.getElementById('btn-back-to-list').addEventListener('click', () => {
         switchTab('listado');
     });
+
+    // Comment Moderation Buttons
+    const btnRefreshComments = document.getElementById('btn-refresh-comments');
+    if (btnRefreshComments) {
+        btnRefreshComments.addEventListener('click', loadAdminComments);
+    }
+    
+    const btnSyncCloud = document.getElementById('btn-sync-cloud-comments');
+    if (btnSyncCloud) {
+        btnSyncCloud.addEventListener('click', syncCloudComments);
+    }
+    
+    const btnAddManualComment = document.getElementById('btn-add-manual-comment');
+    if (btnAddManualComment) {
+        btnAddManualComment.addEventListener('click', createManualComment);
+    }
+
+    // Periodically check for new comments to update badge
+    setInterval(updatePendingBadge, 30000);
+    setTimeout(updatePendingBadge, 2000);
 
     // Save
     document.getElementById('btn-save').addEventListener('click', saveProtocol);
@@ -1186,7 +1246,7 @@ function addMenuRow(id, name, icon, subsections = {}) {
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform:uppercase;">Sección</label>
-                <input type="text" class="menu-id" value="${id}" readonly style="width:100%; padding:8px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-weight:bold; cursor: default;">
+                <input type="text" class="menu-id" value="${id}" data-original-id="${id}" readonly style="width:100%; padding:8px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-weight:bold; cursor: default;">
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <label style="font-size: 0.75rem; font-weight: 700; color: #666; text-transform:uppercase;">Nombre de la Categoría</label>
@@ -1283,7 +1343,7 @@ function addSubRow(container, id, name) {
     row.style = 'display: grid; grid-template-columns: 80px 1fr 40px; gap: 10px; align-items: center; background: #fdfdfd; padding: 5px 10px; border: 1px solid #f0f0f0; border-radius: 4px;';
     
     row.innerHTML = `
-        <input type="text" class="sub-id" value="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
+        <input type="text" class="sub-id" value="${id}" data-original-id="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
         <input type="text" class="sub-name" value="${name}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
         <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1rem;" onclick="this.parentElement.remove()" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#bbb'"><i class="fas fa-times-circle"></i></button>
     `;
@@ -1443,17 +1503,32 @@ function addGraphicLineRow(container, text, highlight = false) {
 function collectMenus() {
     const rows = document.querySelectorAll('#menus-container .menu-row');
     const newNav = {};
+    const idMap = {}; // Tracks Old ID -> New ID
+
     rows.forEach(row => {
-        const id = row.querySelector('.menu-id').value.trim();
+        const idInput = row.querySelector('.menu-id');
+        const id = idInput.value.trim();
+        const originalId = idInput.getAttribute('data-original-id');
         const name = row.querySelector('.menu-name').value.trim();
         const icon = row.querySelector('.menu-icon').value.trim();
         
+        if (originalId && id !== originalId) {
+            idMap[originalId] = id;
+        }
+
         if (id && name) {
             const subsectionsObj = {};
             const subRows = row.querySelectorAll('.sub-row');
             subRows.forEach(sub => {
-                const sId = sub.querySelector('.sub-id').value.trim();
+                const subIdInput = sub.querySelector('.sub-id');
+                const sId = subIdInput.value.trim();
+                const sOriginalId = subIdInput.getAttribute('data-original-id');
                 const sName = sub.querySelector('.sub-name').value.trim();
+                
+                if (sOriginalId && sId !== sOriginalId) {
+                    idMap[sOriginalId] = sId;
+                }
+
                 if (sId && sName) {
                     subsectionsObj[sId] = sName;
                 }
@@ -1478,6 +1553,12 @@ function collectMenus() {
             };
         }
     });
+
+    // --- Sync Protocols with New IDs ---
+    if (Object.keys(idMap).length > 0) {
+        syncProtocolsWithNewIds(idMap);
+    }
+
     document.getElementById('edit-menus-json').value = JSON.stringify(newNav, null, 2);
     // Update global config if present
     if (typeof navigation_config !== 'undefined') {
@@ -1485,6 +1566,67 @@ function collectMenus() {
         Object.assign(navigation_config, newNav);
     }
     return newNav;
+}
+
+/**
+ * Recalcula las secciones de los protocolos basándose en un mapa de traducción
+ */
+function syncProtocolsWithNewIds(idMap) {
+    console.log("Sincronizando protocolos. Mapa de cambios:", idMap);
+    let changesMade = 0;
+
+    adminProtocols.forEach(p => {
+        const oldSection = p.section;
+        if (!oldSection) return;
+
+        // 1. Verificar si la sección exacta ha cambiado (ej: 5.3 -> 4.3)
+        if (idMap[oldSection]) {
+            p.section = idMap[oldSection];
+            changesMade++;
+        } 
+        // 2. Verificar si el prefijo ha cambiado (ej: categoría 5 -> categoría 4)
+        // Esto cubre casos donde el sub-id no cambió explícitamente pero el padre sí
+        else {
+            const parts = oldSection.split('.');
+            const parentId = parts[0];
+            if (idMap[parentId]) {
+                const newParentId = idMap[parentId];
+                const rest = parts.slice(1).join('.');
+                p.section = `${newParentId}${rest ? '.' + rest : ''}`;
+                changesMade++;
+            }
+        }
+
+        // 3. Actualizar etiquetas de categorías ("1ª Sección" -> "2ª Sección")
+        if (p.section && p.categories) {
+            const mainSectionNum = p.section.split('.')[0];
+            const newCategoryLabel = `${mainSectionNum}ª Sección`;
+            
+            // Reemplazar etiqueta de sección antigua por la nueva
+            p.categories = p.categories.map(cat => {
+                if (cat.includes('ª Sección')) return newCategoryLabel;
+                return cat;
+            });
+        }
+        
+        // 4. Actualizar enlaces internos en el contenido
+        // Formato: #section/X.Y
+        if (p.content && Object.keys(idMap).length > 0) {
+            Object.entries(idMap).forEach(([oldId, newId]) => {
+                const escapedOldId = oldId.replace(/\./g, '\\.');
+                const regex = new RegExp(`#section/${escapedOldId}(?=["'\\s]|$)`, 'g');
+                if (p.content.includes(`#section/${oldId}`)) {
+                    p.content = p.content.replace(regex, `#section/${newId}`);
+                }
+            });
+        }
+    });
+
+    if (changesMade > 0) {
+        console.log(`Se han actualizado ${changesMade} protocolos por reordenación.`);
+        renderAdminTable(adminProtocols);
+        updateCounters();
+    }
 }
 
 
@@ -1661,9 +1803,10 @@ function saveToServer(protocolsData, navData, homeData) {
     }
 
     const payload = {
-        protocols: protocolsData,
+        protocols: protocolsData || (typeof protocols_data !== 'undefined' ? protocols_data : []),
         navConfig: finalNav,
-        homeConfig: finalHome
+        homeConfig: finalHome,
+        channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined
     };
 
     const saveUrl = window.location.protocol === 'file:' 
@@ -1772,45 +1915,7 @@ function renderIconBank(filterText) {
 
 // --- COMMENT MODERATION LOGIC ---
 
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-    const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-    if (tabBtn) tabBtn.classList.add('active');
-    
-    if (tabId === 'comentarios') {
-        loadAdminComments();
-    }
-}
-
-// Initial binding for new tab
-document.addEventListener('DOMContentLoaded', () => {
-    const commentTabBtn = document.querySelector('.tab-btn[data-tab="comentarios"]');
-    if (commentTabBtn) {
-        commentTabBtn.addEventListener('click', () => switchTab('comentarios'));
-    }
-    
-    const btnRefreshComments = document.getElementById('btn-refresh-comments');
-    if (btnRefreshComments) {
-        btnRefreshComments.addEventListener('click', loadAdminComments);
-    }
-    
-    const btnSyncCloud = document.getElementById('btn-sync-cloud-comments');
-    if (btnSyncCloud) {
-        btnSyncCloud.addEventListener('click', syncCloudComments);
-    }
-    
-    const btnAddManualComment = document.getElementById('btn-add-manual-comment');
-    if (btnAddManualComment) {
-        btnAddManualComment.addEventListener('click', createManualComment);
-    }
-
-    // Periodically check for new comments to update badge
-    setInterval(updatePendingBadge, 30000);
-    setTimeout(updatePendingBadge, 2000);
-});
+// Comment Moderation logic moved or already integrated
 
 async function updatePendingBadge() {
     try {
@@ -2010,10 +2115,10 @@ async function syncCloudComments() {
 
 // --- GESTIÓN DE CANALES ---
 function initCanalesTab() {
-    console.log('Iniciando pestaña Canales...', typeof channels_config);
+    console.log('Iniciando pestaña Canales...', typeof window.channels_config);
     
-    // Ensure channels_config is initialized from global data.js if not already
-    if (typeof channels_config === 'undefined') {
+    // Ensure window.channels_config is initialized from global data.js if not already
+    if (typeof window.channels_config === 'undefined') {
         window.channels_config = [];
     }
 
@@ -2023,13 +2128,15 @@ function initCanalesTab() {
     if (btnAdd) {
         btnAdd.onclick = (e) => {
             e.preventDefault();
-            channels_config.push({
+            window.channels_config.push({
                 id: 'nuevo-' + Date.now(),
                 name: 'NUEVO CANAL',
                 icon: '🌍',
+                hotel: 'Ambos hoteles',
                 summary: 'Descripción corta',
                 content: 'Normativa general...',
-                notes: ''
+                notes: '',
+                htmlContent: ''
             });
             renderCanales();
         };
@@ -2043,49 +2150,125 @@ function renderCanales() {
     const container = document.getElementById('canales-container');
     if (!container) return;
     
-    container.innerHTML = channels_config.map((c, idx) => `
+    container.innerHTML = window.channels_config.map((c, idx) => `
         <div class="channel-editor-card" style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
                 <h3 style="margin:0; font-size:1rem; color:var(--primary);"><i class="fas fa-satellite-dish"></i> Canal #${idx + 1}</h3>
                 <button class="btn-link" style="color:#e74c3c;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i> Eliminar</button>
             </div>
-            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px; margin-bottom:15px;">
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
                 <div>
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Icono</label>
-                    <input type="text" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:1.2rem;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#0a6aa1; margin-bottom:4px;"><i class="fas fa-hotel"></i> Destinatario / Hotel</label>
+                    <select onchange="updateChannelData(${idx}, 'hotel', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-weight: 500;">
+                        <option value="Ambos hoteles" ${c.hotel === 'Ambos hoteles' ? 'selected' : ''}>Ambos hoteles</option>
+                        <option value="Sercotel Guadiana" ${c.hotel === 'Sercotel Guadiana' ? 'selected' : ''}>Sercotel Guadiana</option>
+                        <option value="Cumbria Spa & Hotel" ${c.hotel === 'Cumbria Spa & Hotel' ? 'selected' : ''}>Cumbria Spa & Hotel</option>
+                    </select>
                 </div>
                 <div>
                     <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Nombre del Canal</label>
                     <input type="text" value="${c.name || ''}" onchange="updateChannelData(${idx}, 'name', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-weight:bold;">
                 </div>
             </div>
-            <div style="margin-bottom:15px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Resumen / Subtítulo</label>
-                <input type="text" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+
+            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px; margin-bottom:15px;">
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Icono</label>
+                    <input type="text" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:1.2rem;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Resumen / Subtítulo</label>
+                    <input type="text" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                </div>
             </div>
+
             <div style="margin-bottom:15px;">
                 <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Contenido Principal (Procedimiento)</label>
                 <textarea rows="3" onchange="updateChannelData(${idx}, 'content', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.9rem;">${c.content || ''}</textarea>
             </div>
-            <div>
+            
+            <div style="margin-bottom:15px;">
                 <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Notas Adicionales / Peculiaridades</label>
                 <textarea rows="2" onchange="updateChannelData(${idx}, 'notes', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.85rem; background:#f9f9f9;">${c.notes || ''}</textarea>
+            </div>
+
+            <div style="background: #eef7ff; padding: 12px; border-radius: 8px; border: 1px dashed #0a6aa1;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#0a6aa1; margin-bottom:0;"><i class="fas fa-code"></i> HTML Personalizado para este Canal</label>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="selectChannelMedia(${idx}, 'image')" class="btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; background: #27ae60 !important; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-image"></i> + Imagen</button>
+                        <button type="button" onclick="selectChannelMedia(${idx}, 'video')" class="btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; background: #f39c12 !important; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-video"></i> + Video</button>
+                    </div>
+                </div>
+                <textarea id="channel-html-${idx}" rows="4" onchange="updateChannelData(${idx}, 'htmlContent', this.value)" style="width:100%; padding:8px; border:1px solid #b8d9f5; border-radius:4px; resize:vertical; font-size:0.85rem; font-family: monospace;" placeholder="Introduce aquí HTML si este canal requiere una tabla o diseño especial...">${c.htmlContent || ''}</textarea>
             </div>
         </div>
     `).join('');
 }
 
+window.selectChannelMedia = (idx, type) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = type === 'image' ? 'image/*' : 'video/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            uploadChannelMedia(file, idx, type);
+        }
+    };
+    input.click();
+};
+
+async function uploadChannelMedia(file, idx, type) {
+    const btn = event.target; // Note: This might be tricky if called from input.onchange
+    showToast(`Subiendo ${type}...`);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+            let mediaHtml = '';
+            if (type === 'image') {
+                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><img src="${result.url}" alt="Información canal" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>`;
+            } else {
+                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><video controls style="max-width:100%; border-radius:8px;"><source src="${result.url}" type="${file.type}">Tu navegador no soporta video.</video></div>`;
+            }
+            
+            const textarea = document.getElementById(`channel-html-${idx}`);
+            if (textarea) {
+                textarea.value += mediaHtml;
+                window.updateChannelData(idx, 'htmlContent', textarea.value);
+                showToast('✅ Media insertado correctamente');
+            }
+        } else {
+            alert('Error al subir: ' + result.message);
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error en la subida al servidor.');
+    }
+}
+
+
 window.updateChannelData = (idx, field, value) => {
-    channels_config[idx][field] = value;
+    window.channels_config[idx][field] = value;
     // Update ID from name if it's default
     if (field === 'name') {
-        channels_config[idx].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        window.channels_config[idx].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-');
     }
 };
 
 window.removeChannel = (idx) => {
     if (confirm('¿Eliminar este canal permanentemente?')) {
-        channels_config.splice(idx, 1);
+        window.channels_config.splice(idx, 1);
         renderCanales();
     }
 };
@@ -2097,29 +2280,10 @@ async function saveCanales() {
     btn.disabled = true;
 
     try {
-        // Enlazar con el backend (asumiendo que hay un endpoint similar a save-data)
-        // Como solución temporal para estático local, mostramos en el textarea oculto
-        const json = JSON.stringify(channels_config, null, 2);
-        const encoded = btoa(unescape(encodeURIComponent(json)));
-        
-        const response = await fetch('/save-channels', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: encoded })
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            showToast('¡Configuración de canales guardada con éxito!');
-        } else {
-            // Fallback: Si no existe el endpoint, intentamos usar el de guardado general
-            // o simplemente alertamos al usuario (en local file:// no funcionará fetch POST)
-            console.warn('Endpoint /save-channels no encontrado. Usando persistencia local si está disponible.');
-            alert('Cambios aplicados en memoria. Recuerda que para persistencia permanente necesitas el servidor backend activo.');
-        }
+        // Use the centralized save function which handles channels_config now
+        saveToServer(adminProtocols);
     } catch (e) {
         console.error('Error al guardar canales:', e);
-        // Fallback for simple local setups
         alert('Configuración guardada en memoria. Para guardado permanente, copia el array channels_config al inicio de data.js');
     } finally {
         btn.innerHTML = originalText;

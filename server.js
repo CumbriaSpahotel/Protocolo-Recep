@@ -40,27 +40,35 @@ app.post('/api/save', (req, res) => {
         const data = req.body;
         let jsContent = '';
         
-        if (data.protocols) {
-            jsContent += 'const protocols_data = ' + JSON.stringify(data.protocols, null, 2) + ';\n\n';
-        }
-        if (data.navConfig) {
-            jsContent += 'const navigation_config = ' + JSON.stringify(data.navConfig, null, 2) + ';\n\n';
-        }
-        if (data.homeConfig) {
-            jsContent += 'const home_config = ' + JSON.stringify(data.homeConfig, null, 2) + ';\n\n';
-        }
-        if (data.menusConfig) {
-            jsContent += 'const menus_data = ' + JSON.stringify(data.menusConfig, null, 2) + ';\n\n';
-        }
+        // 1. Channels Config (Top of file, global var)
+        const channels = data.channelsConfig || (typeof channels_config !== 'undefined' ? channels_config : []);
+        jsContent += 'var channels_config = ' + JSON.stringify(channels, null, 2) + ';\n\n';
 
-        if(!jsContent) {
-           throw new Error("No hay datos para guardar");
+        // 2. Protocols Data
+        const protocols = data.protocols || (typeof protocols_data !== 'undefined' ? protocols_data : []);
+        jsContent += 'const protocols_data = ' + JSON.stringify(protocols, null, 2) + ';\n\n';
+
+        // 3. Navigation Config
+        const nav = data.navConfig || (typeof navigation_config !== 'undefined' ? navigation_config : {});
+        jsContent += 'const navigation_config = ' + JSON.stringify(nav, null, 2) + ';\n\n';
+
+        // 4. Home Config
+        const home = data.homeConfig || (typeof home_config !== 'undefined' ? home_config : {});
+        jsContent += 'const home_config = ' + JSON.stringify(home, null, 2) + ';\n\n';
+
+        // 5. Menus Data
+        const menus = data.menusConfig || (typeof menus_data !== 'undefined' ? menus_data : []);
+        jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
+
+        if(!jsContent || jsContent.length < 50) {
+           throw new Error("Contenido generado insuficiente o vacío");
         }
 
         fs.writeFileSync(path.join(__dirname, 'data.js'), jsContent, 'utf-8');
+        console.log('✅ data.js actualizado correctamente');
         res.json({ success: true, message: 'Datos guardados correctamente' });
     } catch (e) {
-        console.error(e);
+        console.error('❌ Error al guardar:', e);
         res.status(500).json({ success: false, message: e.message });
     }
 });

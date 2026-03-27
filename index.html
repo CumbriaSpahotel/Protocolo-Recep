@@ -85,7 +85,34 @@
         </main>
     </div>
 
+    <!-- Chatbot Assistant -->
+    <div id="chatbot-trigger" class="chatbot-bubble">
+        <i class="fas fa-comment-dots"></i>
+        <span>Asistente Manual</span>
+    </div>
+
+    <div id="chatbot-container" class="chatbot-window">
+        <div class="chatbot-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="Imagenes/Logo.png" alt="Bot Logo" style="height:24px; background:white; padding:2px; border-radius:4px;">
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-weight: 700; font-size: 0.9rem;">Asistente Virtual</span>
+                    <span style="font-size: 0.7rem; opacity: 0.8;">Manual Recepción</span>
+                </div>
+            </div>
+            <button id="close-chatbot" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">&times;</button>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="bot-message">¡Hola! Soy tu asistente para el manual operativo. ¿En qué puedo ayudarte hoy? Puedes preguntarme por procedimientos, check-ins, grupos, etc.</div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="Pregunta algo..." autocomplete="off">
+            <button id="send-chatbot-msg"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <script>
+
         // Cargador dinámico para evitar que el navegador guarde versiones viejas de los datos
         (function() {
             const timestamp = Date.now();

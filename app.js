@@ -243,6 +243,9 @@ function initApp() {
             lastScrollY = window.scrollY;
         }, { passive: true });
     }
+
+    // Initialize Chatbot
+    initChatbot();
 }
 
 function renderNavigation() {
@@ -805,30 +808,89 @@ function loadProtocol(p, highlightText = '') {
     let content = p.content;
     
     // Special Case: CANALES DE VENTA (Dynamic rendering from channels_config)
-    if (p.section === '2.1.0' && typeof channels_config !== 'undefined') {
+    const isChannelProtocol = p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
+    if (isChannelProtocol && typeof channels_config !== 'undefined') {
+        const cumbriaChannels = channels_config.filter(c => c.hotel === 'Cumbria Spa & Hotel' || c.hotel === 'Ambos hoteles');
+        const guadianaChannels = channels_config.filter(c => c.hotel === 'Sercotel Guadiana' || c.hotel === 'Ambos hoteles');
+        const allChannels = channels_config;
+
         content = `
             <div class="channel-explorer-container">
+                <div class="hotel-selector-tabs" style="margin-bottom: 20px; display: flex; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+                    <button class="hotel-tab-btn active" onclick="filterChannelsByHotel('todos', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #004a66; background: #004a66; color: white; cursor: pointer; font-weight: 600;">Todos los Canales</button>
+                    <button class="hotel-tab-btn" onclick="filterChannelsByHotel('cumbria', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ccc; background: white; color: #555; cursor: pointer;">Cumbria Spa</button>
+                    <button class="hotel-tab-btn" onclick="filterChannelsByHotel('guadiana', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ccc; background: white; color: #555; cursor: pointer;">Sercotel Guadiana</button>
+                </div>
+
                 <nav class="channel-nav-sticky">
-                    ${channels_config.map(c => `<a href="#${c.id}" class="channel-tab">${c.name}</a>`).join('')}
+                    ${channels_config.map(c => `<a href="#${c.id}" class="channel-tab" data-hotel="${c.hotel}">${c.name}</a>`).join('')}
                 </nav>
-                ${channels_config.map(c => `
-                    <div id="${c.id}" class="channel-section">
-                        <h2>${c.icon} ${c.name}</h2>
-                        <div class="channel-card">
-                            <p style="font-weight:600; color:var(--primary); margin-bottom:10px;">${c.summary || ''}</p>
-                            <div class="channel-procedimiento">
-                                ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
+
+                <div id="channels-render-list">
+                    ${channels_config.map(c => `
+                        <div id="${c.id}" class="channel-section" data-hotel="${c.hotel}">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px;">
+                                <h2 style="border:none; margin:0;">${c.icon} ${c.name}</h2>
+                                <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#004a66' : c.hotel === 'Sercotel Guadiana' ? '#a58c5f' : '#27ae60'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                                    ${c.hotel || 'Ambos hoteles'}
+                                </span>
                             </div>
-                            ${c.notes ? `
-                                <div class="channel-notes" style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid var(--accent); border-radius:4px;">
-                                    <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#555;"><i class="fas fa-info-circle"></i> PECULIARIDADES Y NOTAS:</h4>
-                                    <p style="margin:0; font-size:0.9rem; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
+                            <div class="channel-card">
+                                <p style="font-weight:600; color:var(--primary); margin-bottom:10px;">${c.summary || ''}</p>
+                                <div class="channel-procedimiento">
+                                    ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
                                 </div>
-                            ` : ''}
+                                
+                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:20px; border-top: 1px solid #eee; padding-top: 20px;">${c.htmlContent}</div>` : ''}
+
+                                ${c.notes ? `
+                                    <div class="channel-notes" style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid var(--accent); border-radius:4px;">
+                                        <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#555;"><i class="fas fa-info-circle"></i> PECULIARIDADES Y NOTAS:</h4>
+                                        <p style="margin:0; font-size:0.9rem; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('')}
+                    `).join('')}
+                </div>
             </div>
+            <script>
+                function filterChannelsByHotel(hotel, btn) {
+                    // Update buttons
+                    document.querySelectorAll('.hotel-tab-btn').forEach(b => {
+                        b.style.background = 'white';
+                        b.style.color = '#555';
+                        b.style.borderColor = '#ccc';
+                    });
+                    btn.style.background = '#004a66';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#004a66';
+
+                    // Filter sections
+                    document.querySelectorAll('.channel-section').forEach(sec => {
+                        const secHotel = sec.dataset.hotel;
+                        if (hotel === 'todos' || secHotel === 'Ambos hoteles' || 
+                           (hotel === 'cumbria' && secHotel === 'Cumbria Spa & Hotel') || 
+                           (hotel === 'guadiana' && secHotel === 'Sercotel Guadiana')) {
+                            sec.style.display = 'block';
+                        } else {
+                            sec.style.display = 'none';
+                        }
+                    });
+
+                    // Filter tabs
+                    document.querySelectorAll('.channel-tab').forEach(tab => {
+                        const tabHotel = tab.dataset.hotel;
+                        if (hotel === 'todos' || tabHotel === 'Ambos hoteles' || 
+                           (hotel === 'cumbria' && tabHotel === 'Cumbria Spa & Hotel') || 
+                           (hotel === 'guadiana' && tabHotel === 'Sercotel Guadiana')) {
+                            tab.style.display = 'inline-flex';
+                        } else {
+                            tab.style.display = 'none';
+                        }
+                    });
+                }
+            </script>
             <style>
                 .channel-explorer-container { position: relative; }
                 .channel-nav-sticky {
@@ -861,6 +923,14 @@ function loadProtocol(p, highlightText = '') {
                 .channel-section h2 { color: #004a66; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px; }
                 .channel-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
                 .channel-procedimiento { color: #444; line-height: 1.6; }
+                .channel-custom-html img, .channel-custom-html video { 
+                    max-width: 100%; 
+                    height: auto; 
+                    display: block; 
+                    margin: 15px auto; 
+                    border-radius: 8px; 
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+                }
             </style>
         `;
     }
@@ -1565,3 +1635,216 @@ function getLegalFooterHtml() {
         </footer>
     `;
 }
+
+/* --- CHATBOT LOGIC --- */
+function initChatbot() {
+    const trigger = document.getElementById('chatbot-trigger');
+    const container = document.getElementById('chatbot-container');
+    const closeBtn = document.getElementById('close-chatbot');
+    const sendBtn = document.getElementById('send-chatbot-msg');
+    const input = document.getElementById('chatbot-input');
+
+    if (!trigger || !container) return;
+
+    trigger.onclick = () => {
+        container.style.display = container.style.display === 'flex' ? 'none' : 'flex';
+        input.focus();
+    };
+
+    closeBtn.onclick = () => {
+        container.style.display = 'none';
+    };
+
+    sendBtn.onclick = processChatInput;
+    input.onkeypress = (e) => {
+        if (e.key === 'Enter') processChatInput();
+    };
+}
+
+function appendChatMessage(sender, text, isLink = false) {
+    const messagesContainer = document.getElementById('chatbot-messages');
+    if (!messagesContainer) return;
+
+    // Remove typing indicator if it exists
+    const typing = messagesContainer.querySelector('.typing');
+    if (typing) typing.remove();
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = sender === 'user' ? 'user-message' : 'bot-message';
+    
+    if (isLink) {
+        msgDiv.innerHTML = text;
+    } else {
+        msgDiv.textContent = text;
+    }
+    
+    messagesContainer.appendChild(msgDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatbot-messages');
+    if (!messagesContainer) return;
+    
+    // Don't add if already there
+    if (messagesContainer.querySelector('.typing')) return;
+
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing';
+    typingDiv.innerHTML = '<span></span><span></span><span></span>';
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function processChatInput() {
+    const input = document.getElementById('chatbot-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendChatMessage('user', text);
+    input.value = '';
+
+    showTypingIndicator();
+    
+    // Natural delay logic
+    const delay = Math.max(1000, Math.min(2500, text.length * 20));
+    setTimeout(() => {
+        generateBotResponse(text);
+    }, delay);
+}
+
+function getExcerpt(html, maxLength = 120) {
+    if (!html) return '';
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const text = temp.textContent || temp.innerText || '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+function generateBotResponse(userInput) {
+    const input = userInput.toLowerCase();
+    
+    // SYNONYM ENHANCEMENT
+    const synonymMap = {
+        'wifi': ['internet', 'red', 'clave', 'conexion'],
+        'pms': ['tesipro', 'sistema', 'programa'],
+        'hab': ['habitacion', 'alojamiento', 'cuarto'],
+        'copia': ['duplicado', 'clonar'],
+        'qr': ['codigo', 'digital'],
+        'factura': ['ticket', 'pago', 'cobro', 'invoice'],
+        'menor': ['menores', 'niño', 'niña', 'hijo', '14'],
+        'dni': ['documento', 'identidad', 'pasaporte']
+    };
+
+    // FILTER FILLER WORDS
+    const fillers = ['de', 'el', 'la', 'los', 'las', 'un', 'una', 'con', 'para', 'por', 'que'];
+    const words = input.split(/\s+/).filter(w => w.length > 1 && !fillers.includes(w));
+
+    let searchTerms = [input, ...words];
+    for (const [key, values] of Object.entries(synonymMap)) {
+        if (input.includes(key)) {
+            searchTerms = [...searchTerms, ...values];
+        }
+    }
+    
+    // GREETINGS
+    const greetings = ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'ey', 'saludos', 'ayuda'];
+    if (greetings.some(g => input.includes(g))) {
+        appendChatMessage('bot', '¡Hola! Soy tu asistente inteligente. Puedo buscar procedimientos, protocolos y resolver dudas sobre la operativa del hotel.');
+        renderQuickReplies();
+        return;
+    }
+
+    // SEARCH IN PROTOCOLS
+    const matches = (typeof protocols_data !== 'undefined' ? protocols_data : protocols).map(p => {
+        let score = 0;
+        const title = (p.title || '').toLowerCase();
+        const section = (p.section || '').toLowerCase();
+        const content = (p.content || '').toLowerCase();
+
+        searchTerms.forEach(term => {
+            if (title.includes(term)) score += 50;
+            if (section.includes(term)) score += 100;
+            if (content.includes(term)) score += 10;
+        });
+
+        return { protocol: p, score: score };
+    }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
+
+    if (matches.length > 0) {
+        appendChatMessage('bot', 'He analizado los protocolos y esto es lo más relevante:');
+        
+        matches.slice(0, 2).forEach(m => {
+            const p = m.protocol;
+            const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+            const excerpt = getExcerpt(p.info_html || p.content);
+            
+            const linkHtml = `
+                <div style="margin-bottom: 12px;">
+                    <a href="#" class="chat-link" onclick="handleChatLinkClick('${p.section || ''}', '${p.title.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-file-alt"></i> ${p.section ? p.section + ' - ' : ''}${cleanTitle}
+                    </a>
+                    <div class="chat-excerpt">${excerpt}</div>
+                </div>
+            `;
+            appendChatMessage('bot', linkHtml, true);
+        });
+        
+        if (matches.length > 2) {
+            appendChatMessage('bot', `También he encontrado otros ${matches.length - 2} resultados. ¿Necesitas algo más específico?`);
+        }
+    } else {
+        appendChatMessage('bot', 'No he encontrado una coincidencia exacta en los manuales actuales. ¿Te refieres a algo de esto?');
+        renderQuickReplies();
+    }
+}
+
+function renderQuickReplies() {
+    const options = [
+        { label: 'Check-in', query: 'check-in' },
+        { label: 'Check-out', query: 'check-out' },
+        { label: 'Facturación', query: 'factura' },
+        { label: 'Claves WiFi', query: 'wifi' }
+    ];
+    
+    const html = `
+        <div class="quick-replies">
+            ${options.map(opt => `
+                <button class="quick-reply-btn" onclick="handleQuickReply('${opt.query}')">${opt.label}</button>
+            `).join('')}
+        </div>
+    `;
+    appendChatMessage('bot', html, true);
+}
+
+window.handleQuickReply = (query) => {
+    const input = document.getElementById('chatbot-input');
+    input.value = query;
+    processChatInput();
+};
+
+window.handleChatLinkClick = (sectionId, title) => {
+    const source = (typeof protocols_data !== 'undefined' ? protocols_data : protocols);
+    const p = source.find(p => (sectionId && p.section === sectionId) || (p.title === title));
+    
+    if (p) {
+        if (typeof viewHistory !== 'undefined') {
+            viewHistory.push({ type: 'protocol', payload: p });
+        }
+        loadProtocol(p);
+        if (window.innerWidth < 600) {
+            const chatbotContainer = document.getElementById('chatbot-container');
+            if (chatbotContainer) chatbotContainer.style.display = 'none';
+        }
+    }
+};
+
+window.handleChatCategoryClick = (catId) => {
+    const CAT_MAP = getCatMap();
+    if (CAT_MAP[catId]) {
+        renderFilteredProtocols(catId, CAT_MAP[catId].name);
+        if (window.innerWidth < 600) {
+            document.getElementById('chatbot-container').style.display = 'none';
+        }
+    }
+};
