@@ -6,6 +6,9 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+// Cloud gateway URL (same as app.js)
+const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbzRRNwjwp86B33O5rUjOG-uCVXUzieMAHijuOCq08k6BQ1SNmWARHytwUDjUijywGze/exec';
+
 // --- Comment module state ---
 let _allComments = [];
 let _commentFilter = 'all';
@@ -13,11 +16,16 @@ let _commentPage = 1;
 const _commentsPerPage = 20;
 let _replyTargetId = null;
 
+// --- Environment detection ---
+const IS_LOCAL_SERVER = (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.protocol === 'file:'
+);
+
 // Protección por contraseña
 (function() {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
-                        window.location.protocol === 'file:';
+    const isLocalhost = IS_LOCAL_SERVER;
     
     // Si es local, saltamos directamente la validación para mayor comodidad y evitar errores de CORS/Storage
     if (isLocalhost) {
@@ -461,9 +469,26 @@ function initAdmin() {
         btnAddManualComment.addEventListener('click', openManualCommentModal);
     }
 
-    // Periodically check for new comments to update badge
-    setInterval(updatePendingBadge, 30000);
-    setTimeout(updatePendingBadge, 2000);
+    // Periodically check for new comments to update badge (only in local server mode)
+    if (IS_LOCAL_SERVER) {
+        setInterval(updatePendingBadge, 30000);
+        setTimeout(updatePendingBadge, 2000);
+    } else {
+        // On GitHub Pages: hide comments tab badge and disable server-only buttons
+        const commentsTab = document.querySelector('.tab-btn[data-tab="comentarios"]');
+        if (commentsTab) {
+            commentsTab.title = 'Los comentarios están disponibles solo en el administrador local';
+            commentsTab.style.opacity = '0.5';
+        }
+        // Disable sync/manual comment buttons
+        ['btn-sync-cloud-comments','btn-add-manual-comment','btn-refresh-comments'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = true; el.style.opacity = '0.4'; el.style.cursor = 'not-allowed'; }
+        });
+        // Show informational message in comments table
+        const tbody = document.getElementById('comments-table-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:40px; color:#999;"><i class="fas fa-server" style="font-size:2rem; display:block; margin-bottom:10px;"></i>Los comentarios solo se gestionan desde el <strong>administrador local</strong> (Abrir_Administrador.bat).</td></tr>';
+    }
 
     // Save
     document.getElementById('btn-save').addEventListener('click', saveProtocol);
@@ -676,33 +701,46 @@ function initAdmin() {
     // GitHub Publish Logic
     const btnPublish = document.getElementById('btn-publish');
     if (btnPublish) {
-        btnPublish.addEventListener('click', () => {
-            if (!confirm('Esto subirá todos los cambios guardados a la web pública de GitHub. ¿Continuar?')) return;
-            
-            btnPublish.disabled = true;
-            btnPublish.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
-            
-            const publishUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/publish' : '/api/publish';
-            
-            fetch(publishUrl, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast('✅ ¡Enviado a GitHub!');
-                        alert('Los cambios se han enviado. GitHub tardará unos 2-3 minutos en actualizar la web pública. Por favor, espera un poco antes de refrescar la página pública.');
-                    } else {
-                        alert('Error al publicar: ' + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Error conectando al servidor para publicar.');
-                })
-                .finally(() => {
-                    btnPublish.disabled = false;
-                    btnPublish.innerHTML = '<i class="fab fa-github"></i> Publicar en GitHub';
-                });
-        });
+        if (!IS_LOCAL_SERVER) {
+            // On GitHub Pages: show info instead of trying to call missing API
+            btnPublish.title = 'Solo disponible desde el administrador local';
+            btnPublish.style.opacity = '0.4';
+            btnPublish.style.cursor = 'not-allowed';
+            btnPublish.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('⚠️ La función "Publicar en GitHub" solo está disponible cuando abres el administrador desde tu PC con el servidor local en marcha (Abrir_Administrador.bat).');
+            });
+        } else {
+            btnPublish.addEventListener('click', () => {
+                if (!confirm('Esto subirá todos los cambios guardados a la web pública de GitHub. ¿Continuar?')) return;
+                
+                btnPublish.disabled = true;
+                btnPublish.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+                
+                const publishUrl = window.location.protocol === 'file:'
+                    ? 'http://localhost:3000/api/publish'
+                    : `${window.location.origin}/api/publish`;
+                
+                fetch(publishUrl, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('✅ ¡Enviado a GitHub!');
+                            alert('Los cambios se han enviado. GitHub tardará unos 2-3 minutos en actualizar la web pública. Por favor, espera un poco antes de refrescar la página pública.');
+                        } else {
+                            alert('Error al publicar: ' + data.message);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error conectando al servidor para publicar. Asegúrate de que el servidor local está en marcha.');
+                    })
+                    .finally(() => {
+                        btnPublish.disabled = false;
+                        btnPublish.innerHTML = '<i class="fab fa-github"></i> Publicar en GitHub';
+                    });
+            });
+        }
     }
 
     // --- Unified Settings & UI Initializers ---
@@ -1855,9 +1893,16 @@ function saveToServer(protocolsData, navData, homeData) {
         channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined
     };
 
+    // On GitHub Pages there is no server: offer direct download instead
+    if (!IS_LOCAL_SERVER) {
+        const proceed = confirm('⚠️ Estás en la versión pública (GitHub Pages). Los cambios no se pueden guardar aquí.\n\n¿Deseas descargar el archivo "data.js" actualizado para guardarlo manualmente en tu PC?');
+        if (proceed) showDownloadPrompt(payload);
+        return;
+    }
+
     const saveUrl = window.location.protocol === 'file:' 
         ? 'http://localhost:3000/api/save'
-        : '/api/save';
+        : `${window.location.origin}/api/save`;
 
     fetch(saveUrl, {
         method: 'POST',
