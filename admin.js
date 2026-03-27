@@ -1,22 +1,36 @@
 let adminProtocols = [];
+if (typeof channels_config === 'undefined') {
+    window.channels_config = [];
+}
 let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
 // Protección por contraseña
 (function() {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const storedPass = sessionStorage.getItem('adminAuth');
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.protocol === 'file:';
     
+    // Si es local, saltamos directamente la validación para mayor comodidad y evitar errores de CORS/Storage
     if (isLocalhost) {
-        sessionStorage.setItem('adminAuth', 'Recp2026');
+        console.log("Acceso local detectado: Saltando validación de auth.");
         return;
+    }
+
+    let storedPass = null;
+    try {
+        storedPass = sessionStorage.getItem('adminAuth');
+    } catch (e) {
+        console.warn("Storage bloqueado por política de seguridad del navegador.");
     }
 
     if (storedPass !== 'Recp2026') {
         const pass = prompt('Introduce la clave de administrador:');
         if (pass === 'Recp2026') {
-            sessionStorage.setItem('adminAuth', 'Recp2026');
+            try {
+                sessionStorage.setItem('adminAuth', 'Recp2026');
+            } catch(e) {}
         } else {
             alert('Acceso denegado');
             window.location.href = 'index.html';
@@ -1996,21 +2010,33 @@ async function syncCloudComments() {
 
 // --- GESTIÓN DE CANALES ---
 function initCanalesTab() {
+    console.log('Iniciando pestaña Canales...', typeof channels_config);
+    
+    // Ensure channels_config is initialized from global data.js if not already
+    if (typeof channels_config === 'undefined') {
+        window.channels_config = [];
+    }
+
     renderCanales();
     
-    document.getElementById('btn-add-channel').onclick = () => {
-        channels_config.push({
-            id: 'nuevo-' + Date.now(),
-            name: 'NUEVO CANAL',
-            icon: '🌍',
-            summary: 'Descripción corta',
-            content: 'Normativa general...',
-            notes: ''
-        });
-        renderCanales();
-    };
+    const btnAdd = document.getElementById('btn-add-channel');
+    if (btnAdd) {
+        btnAdd.onclick = (e) => {
+            e.preventDefault();
+            channels_config.push({
+                id: 'nuevo-' + Date.now(),
+                name: 'NUEVO CANAL',
+                icon: '🌍',
+                summary: 'Descripción corta',
+                content: 'Normativa general...',
+                notes: ''
+            });
+            renderCanales();
+        };
+    }
     
-    document.getElementById('btn-save-canales').onclick = saveCanales;
+    const btnSave = document.getElementById('btn-save-canales');
+    if (btnSave) btnSave.onclick = saveCanales;
 }
 
 function renderCanales() {
