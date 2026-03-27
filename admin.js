@@ -1795,13 +1795,21 @@ async function updatePendingBadge() {
         
         const comments = JSON.parse(text);
         const pendingCount = comments.filter(c => c.status === 'pending').length;
+        
         const badge = document.getElementById('pending-comments-badge');
+        const tabBtn = document.querySelector('.tab-btn[data-tab="comentarios"]');
+        
         if (badge) {
             if (pendingCount > 0) {
                 badge.textContent = pendingCount;
                 badge.style.display = 'inline-block';
+                badge.classList.add('badge-ping');
+                if (tabBtn) tabBtn.classList.add('pending-alert');
             } else {
+                badge.textContent = '0';
                 badge.style.display = 'none';
+                badge.classList.remove('badge-ping');
+                if (tabBtn) tabBtn.classList.remove('pending-alert');
             }
         }
     } catch (e) {
