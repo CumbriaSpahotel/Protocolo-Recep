@@ -301,6 +301,7 @@ function renderNavigation() {
             link.href = '#';
             link.className = 'nav-link';
             link.dataset.id = id;
+            
             const isImageIcon = cat.icon.startsWith('http') || cat.icon.startsWith('assets/');
             const iconHtml = isImageIcon 
                 ? `<img src="${cat.icon}" class="nav-icon-img" style="width: 18px; height: 18px; object-fit: contain; margin-right: 8px; vertical-align: middle;">`
@@ -308,32 +309,69 @@ function renderNavigation() {
             
             link.innerHTML = `${iconHtml} ${cat.name}`;
             
-            // Special handling for submenus (dynamic)
-            const hasSubsections = cat.subsections && Object.keys(cat.subsections).length > 0;
-            const hasLinks = cat.links && cat.links.length > 0;
-            const allCategoryProtocols = protocols.filter(p => p.section === id || (p.section && p.section.startsWith(id + '.')));
-            // Filter out protocols that belong to an explicit subsection to avoid duplication
-            const directProtocols = allCategoryProtocols.filter(p => {
-                if (p.section === id) return true;
-                const subId = p.section;
-                return !Object.keys(cat.subsections || {}).some(sid => subId === sid || subId.startsWith(sid + "."));
-            });
-            const hasProtocols = directProtocols.length > 0;
+            // --- AUTOMATIC HIERARCHY DISCOVERY ---
+            // 1. Find all relevant protocols for this category prefix (e.g., "1.")
+            const catProtocols = protocols.filter(p => p.section && (String(p.section) === id || String(p.section).startsWith(id + '.')));
             
-            if (hasSubsections || hasLinks || hasProtocols) {
-                link.innerHTML += ` <i class="fas fa-caret-down"></i>`;
+            // 2. Build a map of all unique section IDs present in these protocols
+            const subMap = new Map();
+            catProtocols.forEach(p => {
+                const sId = String(p.section);
+                if (sId === id) return; // Top-level handled by click on link itself or special entry
                 
+                const parts = sId.split('.');
+                // Ensure all levels exist in map (e.g., if we have 1.5.1, ensure 1.5 exists)
+                for (let i = 2; i <= parts.length; i++) {
+                    const currentId = parts.slice(0, i).join('.');
+                    if (!subMap.has(currentId)) {
+                        const matchedP = protocols.find(pr => String(pr.section) === currentId);
+                        const name = matchedP ? matchedP.title.replace(/\{.*?\}/, '').trim() : `Sección ${currentId}`;
+                        const emoji = matchedP ? (matchedP.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/)?.[1] || null) : null;
+                        
+                        subMap.set(currentId, { 
+                            id: currentId, 
+                            name, 
+                            emoji,
+                            protocol: matchedP,
+                            children: [] 
+                        });
+                    }
+                }
+            });
+            
+            // 3. Construct the tree structure
+            const rootSubItems = [];
+            const allSubItems = Array.from(subMap.values()).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+            
+            allSubItems.forEach(item => {
+                const parts = item.id.split('.');
+                if (parts.length > 2) {
+                    const parentId = parts.slice(0, parts.length - 1).join('.');
+                    if (subMap.has(parentId)) {
+                        subMap.get(parentId).children.push(item);
+                    } else {
+                        rootSubItems.push(item);
+                    }
+                } else {
+                    rootSubItems.push(item);
+                }
+            });
+
+            const hasDynamicContent = rootSubItems.length > 0;
+            const hasExternalLinks = cat.links && cat.links.length > 0;
+
+            if (hasDynamicContent || hasExternalLinks) {
+                link.innerHTML += ` <i class="fas fa-caret-down"></i>`;
                 const dropdown = document.createElement('div');
                 dropdown.className = 'dropdown-content';
                 
-                // Add explicit links (External)
-                if (hasLinks) {
+                // Add External Links first (if any)
+                if (hasExternalLinks) {
                     cat.links.forEach(l => {
                         const a = document.createElement('a');
-                        a.href = l.url;
-                        a.target = "_blank";
-                        const isImageIcon = l.icon && (l.icon.startsWith('http') || l.icon.startsWith('assets/'));
-                        const iconHtml = isImageIcon 
+                        a.href = l.url; a.target = "_blank";
+                        const isImg = l.icon && (l.icon.startsWith('http') || l.icon.startsWith('assets/'));
+                        const iconHtml = isImg 
                             ? `<img src="${l.icon}" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;">`
                             : `<i class="fas ${l.icon || 'fa-link'}"></i> `;
                         a.innerHTML = `${iconHtml}${l.text}`;
@@ -341,152 +379,63 @@ function renderNavigation() {
                     });
                 }
 
-                // Add dynamic subsections with nesting support
-                if (hasSubsections) {
-                    const sortedSubs = Object.entries(cat.subsections).sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric:true}));
+                // Recursive render function for subsections
+                const renderNavItem = (item, parentEl) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'sub-dropdown-wrapper';
                     
-                    const subMap = new Map();
-                    // First pass: identify parents and children
-                    sortedSubs.forEach(([subId, subName]) => {
-                        const parts = subId.split('.');
-                        const parentId = parts.length > 2 ? parts.slice(0, parts.length - 1).join('.') : null;
-                        subMap.set(subId, { id: subId, name: subName, parent: parentId, children: [] });
-                    });
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.className = 'nav-item-link';
                     
-                    // Second pass: build tree
-                    const rootSubs = [];
-                    subMap.forEach(item => {
-                        if (item.parent && subMap.has(item.parent)) {
-                            subMap.get(item.parent).children.push(item);
-                        } else {
-                            rootSubs.push(item);
-                        }
-                    });
-
-                    // Helper function to render items recursively
-                    const renderSubItem = (item, parentEl) => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'sub-dropdown-wrapper';
-                        
-                        const a = document.createElement('a');
-                        a.href = '#';
-                        a.className = 'internal-nav';
-                        a.dataset.search = item.id;
-                        
-                        // Handle icon/emoji from protocols data if possible, or just default
-                        const pData = protocols.find(p => p.section === item.id);
-                        let iconHtml = '<i class="fas fa-angle-right" style="opacity:0.3;"></i> ';
-                        
-                        if (pData) {
-                            const emojiMatch = pData.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
-                            if (emojiMatch) {
-                                iconHtml = `<span style="margin-right:8px; font-size:1.1rem;">${emojiMatch[1]}</span>`;
-                            }
-                        }
-                        
-                        const cleanName = item.name.replace(/\{.*?\}/, '').trim();
-                        a.innerHTML = `<span style="display:flex; align-items:center;">${iconHtml}${cleanName}</span>`;
-                        
-                        // Check for direct protocols in this section
-                        const sectionProtocols = protocols.filter(p => p.section === item.id);
-                        const hasChildren = item.children.length > 0;
-                        const hasProtocols = sectionProtocols.length > 0;
-
-                        if (hasChildren || hasProtocols) {
-                            a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6;"></i>`;
-                            const nestedDropdown = document.createElement('div');
-                            nestedDropdown.className = 'dropdown-content nested';
-                            
-                            // 1. Render children sub-sections
-                            item.children.forEach(child => renderSubItem(child, nestedDropdown));
-                            
-                            // 2. Render protocols of this specific section
-                            sectionProtocols.forEach(p => {
-                                const pA = document.createElement('a');
-                                pA.href = '#';
-                                pA.className = 'protocol-nav-link';
-                                
-                                let pIcon = '<i class="far fa-file-alt" style="margin-right:8px; opacity:0.6;"></i>';
-                                const pEmojiMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
-                                if (pEmojiMatch) {
-                                    pIcon = `<span style="margin-right:8px; font-size:1rem;">${pEmojiMatch[1]}</span>`;
-                                }
-                                
-                                const pCleanTitle = p.title.replace(/\{.*?\}/, '').trim();
-                                pA.innerHTML = `<span style="display:flex; align-items:center;">${pIcon}${pCleanTitle}</span>`;
-                                pA.onclick = (e) => {
-                                    e.preventDefault();
-                                    viewHistory.push({ type: 'protocol', payload: p });
-                                    loadProtocol(p);
-                                };
-                                nestedDropdown.appendChild(pA);
-                            });
-                            
-                            wrapper.appendChild(a);
-                            wrapper.appendChild(nestedDropdown);
-                        } else {
-                            wrapper.appendChild(a);
-                        }
-                        
-                        parentEl.appendChild(wrapper);
-                    };
-
-                    rootSubs.forEach(item => renderSubItem(item, dropdown));
-                }
-
-                // Add direct protocols for this category (at the end)
-                if (hasProtocols) {
-                    directProtocols.forEach(p => {
-                        const pA = document.createElement('a');
-                        pA.href = '#';
-                        pA.className = 'protocol-nav-link';
-                        
-                        let pIcon = '<i class="far fa-file-alt" style="margin-right:8px; opacity:0.6;"></i>';
-                        const emojiMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
-                        if (emojiMatch) {
-                            pIcon = `<span style="margin-right:8px; font-size:1rem;">${emojiMatch[1]}</span>`;
-                        }
-                        
-                        const pCleanTitle = p.title.replace(/\{.*?\}/, '').trim();
-                        pA.innerHTML = `<span style="display:flex; align-items:center;">${pIcon}${pCleanTitle}</span>`;
-                        pA.onclick = (e) => {
+                    let iconHtml = item.emoji 
+                        ? `<span style="margin-right:8px; font-size:1.1rem;">${item.emoji}</span>`
+                        : '<i class="far fa-folder" style="margin-right:8px; opacity:0.3;"></i> ';
+                    
+                    a.innerHTML = `<span style="display:flex; align-items:center; flex:1;">${iconHtml}${item.name}</span>`;
+                    
+                    if (item.protocol) {
+                        a.onclick = (e) => {
                             e.preventDefault();
-                            viewHistory.push({ type: 'protocol', payload: p });
-                            loadProtocol(p);
+                            viewHistory.push({ type: 'protocol', payload: item.protocol });
+                            loadProtocol(item.protocol);
                         };
-                        dropdown.appendChild(pA);
-                    });
-                }
-                
-                // Set up internal navigation links
-                dropdown.querySelectorAll('.internal-nav').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const query = el.getAttribute('data-search');
-                        handleSearch(query);
-                    });
-                });
-                
-                // General click handler for the top category dropdown link
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    setActiveNav(link);
-                    viewHistory.push({ type: 'category', name: cat.name, id: id });
-                    renderCategory(cat.name, id);
-                });
+                    } else {
+                        // If it's just a folder, maybe trigger a search or category view
+                        a.onclick = (e) => e.preventDefault();
+                    }
+                    
+                    if (item.children.length > 0) {
+                        a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6; padding-left: 10px;"></i>`;
+                        const nested = document.createElement('div');
+                        nested.className = 'dropdown-content nested';
+                        item.children.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}))
+                                     .forEach(child => renderNavItem(child, nested));
+                        wrapper.appendChild(a);
+                        wrapper.appendChild(nested);
+                    } else {
+                        wrapper.appendChild(a);
+                    }
+                    parentEl.appendChild(wrapper);
+                };
 
+                rootSubItems.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))
+                            .forEach(item => renderNavItem(item, dropdown));
+                
                 linkWrapper.appendChild(link);
                 linkWrapper.appendChild(dropdown);
                 navItems.appendChild(linkWrapper);
             } else {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    setActiveNav(link);
-                    viewHistory.push({ type: 'category', name: cat.name, id: id });
-                    renderCategory(cat.name, id);
-                });
                 navItems.appendChild(link);
             }
+
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveNav(link);
+                viewHistory.push({ type: 'category', name: cat.name, id: id });
+                renderCategory(cat.name, id);
+            });
+
             seenNames.add(cat.name);
         }
     });
