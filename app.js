@@ -262,6 +262,12 @@ function renderNavigation() {
     inicioItem.innerHTML = '<i class="fas fa-th-large"></i> Inicio <i class="fas fa-caret-down"></i>';
     inicioItem.onclick = (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        
+        const isActive = inicioWrapper.classList.contains('active-dropdown');
+        document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
+        if (!isActive) inicioWrapper.classList.add('active-dropdown');
+        
         viewHistory = [{ type: 'home' }];
         renderHome();
         setActiveNav(inicioItem);
@@ -394,26 +400,47 @@ function renderNavigation() {
                     
                     a.innerHTML = `<span style="display:flex; align-items:center; flex:1;">${iconHtml}${item.name}</span>`;
                     
-                    if (item.protocol) {
-                        a.onclick = (e) => {
-                            e.preventDefault();
-                            viewHistory.push({ type: 'protocol', payload: item.protocol });
-                            loadProtocol(item.protocol);
-                        };
-                    } else {
-                        // If it's just a folder, maybe trigger a search or category view
-                        a.onclick = (e) => e.preventDefault();
-                    }
-                    
                     if (item.children.length > 0) {
                         a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6; padding-left: 10px;"></i>`;
                         const nested = document.createElement('div');
                         nested.className = 'dropdown-content nested';
                         item.children.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}))
                                      .forEach(child => renderNavItem(child, nested));
+                        
+                        a.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const isActive = wrapper.classList.contains('active-sub');
+                            // Close siblings at this level
+                            wrapper.parentElement.querySelectorAll('.sub-dropdown-wrapper').forEach(s => s.classList.remove('active-sub'));
+                            if (!isActive) wrapper.classList.add('active-sub');
+                            
+                            if (item.protocol) {
+                                viewHistory.push({ type: 'protocol', payload: item.protocol });
+                                loadProtocol(item.protocol);
+                            }
+                        };
+                        
                         wrapper.appendChild(a);
                         wrapper.appendChild(nested);
                     } else {
+                        if (item.protocol) {
+                            a.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Close all sub-dropdowns when a terminal item is clicked
+                                document.querySelectorAll('.sub-dropdown-wrapper').forEach(w => w.classList.remove('active-sub'));
+                                document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
+                                
+                                viewHistory.push({ type: 'protocol', payload: item.protocol });
+                                loadProtocol(item.protocol);
+                            };
+                        } else {
+                            a.onclick = (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            };
+                        }
                         wrapper.appendChild(a);
                     }
                     parentEl.appendChild(wrapper);
@@ -431,6 +458,16 @@ function renderNavigation() {
 
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                
+                const isActive = linkWrapper.classList.contains('active-dropdown');
+                // Close all other top-level dropdowns
+                document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
+                
+                if (!isActive) {
+                    linkWrapper.classList.add('active-dropdown');
+                }
+                
                 setActiveNav(link);
                 viewHistory.push({ type: 'category', name: cat.name, id: id });
                 renderCategory(cat.name, id);
@@ -445,6 +482,12 @@ function setActiveNav(el) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     el.classList.add('active');
 }
+
+// Global click listener to close dropdowns when clicking outside
+document.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
+    document.querySelectorAll('.sub-dropdown-wrapper').forEach(w => w.classList.remove('active-sub'));
+});
 function toggleHomeComponents(isHome) {
     const efficiencyWidget = document.getElementById('sidebar-efficiency-widget');
     if (efficiencyWidget) {
