@@ -276,7 +276,18 @@
                 </div>
             </div>
             <div class="editor-body">
-                <p style="margin-bottom: 20px; color: #666;">Revisa y autoriza los comentarios recibidos de los trabajadores.</p>
+                <!-- Stats row -->
+                <div id="comments-stats-row" style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;"></div>
+                
+                <!-- Filter chips -->
+                <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:0.78rem; font-weight:700; color:#aaa; text-transform:uppercase; margin-right:4px; letter-spacing:0.05em;">Filtrar:</span>
+                    <button class="comment-filter-btn" data-filter="all" style="padding:5px 14px; border-radius:20px; border:2px solid #0a6aa1; background:#0a6aa1; color:white; cursor:pointer; font-size:0.82rem; font-weight:600; transition:all 0.2s;">Todos</button>
+                    <button class="comment-filter-btn" data-filter="pending" style="padding:5px 14px; border-radius:20px; border:2px solid #ffc107; background:white; color:#856404; cursor:pointer; font-size:0.82rem; font-weight:600; transition:all 0.2s;">⏳ Pendientes</button>
+                    <button class="comment-filter-btn" data-filter="approved" style="padding:5px 14px; border-radius:20px; border:2px solid #28a745; background:white; color:#155724; cursor:pointer; font-size:0.82rem; font-weight:600; transition:all 0.2s;">✅ Autorizados</button>
+                    <button class="comment-filter-btn" data-filter="replied" style="padding:5px 14px; border-radius:20px; border:2px solid #6c5ce7; background:white; color:#6c5ce7; cursor:pointer; font-size:0.82rem; font-weight:600; transition:all 0.2s;">💬 Con respuesta</button>
+                </div>
+
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
@@ -286,7 +297,7 @@
                                 <th>Autor/Trabajador</th>
                                 <th>Comentario</th>
                                 <th>Estado</th>
-                                <th style="width: 200px;">Acciones</th>
+                                <th style="width: 220px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="comments-table-body">
@@ -296,11 +307,58 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <div id="comments-pagination" style="display:flex; justify-content:center; gap:8px; margin-top:16px; flex-wrap:wrap; align-items:center;"></div>
             </div>
         </section>
+
     </main>
 
     <div id="toast" class="toast">Mensaje guardado</div>
+
+    <!-- ===== MODAL: RESPONDER COMENTARIO ===== -->
+    <div id="modal-reply-comment" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:10000; justify-content:center; align-items:center; padding:20px;">
+        <div style="background:white; border-radius:14px; padding:32px; width:100%; max-width:560px; box-shadow:0 20px 60px rgba(0,0,0,0.35); animation: fadeIn 0.2s ease;">
+            <h3 style="margin-top:0; color:#032d4b; display:flex; align-items:center; gap:10px; font-family:'Outfit',sans-serif;"><i class="fas fa-reply" style="color:#0a6aa1;"></i> Respuesta Oficial</h3>
+            <div id="reply-modal-comment-preview" style="background:#f0f7ff; border-radius:8px; padding:12px 15px; margin-bottom:18px; font-size:0.88rem; color:#555; border-left:4px solid #0a6aa1; line-height:1.5;"></div>
+            <label style="font-size:0.78rem; font-weight:700; color:#777; text-transform:uppercase; display:block; margin-bottom:6px; letter-spacing:0.05em;">Tu respuesta:</label>
+            <textarea id="reply-text-input" rows="5" placeholder="Escribe tu respuesta oficial aquí..." style="width:100%; padding:10px 14px; border:1.5px solid #ccc; border-radius:8px; font-family:inherit; font-size:0.92rem; resize:vertical; outline:none; transition:border 0.2s; box-sizing:border-box;"></textarea>
+            <div style="display:flex; justify-content:space-between; gap:10px; margin-top:18px; align-items:center;">
+                <button id="btn-delete-reply" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; border-radius:6px; padding:7px 14px; cursor:pointer; font-size:0.85rem; font-weight:600;"><i class="fas fa-trash"></i> Borrar respuesta</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" onclick="closeReplyModal()">Cancelar</button>
+                    <button class="btn-primary" id="btn-submit-reply"><i class="fas fa-save"></i> Guardar Respuesta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: NUEVO COMENTARIO MANUAL ===== -->
+    <div id="modal-manual-comment" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:10000; justify-content:center; align-items:center; padding:20px;">
+        <div style="background:white; border-radius:14px; padding:32px; width:100%; max-width:560px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+            <h3 style="margin-top:0; color:#032d4b; display:flex; align-items:center; gap:10px; font-family:'Outfit',sans-serif;"><i class="fas fa-plus-circle" style="color:#0a6aa1;"></i> Nuevo Comentario Manual</h3>
+            <p style="font-size:0.85rem; color:#888; margin-top:-5px; margin-bottom:20px;">Para registrar comentarios recibidos por email u otros canales.</p>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <label style="font-size:0.78rem; font-weight:700; color:#777; text-transform:uppercase; display:block; margin-bottom:5px;"><i class="fas fa-hashtag"></i> ID Sección (ej: 5.3)</label>
+                    <input type="text" id="manual-comment-pid" placeholder="Ej: 5.3" list="protocol-sections-list" style="width:100%; padding:9px 12px; border:1.5px solid #ccc; border-radius:7px; font-size:0.95rem; box-sizing:border-box;">
+                    <datalist id="protocol-sections-list"></datalist>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:700; color:#777; text-transform:uppercase; display:block; margin-bottom:5px;"><i class="fas fa-user"></i> Autor / Trabajador</label>
+                    <input type="text" id="manual-comment-author" placeholder="Nombre del trabajador" style="width:100%; padding:9px 12px; border:1.5px solid #ccc; border-radius:7px; font-size:0.95rem; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:700; color:#777; text-transform:uppercase; display:block; margin-bottom:5px;"><i class="fas fa-comment"></i> Contenido del comentario</label>
+                    <textarea id="manual-comment-text" rows="5" placeholder="Copia y pega el texto del email o escribe el comentario..." style="width:100%; padding:9px 12px; border:1.5px solid #ccc; border-radius:7px; font-family:inherit; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">
+                <button class="btn-secondary" onclick="closeManualCommentModal()">Cancelar</button>
+                <button class="btn-primary" id="btn-submit-manual-comment"><i class="fas fa-save"></i> Registrar Comentario</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Icon Bank Modal -->
     <div id="icon-bank-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px;">

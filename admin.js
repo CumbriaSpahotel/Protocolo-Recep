@@ -6,6 +6,13 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+// --- Comment module state ---
+let _allComments = [];
+let _commentFilter = 'all';
+let _commentPage = 1;
+const _commentsPerPage = 20;
+let _replyTargetId = null;
+
 // Protección por contraseña
 (function() {
     const isLocalhost = window.location.hostname === 'localhost' || 
@@ -451,7 +458,7 @@ function initAdmin() {
     
     const btnAddManualComment = document.getElementById('btn-add-manual-comment');
     if (btnAddManualComment) {
-        btnAddManualComment.addEventListener('click', createManualComment);
+        btnAddManualComment.addEventListener('click', openManualCommentModal);
     }
 
     // Periodically check for new comments to update badge
@@ -1961,7 +1968,6 @@ async function updatePendingBadge() {
         const response = await fetch('/api/comments/all');
         if (!response.ok) return;
         const text = await response.text();
-        // Safety: check if response start with [ (array) or { (object)
         if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) return;
         
         const comments = JSON.parse(text);
@@ -2005,42 +2011,242 @@ async function loadAdminComments() {
             tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Respuesta no válida del servidor.</td></tr>`;
             return;
         }
-        const comments = JSON.parse(text);
+        _allComments = JSON.parse(text);
+        _allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        if (comments.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay comentarios registrados.</td></tr>';
-            return;
+        // Populate datalist for manual comment modal
+        const datalist = document.getElementById('protocol-sections-list');
+        if (datalist && adminProtocols.length > 0) {
+            datalist.innerHTML = adminProtocols.map(p => `<option value="${p.section}">${p.section} - ${(p.title || '').replace(/\{.*?\}/, '').trim()}</option>`).join('');
         }
         
-        // Sort by date descending
-        comments.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        tbody.innerHTML = '';
-        comments.forEach(c => {
-            const tr = document.createElement('tr');
-            
-            const statusClass = c.status === 'approved' ? 'badge-success' : 'badge-warning';
-            const statusText = c.status === 'approved' ? 'Autorizado' : 'Pendiente';
-            
-            tr.innerHTML = `
-                <td style="font-size: 0.8rem; color: #666;">${new Date(c.date).toLocaleString()}</td>
-                <td><small>${c.pId}</small><br><strong>${c.pTitle || 'Protocolo'}</strong></td>
-                <td><i class="fas fa-user-circle"></i> ${c.author}</td>
-                <td style="max-width: 300px;">
-                    <div style="font-size: 0.9rem;">${c.text}</div>
-                    ${c.reply ? `<div style="margin-top: 8px; padding: 5px 10px; background: #eef7ff; border-left: 3px solid #0a6aa1; font-size: 0.85rem;"><strong>Respuesta Admin:</strong> ${c.reply}</div>` : ''}
-                </td>
-                <td><span class="badge ${statusClass}">${statusText}</span></td>
-                <td class="actions-cell" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    ${c.status === 'pending' ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
-                    <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; background: #0a6aa1; color: white;" onclick="promptReply(${c.id})"><i class="fas fa-reply"></i> ${c.reply ? 'Editar Rpta' : 'Contestar'}</button>
-                    <button class="btn-icon btn-delete" style="padding: 4px 8px;" onclick="moderateComment(${c.id}, 'delete')"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+        renderCommentStats(_allComments);
+        renderCommentFilter();
     } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Error cargando comentarios: ${e.message}</td></tr>`;
+        const tbody2 = document.getElementById('comments-table-body');
+        if (tbody2) tbody2.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Error cargando comentarios: ${e.message}</td></tr>`;
+    }
+}
+
+function renderCommentStats(comments) {
+    const statsRow = document.getElementById('comments-stats-row');
+    if (!statsRow) return;
+    
+    const total = comments.length;
+    const pending = comments.filter(c => c.status === 'pending').length;
+    const approved = comments.filter(c => c.status === 'approved').length;
+    const replied = comments.filter(c => c.reply && c.reply.trim()).length;
+    
+    const stat = (icon, label, value, color) => `
+        <div style="display:flex; align-items:center; gap:10px; background:white; border-radius:10px; padding:10px 18px; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-left:4px solid ${color};">
+            <i class="fas ${icon}" style="color:${color}; font-size:1.2rem;"></i>
+            <div>
+                <div style="font-size:1.4rem; font-weight:800; color:#333; line-height:1;">${value}</div>
+                <div style="font-size:0.72rem; color:#999; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">${label}</div>
+            </div>
+        </div>`;
+    
+    statsRow.innerHTML = 
+        stat('fa-comments', 'Total', total, '#607d8b') +
+        stat('fa-clock', 'Pendientes', pending, '#ffc107') +
+        stat('fa-check-circle', 'Autorizados', approved, '#28a745') +
+        stat('fa-reply', 'Respondidos', replied, '#6c5ce7');
+}
+
+function setCommentFilter(filter, btn) {
+    _commentFilter = filter;
+    _commentPage = 1;
+    
+    // Update button styles
+    document.querySelectorAll('.comment-filter-btn').forEach(b => {
+        const f = b.getAttribute('data-filter');
+        const colors = { all: '#0a6aa1', pending: '#ffc107', approved: '#28a745', replied: '#6c5ce7' };
+        const textColors = { all: 'white', pending: '#856404', approved: '#155724', replied: '#6c5ce7' };
+        const col = colors[f] || '#0a6aa1';
+        if (b === btn) {
+            b.style.background = col;
+            b.style.color = 'white';
+            b.style.borderColor = col;
+        } else {
+            b.style.background = 'white';
+            b.style.color = textColors[f] || '#333';
+            b.style.borderColor = col;
+        }
+    });
+    
+    renderCommentFilter();
+}
+
+function renderCommentFilter() {
+    let filtered = _allComments;
+    if (_commentFilter === 'pending') filtered = _allComments.filter(c => c.status === 'pending');
+    else if (_commentFilter === 'approved') filtered = _allComments.filter(c => c.status === 'approved');
+    else if (_commentFilter === 'replied') filtered = _allComments.filter(c => c.reply && c.reply.trim());
+    
+    renderCommentPage(filtered);
+    renderCommentPagination(filtered);
+}
+
+function renderCommentPage(filtered) {
+    const tbody = document.getElementById('comments-table-body');
+    if (!tbody) return;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:#999; padding:30px;"><i class="fas fa-comment-slash" style="font-size:2rem; margin-bottom:10px; display:block;"></i>No hay comentarios en esta categoría.</td></tr>';
+        return;
+    }
+    
+    const start = (_commentPage - 1) * _commentsPerPage;
+    const pageItems = filtered.slice(start, start + _commentsPerPage);
+    
+    tbody.innerHTML = '';
+    pageItems.forEach(c => {
+        const tr = document.createElement('tr');
+        const isPending = c.status === 'pending';
+        const statusClass = isPending ? 'badge-warning' : 'badge-success';
+        const statusText = isPending ? '⏳ Pendiente' : '✅ Autorizado';
+        
+        tr.innerHTML = `
+            <td style="font-size: 0.8rem; color: #666; white-space:nowrap;">${new Date(c.date).toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'})}<br><span style="font-size:0.72rem; color:#bbb;">${new Date(c.date).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</span></td>
+            <td><span style="font-size:0.75rem; color:#0a6aa1; font-weight:700; font-family:monospace;">${c.pId}</span><br><strong style="font-size:0.85rem;">${c.pTitle || 'Protocolo'}</strong></td>
+            <td><i class="fas fa-user-circle" style="color:#0a6aa1;"></i> <strong>${c.author}</strong></td>
+            <td style="max-width: 280px;">
+                <div style="font-size: 0.88rem; color:#333;">${c.text}</div>
+                ${c.reply ? `<div style="margin-top: 8px; padding: 7px 10px; background: #eef7ff; border-left: 3px solid #0a6aa1; border-radius:4px; font-size: 0.82rem;"><strong style="color:#0a6aa1;"><i class="fas fa-reply"></i> Admin:</strong> ${c.reply}</div>` : ''}
+            </td>
+            <td><span class="badge ${statusClass}" style="white-space:nowrap;">${statusText}</span></td>
+            <td class="actions-cell" style="display: flex; gap: 5px; flex-wrap: wrap; align-items:center;">
+                ${isPending ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; background: #0a6aa1; color: white;" onclick="openReplyModal(${c.id})"><i class="fas fa-reply"></i> ${c.reply ? 'Editar Rpta' : 'Contestar'}</button>
+                <button class="btn-icon btn-delete" style="padding: 4px 8px;" onclick="moderateComment(${c.id}, 'delete')" title="Eliminar comentario"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderCommentPagination(filtered) {
+    const container = document.getElementById('comments-pagination');
+    if (!container) return;
+    
+    const totalPages = Math.ceil(filtered.length / _commentsPerPage);
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+    
+    const btnStyle = (active) => `padding:6px 14px; border-radius:6px; border:1px solid ${active ? '#0a6aa1' : '#dee2e6'}; background:${active ? '#0a6aa1' : 'white'}; color:${active ? 'white' : '#333'}; cursor:pointer; font-weight:600; font-size:0.85rem;`;
+    
+    let html = `<span style="font-size:0.82rem; color:#999; margin-right:4px;">Página ${_commentPage} de ${totalPages}</span>`;
+    if (_commentPage > 1) html += `<button style="${btnStyle(false)}" onclick="goCommentPage(${_commentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - _commentPage) <= 1) {
+            html += `<button style="${btnStyle(i === _commentPage)}" onclick="goCommentPage(${i})">${i}</button>`;
+        } else if (Math.abs(i - _commentPage) === 2) {
+            html += `<span style="color:#ccc;">...</span>`;
+        }
+    }
+    if (_commentPage < totalPages) html += `<button style="${btnStyle(false)}" onclick="goCommentPage(${_commentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    
+    container.innerHTML = html;
+}
+
+function goCommentPage(page) {
+    _commentPage = page;
+    renderCommentFilter();
+    document.getElementById('comments-table-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// --- Reply Modal ---
+function openReplyModal(commentId) {
+    _replyTargetId = commentId;
+    const c = _allComments.find(x => x.id === commentId);
+    if (!c) return;
+    
+    const modal = document.getElementById('modal-reply-comment');
+    const preview = document.getElementById('reply-modal-comment-preview');
+    const textarea = document.getElementById('reply-text-input');
+    const btnDelete = document.getElementById('btn-delete-reply');
+    
+    preview.innerHTML = `<strong>${c.author}</strong> sobre <em>${c.pTitle || c.pId}</em>:<br>${c.text}`;
+    textarea.value = c.reply || '';
+    
+    btnDelete.style.display = c.reply ? 'inline-flex' : 'none';
+    btnDelete.onclick = () => {
+        if (confirm('¿Eliminar la respuesta de este comentario?')) {
+            moderateComment(commentId, 'reply', '');
+            closeReplyModal();
+        }
+    };
+    
+    document.getElementById('btn-submit-reply').onclick = () => {
+        const reply = textarea.value.trim();
+        if (!reply) { textarea.style.borderColor = '#e74c3c'; return; }
+        moderateComment(commentId, 'reply', reply);
+        closeReplyModal();
+    };
+    
+    modal.style.display = 'flex';
+    setTimeout(() => textarea.focus(), 100);
+}
+
+function closeReplyModal() {
+    document.getElementById('modal-reply-comment').style.display = 'none';
+    _replyTargetId = null;
+}
+
+// --- Manual Comment Modal ---
+function openManualCommentModal() {
+    const modal = document.getElementById('modal-manual-comment');
+    document.getElementById('manual-comment-pid').value = '';
+    document.getElementById('manual-comment-author').value = '';
+    document.getElementById('manual-comment-text').value = '';
+    modal.style.display = 'flex';
+    setTimeout(() => document.getElementById('manual-comment-pid').focus(), 100);
+    
+    document.getElementById('btn-submit-manual-comment').onclick = submitManualComment;
+}
+
+function closeManualCommentModal() {
+    document.getElementById('modal-manual-comment').style.display = 'none';
+}
+
+async function submitManualComment() {
+    const pId = document.getElementById('manual-comment-pid').value.trim();
+    const author = document.getElementById('manual-comment-author').value.trim();
+    const text = document.getElementById('manual-comment-text').value.trim();
+    
+    if (!pId || !author || !text) {
+        alert('Por favor rellena todos los campos.');
+        return;
+    }
+    
+    const p = adminProtocols.find(item => item.section === pId);
+    if (!p && !confirm(`No se ha encontrado el protocolo "${pId}". ¿Continuar de todas formas?`)) return;
+    
+    const pTitle = p ? p.title.replace(/\{.*?\}/, '').trim() : pId;
+    
+    const btn = document.getElementById('btn-submit-manual-comment');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+    
+    try {
+        const response = await fetch('/api/comments/create-manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pId, pTitle, author, text })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('✅ Comentario registrado correctamente');
+            closeManualCommentModal();
+            loadAdminComments();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (e) {
+        alert('Error conectando con el servidor: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Registrar Comentario';
     }
 }
 
@@ -2056,7 +2262,7 @@ async function moderateComment(commentId, action, replyText = null) {
         
         const result = await response.json();
         if (result.success) {
-            showToast('Operación exitosa');
+            showToast(action === 'delete' ? 'Comentario eliminado' : action === 'reply' ? 'Respuesta guardada' : 'Operación exitosa');
             loadAdminComments();
             updatePendingBadge();
         } else {
@@ -2067,46 +2273,12 @@ async function moderateComment(commentId, action, replyText = null) {
     }
 }
 
-function promptReply(commentId) {
-    const reply = prompt('Escribe tu contestación oficial para este comentario:');
-    if (reply !== null && reply.trim() !== '') {
-        moderateComment(commentId, 'reply', reply.trim());
-    }
+async function createManualComment() {
+    openManualCommentModal();
 }
 
-async function createManualComment() {
-    const pId = prompt('ID de la Sección del Protocolo (ej: 5.3):');
-    if (!pId) return;
-    
-    // Check if protocol exists in adminProtocols
-    const p = adminProtocols.find(item => item.section === pId);
-    if (!p) {
-        if(!confirm(`No se ha encontrado el protocolo "${pId}". ¿Continuar de todas formas?`)) return;
-    }
-
-    const pTitle = p ? p.title : pId;
-    const author = prompt('Nombre del trabajador / autor que envió el email:');
-    if (!author) return;
-    
-    const text = prompt('Contenido del comentario (puedes copiar y pegar el texto del email):');
-    if (!text) return;
-
-    try {
-        const response = await fetch('/api/comments/create-manual', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pId, pTitle, author, text })
-        });
-        const result = await response.json();
-        if (result.success) {
-            showToast('¡Comentario registrado y publicado correctamente!');
-            loadAdminComments();
-        } else {
-            alert('Error: ' + result.message);
-        }
-    } catch (e) {
-        alert('Error conectando con el servidor para registro manual: ' + e.message);
-    }
+function promptReply(commentId) {
+    openReplyModal(commentId);
 }
 
 async function syncCloudComments() {
@@ -2122,10 +2294,29 @@ async function syncCloudComments() {
         const cloudData = await response.json();
         
         if (cloudData && Array.isArray(cloudData)) {
+            // Fetch existing to avoid duplicates
+            let existingIds = new Set();
+            let existingKeys = new Set(); // author+date fallback
+            try {
+                const existing = await fetch('/api/comments/all');
+                const existingText = await existing.text();
+                if (existingText.trim().startsWith('[')) {
+                    const existingComments = JSON.parse(existingText);
+                    existingComments.forEach(c => {
+                        if (c.id) existingIds.add(String(c.id));
+                        existingKeys.add(`${c.author}|${c.date}`);
+                    });
+                }
+            } catch(e) {}
+            
             let importedCount = 0;
+            let skippedCount = 0;
             for (const item of cloudData) {
-                // Submit each as a "pending" or "authorized" comment based on your flow
-                // Here we submit them to your local server for record
+                const itemKey = `${item.author}|${item.date}`;
+                if ((item.id && existingIds.has(String(item.id))) || existingKeys.has(itemKey)) {
+                    skippedCount++;
+                    continue; // Skip duplicate
+                }
                 const res = await fetch('/api/comments/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2139,7 +2330,7 @@ async function syncCloudComments() {
                 });
                 if (res.ok) importedCount++;
             }
-            showToast(`¡Sincronización completa! Se han procesado ${importedCount} mensajes de la nube.`);
+            showToast(`✅ Sync completo: ${importedCount} nuevos${skippedCount > 0 ? `, ${skippedCount} duplicados omitidos` : ''}`);
             loadAdminComments();
             updatePendingBadge();
         }
@@ -2151,6 +2342,23 @@ async function syncCloudComments() {
         btn.disabled = false;
     }
 }
+
+// Close modals on background click
+document.addEventListener('click', (e) => {
+    const replyModal = document.getElementById('modal-reply-comment');
+    const manualModal = document.getElementById('modal-manual-comment');
+    if (replyModal && e.target === replyModal) closeReplyModal();
+    if (manualModal && e.target === manualModal) closeManualCommentModal();
+});
+
+// Wire comment filter buttons
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.comment-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => setCommentFilter(btn.getAttribute('data-filter'), btn));
+    });
+});
+
+
 
 // --- GESTIÓN DE CANALES ---
 function initCanalesTab() {
