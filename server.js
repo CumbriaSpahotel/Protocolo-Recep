@@ -32,9 +32,9 @@ const upload = multer({
 });
 
 app.use(cors());
-app.use(express.static(__dirname));
 app.use(express.json({limit: '50mb'}));
 
+// Define API routes FIRST, then static files to avoid path collisions
 app.post('/api/save', (req, res) => {
     try {
         const data = req.body;
@@ -214,6 +214,41 @@ app.post('/api/comments/moderate', (req, res) => {
     }
 });
 
+// Manual Admin Entry for comments received via email
+app.post('/api/comments/create-manual', (req, res) => {
+    try {
+        const { pId, pTitle, author, text, date } = req.body;
+        const commentsFile = path.join(__dirname, 'comments_internal.json');
+        let comments = [];
+        if (fs.existsSync(commentsFile)) {
+            comments = JSON.parse(fs.readFileSync(commentsFile, 'utf-8'));
+        }
+
+        const newComment = {
+            id: Date.now(),
+            pId,
+            pTitle,
+            author,
+            text,
+            date: date || new Date().toISOString(),
+            status: 'approved', // Automatically approved because it's from manual admin entry
+            reply: null
+        };
+
+        comments.push(newComment);
+        fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2), 'utf-8');
+
+        // Update public file
+        const approvedComments = comments.filter(c => c.status === 'approved');
+        const jsContent = `const comments_data = ${JSON.stringify(approvedComments, null, 2)};\n`;
+        fs.writeFileSync(path.join(__dirname, 'comments.js'), jsContent, 'utf-8');
+
+        res.json({ success: true, message: 'Comentario registrado manualmente y publicado' });
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
 const { exec } = require('child_process');
 
 app.post('/api/publish', (req, res) => {
@@ -245,6 +280,9 @@ app.post('/api/publish', (req, res) => {
         });
     });
 });
+
+// Middleware para archivos estáticos al FINAL
+app.use(express.static(__dirname));
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor de desarrollo iniciado en http://localhost:${PORT}/admin.html`);

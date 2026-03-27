@@ -1774,6 +1774,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRefreshComments) {
         btnRefreshComments.addEventListener('click', loadAdminComments);
     }
+    
+    const btnAddManualComment = document.getElementById('btn-add-manual-comment');
+    if (btnAddManualComment) {
+        btnAddManualComment.addEventListener('click', createManualComment);
+    }
 
     // Periodically check for new comments to update badge
     setInterval(updatePendingBadge, 30000);
@@ -1783,7 +1788,12 @@ document.addEventListener('DOMContentLoaded', () => {
 async function updatePendingBadge() {
     try {
         const response = await fetch('/api/comments/all');
-        const comments = await response.json();
+        if (!response.ok) return;
+        const text = await response.text();
+        // Safety: check if response start with [ (array) or { (object)
+        if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) return;
+        
+        const comments = JSON.parse(text);
         const pendingCount = comments.filter(c => c.status === 'pending').length;
         const badge = document.getElementById('pending-comments-badge');
         if (badge) {
@@ -1807,7 +1817,16 @@ async function loadAdminComments() {
     
     try {
         const response = await fetch('/api/comments/all');
-        const comments = await response.json();
+        if (!response.ok) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Error de servidor. Prueba a reiniciar el servidor y recargar.</td></tr>`;
+            return;
+        }
+        const text = await response.text();
+        if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Respuesta no válida del servidor.</td></tr>`;
+            return;
+        }
+        const comments = JSON.parse(text);
         
         if (comments.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay comentarios registrados.</td></tr>';
@@ -1873,5 +1892,40 @@ function promptReply(commentId) {
     const reply = prompt('Escribe tu contestación oficial para este comentario:');
     if (reply !== null && reply.trim() !== '') {
         moderateComment(commentId, 'reply', reply.trim());
+    }
+}
+
+async function createManualComment() {
+    const pId = prompt('ID de la Sección del Protocolo (ej: 5.3):');
+    if (!pId) return;
+    
+    // Check if protocol exists in adminProtocols
+    const p = adminProtocols.find(item => item.section === pId);
+    if (!p) {
+        if(!confirm(`No se ha encontrado el protocolo "${pId}". ¿Continuar de todas formas?`)) return;
+    }
+
+    const pTitle = p ? p.title : pId;
+    const author = prompt('Nombre del trabajador / autor que envió el email:');
+    if (!author) return;
+    
+    const text = prompt('Contenido del comentario (puedes copiar y pegar el texto del email):');
+    if (!text) return;
+
+    try {
+        const response = await fetch('/api/comments/create-manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pId, pTitle, author, text })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('¡Comentario registrado y publicado correctamente!');
+            loadAdminComments();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (e) {
+        alert('Error conectando con el servidor para registro manual: ' + e.message);
     }
 }

@@ -1346,7 +1346,7 @@ function copyProtocolLink(pId) {
     });
 }
 
-// Server-based Comment Submission with Admin Moderation
+// Unified Comment Submission: API if local, Email if static/public
 async function submitComment(pId) {
     const authorEl = document.getElementById('comment-author');
     const textEl = document.getElementById('comment-text');
@@ -1360,26 +1360,51 @@ async function submitComment(pId) {
     
     const p = protocols.find(item => (item.section || item.title) === pId);
     const pTitle = p ? p.title : pId;
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-    try {
-        const response = await fetch('/api/comments/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pId, pTitle, author, text })
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('¡Gracias! Tu comentario ha sido enviado a revisión. Será visible una vez autorizado por administración e informado por correo a los responsables.');
-            authorEl.value = '';
-            textEl.value = '';
-        } else {
-            alert('Error al enviar el comentario: ' + result.message);
+    if (isLocal) {
+        // Try the server API
+        try {
+            const response = await fetch('/api/comments/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pId, pTitle, author, text })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    alert('¡Recibido! Tu comentario ha sido enviado al servidor local y se ha preparado un aviso para administración. Será visible tras ser autorizado.');
+                    authorEl.value = '';
+                    textEl.value = '';
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('API local no disponible, procediendo a modo email.');
         }
-    } catch (e) {
-        // Fallback for non-local dev environments if needed
-        console.error('Error submitting comment:', e);
-        alert('Este sistema requiere conexión con el servidor local para procesar comentarios.');
+    }
+
+    // Public/Static Mode: Send via Email to communications team
+    const mailTo = 'comunicaciones@hotelguadiana.es';
+    const subject = encodeURIComponent(`COMENTARIO: ${pTitle}`);
+    const body = encodeURIComponent(
+        `NUEVO COMENTARIO EN PROTOCOLO\n` +
+        `---------------------------------\n` +
+        `Protocolo: ${pTitle} (${pId})\n` +
+        `Autor/Trabajador: ${author}\n\n` +
+        `Comentario:\n${text}\n\n` +
+        `---------------------------------\n` +
+        `Nota: El administrador registrará este comentario manualmente.`
+    );
+
+    const confirmEmail = confirm('Estás en la versión online del manual. Para procesar este comentario, se abrirá tu gestor de correo para enviarlo a Administración. ¿Continuar?');
+    
+    if (confirmEmail) {
+        window.location.href = `mailto:${mailTo}?subject=${subject}&body=${body}`;
+        authorEl.value = '';
+        textEl.value = '';
+        alert('Gracias. Por favor, asegúrate de enviar el correo que se ha generado.');
     }
 }
 
