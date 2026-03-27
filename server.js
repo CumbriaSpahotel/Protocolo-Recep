@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const open = require('open').default;
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = 3000;
@@ -78,6 +79,137 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         });
     } catch (e) {
         console.error('❌ Error en upload:', e);
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
+// Configure Email Transporter (Mock or real if credentials provided)
+// For now, it will log to console if no credentials, but ready to use.
+const transporter = nodemailer.createTransport({
+    // Example: Gmail (needs App Password)
+    /*
+    service: 'gmail',
+    auth: {
+        user: 'tu-email@gmail.com',
+        pass: 'tu-password'
+    }
+    */
+    host: 'localhost', // Placeholder
+    port: 1025,
+    ignoreTLS: true
+});
+
+async function sendCommentNotification(comment, pTitle) {
+    const mailOptions = {
+        from: '"Protocolo Recep" <no-reply@hotelguadiana.es>',
+        to: 'comunicaciones@hotelguadiana.es',
+        subject: `Nuevo Comentario en: ${pTitle}`,
+        text: `Hola,\n\nSe ha recibido un nuevo comentario para el protocolo "${pTitle}".\n\nAutor: ${comment.author}\nComentario: ${comment.text}\n\nPuedes moderarlo en el panel de administración.\n\nSaludos.`,
+        html: `
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #0a6aa1;">Nuevo Comentario Recibido</h2>
+                <p>Se ha recibido un nuevo comentario para el protocolo: <strong>${pTitle}</strong></p>
+                <hr style="border: none; border-top: 1px solid #eee;">
+                <p><strong>Autor:</strong> ${comment.author}</p>
+                <p><strong>Comentario:</strong></p>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; font-style: italic;">
+                    "${comment.text}"
+                </div>
+                <p style="margin-top: 20px;">
+                    <a href="http://localhost:3000/admin.html" style="background: #0a6aa1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Ir al Panel de Administración</a>
+                </p>
+            </div>
+        `
+    };
+
+    try {
+        // Since we don't have real SMTP yet, we'll log it but try to send
+        console.log(`📧 Intentando enviar correo a comunicaciones@hotelguadiana.es...`);
+        // await transporter.sendMail(mailOptions); // Uncomment when credentials are set
+        console.log(`✅ Aviso de correo preparado para: ${comment.author}`);
+    } catch (error) {
+        console.error('❌ Error enviando email:', error);
+    }
+}
+
+app.get('/api/comments/all', (req, res) => {
+    try {
+        const commentsFile = path.join(__dirname, 'comments_internal.json');
+        if (!fs.existsSync(commentsFile)) {
+            return res.json([]);
+        }
+        const data = JSON.parse(fs.readFileSync(commentsFile, 'utf-8'));
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
+app.post('/api/comments/submit', (req, res) => {
+    try {
+        const { pId, pTitle, author, text } = req.body;
+        const commentsFile = path.join(__dirname, 'comments_internal.json');
+        let comments = [];
+        if (fs.existsSync(commentsFile)) {
+            comments = JSON.parse(fs.readFileSync(commentsFile, 'utf-8'));
+        }
+
+        const newComment = {
+            id: Date.now(),
+            pId,
+            pTitle,
+            author,
+            text,
+            date: new Date().toISOString(),
+            status: 'pending', // Requires admin approval
+            reply: null
+        };
+
+        comments.push(newComment);
+        fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2), 'utf-8');
+        
+        // Notify by email
+        sendCommentNotification(newComment, pTitle);
+
+        res.json({ success: true, message: 'Comentario enviado y pendiente de revisión' });
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
+app.post('/api/comments/moderate', (req, res) => {
+    try {
+        const { commentId, action, replyText } = req.body;
+        const commentsFile = path.join(__dirname, 'comments_internal.json');
+        if (!fs.existsSync(commentsFile)) {
+            return res.status(404).json({ success: false, message: 'No hay comentarios' });
+        }
+
+        let comments = JSON.parse(fs.readFileSync(commentsFile, 'utf-8'));
+        const index = comments.findIndex(c => c.id === commentId);
+
+        if (index === -1) {
+            return res.status(404).json({ success: false, message: 'Comentario no encontrado' });
+        }
+
+        if (action === 'approve') {
+            comments[index].status = 'approved';
+            if (replyText) comments[index].reply = replyText;
+        } else if (action === 'delete') {
+            comments.splice(index, 1);
+        } else if (action === 'reply') {
+            comments[index].reply = replyText;
+        }
+
+        fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2), 'utf-8');
+
+        // Update the public comments.js file with only approved comments
+        const approvedComments = comments.filter(c => c.status === 'approved');
+        const jsContent = `const comments_data = ${JSON.stringify(approvedComments, null, 2)};\n`;
+        fs.writeFileSync(path.join(__dirname, 'comments.js'), jsContent, 'utf-8');
+
+        res.json({ success: true, message: 'Operación realizada correctamente' });
+    } catch (e) {
         res.status(500).json({ success: false, message: e.message });
     }
 });

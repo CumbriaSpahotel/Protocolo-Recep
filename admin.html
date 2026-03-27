@@ -42,6 +42,7 @@
             <button class="tab-btn active" data-tab="listado"><i class="fas fa-file-alt"></i> Protocolos</button>
             <button class="tab-btn" data-tab="menus"><i class="fas fa-list-ul"></i> Gestión de Menús</button>
             <button class="tab-btn" data-tab="inicio"><i class="fas fa-home"></i> Gestión Inicio</button>
+            <button class="tab-btn" data-tab="comentarios"><i class="fas fa-comments"></i> Comentarios <span id="pending-comments-badge" class="badge" style="display:none; background:#ffc107; color:black;">0</span></button>
         </div>
     </div>
 
@@ -240,6 +241,38 @@
                 </div>
 
                 <div style="display: none;"><textarea id="edit-home-json"></textarea></div>
+            </div>
+        </section>
+
+        <!-- Comentarios View -->
+        <section id="tab-comentarios" class="tab-page">
+            <div class="list-header">
+                <h2>Moderación de Comentarios</h2>
+                <div class="list-actions">
+                    <button id="btn-refresh-comments" class="btn-secondary"><i class="fas fa-sync-alt"></i> Actualizar</button>
+                </div>
+            </div>
+            <div class="editor-body">
+                <p style="margin-bottom: 20px; color: #666;">Revisa y autoriza los comentarios recibidos de los trabajadores.</p>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Protocolo</th>
+                                <th>Autor/Trabajador</th>
+                                <th>Comentario</th>
+                                <th>Estado</th>
+                                <th style="width: 200px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comments-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center">Cargando comentarios...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>

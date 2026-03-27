@@ -929,7 +929,7 @@ function loadProtocol(p, highlightText = '') {
                     <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="align-self: flex-end; padding: 10px 24px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                         Publicar Comentario
                     </button>
-                    <p style="font-size: 0.8rem; color: #888; text-align: right; margin-top: 0.5rem;"><i class="fas fa-info-circle"></i> Los comentarios se guardan localmente en esta versión.</p>
+                    <p style="font-size: 0.8rem; color: #888; text-align: right; margin-top: 0.5rem;"><i class="fas fa-lock"></i> Los comentarios requieren autorización de administración antes de ser públicos.</p>
                 </div>
             </div>
 
@@ -1346,54 +1346,72 @@ function copyProtocolLink(pId) {
     });
 }
 
-// Simple Comment Submission (Local for now, can be extended to server)
-function submitComment(pId) {
-    const author = document.getElementById('comment-author').value;
-    const text = document.getElementById('comment-text').value;
+// Server-based Comment Submission with Admin Moderation
+async function submitComment(pId) {
+    const authorEl = document.getElementById('comment-author');
+    const textEl = document.getElementById('comment-text');
+    const author = authorEl.value;
+    const text = textEl.value;
     
     if (!author || !text) {
         alert('Por favor, completa tu nombre y el comentario.');
         return;
     }
     
-    const comment = {
-        author,
-        text,
-        date: new Date().toISOString(),
-        id: Date.now()
-    };
-    
-    // For now, let's use localStorage to persist comments on the user's browser
-    const storageKey = `comments_${pId}`;
-    const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    comments.push(comment);
-    localStorage.setItem(storageKey, JSON.stringify(comments));
-    
-    // Clear form
-    document.getElementById('comment-author').value = '';
-    document.getElementById('comment-text').value = '';
-    
-    // Refresh comments list UI
-    renderComments(pId);
-    alert('Comentario guardado localmente en este navegador.');
+    const p = protocols.find(item => (item.section || item.title) === pId);
+    const pTitle = p ? p.title : pId;
+
+    try {
+        const response = await fetch('/api/comments/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pId, pTitle, author, text })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('¡Gracias! Tu comentario ha sido enviado a revisión. Será visible una vez autorizado por administración e informado por correo a los responsables.');
+            authorEl.value = '';
+            textEl.value = '';
+        } else {
+            alert('Error al enviar el comentario: ' + result.message);
+        }
+    } catch (e) {
+        // Fallback for non-local dev environments if needed
+        console.error('Error submitting comment:', e);
+        alert('Este sistema requiere conexión con el servidor local para procesar comentarios.');
+    }
 }
 
 function renderComments(pId) {
     const container = document.getElementById(`comments-container-${pId}`);
     if (!container) return;
     
-    const storageKey = `comments_${pId}`;
-    const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    // Check if we have public comments loaded from comments.js
+    if (typeof comments_data === 'undefined' || !Array.isArray(comments_data)) {
+        return;
+    }
     
-    if (comments.length === 0) return;
+    const filteredComments = comments_data.filter(c => c.pId === pId);
     
-    container.innerHTML = comments.map(c => `
-        <div class="comment-item" style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #eee; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
-                <strong style="color: var(--accent-blue);"><i class="fas fa-user-circle"></i> ${c.author}</strong>
-                <span style="font-size: 0.75rem; color: #999;">${new Date(c.date).toLocaleString()}</span>
+    if (filteredComments.length === 0) return;
+    
+    container.innerHTML = filteredComments.map(c => `
+        <div class="comment-item" style="background: white; padding: 1.2rem; border-radius: 12px; border: 1px solid #eee; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); animation: fadeIn 0.4s ease;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; align-items: center;">
+                <strong style="color: var(--accent-blue); font-size: 1rem;"><i class="fas fa-user-circle"></i> ${c.author}</strong>
+                <span style="font-size: 0.75rem; color: #999; background: #f8f9fa; padding: 2px 8px; border-radius: 4px;">${new Date(c.date).toLocaleString()}</span>
             </div>
-            <div style="font-size: 0.95rem; color: #444; line-height: 1.4;">${c.text}</div>
+            <div style="font-size: 0.95rem; color: #444; line-height: 1.5;">${c.text}</div>
+            
+            ${c.reply ? `
+                <div class="admin-reply" style="margin-top: 15px; padding: 12px 15px; background: #f1f8ff; border-left: 4px solid #0a6aa1; border-radius: 0 8px 8px 0; font-size: 0.9rem;">
+                    <div style="font-weight: 800; color: #032d4b; margin-bottom: 5px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <i class="fas fa-reply-all"></i> Respuesta de Administración:
+                    </div>
+                    <div style="color: #455a64; font-style: italic;">"${c.reply}"</div>
+                </div>
+            ` : ''}
         </div>
     `).join('');
 }

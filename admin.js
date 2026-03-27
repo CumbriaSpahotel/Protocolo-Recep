@@ -1748,3 +1748,130 @@ function renderIconBank(filterText) {
 }
 
 
+// --- COMMENT MODERATION LOGIC ---
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+    if (tabBtn) tabBtn.classList.add('active');
+    
+    if (tabId === 'comentarios') {
+        loadAdminComments();
+    }
+}
+
+// Initial binding for new tab
+document.addEventListener('DOMContentLoaded', () => {
+    const commentTabBtn = document.querySelector('.tab-btn[data-tab="comentarios"]');
+    if (commentTabBtn) {
+        commentTabBtn.addEventListener('click', () => switchTab('comentarios'));
+    }
+    
+    const btnRefreshComments = document.getElementById('btn-refresh-comments');
+    if (btnRefreshComments) {
+        btnRefreshComments.addEventListener('click', loadAdminComments);
+    }
+
+    // Periodically check for new comments to update badge
+    setInterval(updatePendingBadge, 30000);
+    setTimeout(updatePendingBadge, 2000);
+});
+
+async function updatePendingBadge() {
+    try {
+        const response = await fetch('/api/comments/all');
+        const comments = await response.json();
+        const pendingCount = comments.filter(c => c.status === 'pending').length;
+        const badge = document.getElementById('pending-comments-badge');
+        if (badge) {
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        console.error('Error updating badge:', e);
+    }
+}
+
+async function loadAdminComments() {
+    const tbody = document.getElementById('comments-table-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando comentarios...</td></tr>';
+    
+    try {
+        const response = await fetch('/api/comments/all');
+        const comments = await response.json();
+        
+        if (comments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay comentarios registrados.</td></tr>';
+            return;
+        }
+        
+        // Sort by date descending
+        comments.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        tbody.innerHTML = '';
+        comments.forEach(c => {
+            const tr = document.createElement('tr');
+            
+            const statusClass = c.status === 'approved' ? 'badge-success' : 'badge-warning';
+            const statusText = c.status === 'approved' ? 'Autorizado' : 'Pendiente';
+            
+            tr.innerHTML = `
+                <td style="font-size: 0.8rem; color: #666;">${new Date(c.date).toLocaleString()}</td>
+                <td><small>${c.pId}</small><br><strong>${c.pTitle || 'Protocolo'}</strong></td>
+                <td><i class="fas fa-user-circle"></i> ${c.author}</td>
+                <td style="max-width: 300px;">
+                    <div style="font-size: 0.9rem;">${c.text}</div>
+                    ${c.reply ? `<div style="margin-top: 8px; padding: 5px 10px; background: #eef7ff; border-left: 3px solid #0a6aa1; font-size: 0.85rem;"><strong>Respuesta Admin:</strong> ${c.reply}</div>` : ''}
+                </td>
+                <td><span class="badge ${statusClass}">${statusText}</span></td>
+                <td class="actions-cell" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    ${c.status === 'pending' ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
+                    <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; background: #0a6aa1; color: white;" onclick="promptReply(${c.id})"><i class="fas fa-reply"></i> ${c.reply ? 'Editar Rpta' : 'Contestar'}</button>
+                    <button class="btn-icon btn-delete" style="padding: 4px 8px;" onclick="moderateComment(${c.id}, 'delete')"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:red;">Error cargando comentarios: ${e.message}</td></tr>`;
+    }
+}
+
+async function moderateComment(commentId, action, replyText = null) {
+    if (action === 'delete' && !confirm('¿Estás seguro de que deseas eliminar este comentario?')) return;
+    
+    try {
+        const response = await fetch('/api/comments/moderate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentId, action, replyText })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            showToast('Operación exitosa');
+            loadAdminComments();
+            updatePendingBadge();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (e) {
+        alert('Error conectando con el servidor: ' + e.message);
+    }
+}
+
+function promptReply(commentId) {
+    const reply = prompt('Escribe tu contestación oficial para este comentario:');
+    if (reply !== null && reply.trim() !== '') {
+        moderateComment(commentId, 'reply', reply.trim());
+    }
+}
