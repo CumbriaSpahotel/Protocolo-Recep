@@ -160,7 +160,7 @@ app.post('/api/comments/submit', (req, res) => {
             pTitle,
             author,
             text,
-            date: new Date().toISOString(),
+            date: req.body.date || new Date().toISOString(),
             status: 'pending', // Requires admin approval
             reply: null
         };

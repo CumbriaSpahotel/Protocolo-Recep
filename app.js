@@ -1007,6 +1007,9 @@ function loadProtocol(p, highlightText = '') {
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Auto-render comments for this protocol
+    setTimeout(() => renderComments(pId), 100);
 }
 
 function goBack() {
@@ -1435,9 +1438,17 @@ function renderComments(pId) {
         return;
     }
     
-    const filteredComments = comments_data.filter(c => c.pId === pId);
+    // Robust identifier matching (trimmed strings)
+    const normalizedId = String(pId).trim();
+    const filteredComments = comments_data.filter(c => 
+        (c.pId && String(c.pId).trim() === normalizedId) || 
+        (c.pTitle && String(c.pTitle).trim() === normalizedId)
+    );
     
-    if (filteredComments.length === 0) return;
+    if (filteredComments.length === 0) {
+        // We keep the "No comments" placeholder
+        return;
+    }
     
     container.innerHTML = filteredComments.map(c => `
         <div class="comment-item" style="background: white; padding: 1.2rem; border-radius: 12px; border: 1px solid #eee; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); animation: fadeIn 0.4s ease;">
@@ -1459,13 +1470,7 @@ function renderComments(pId) {
     `).join('');
 }
 
-// Call renderComments when protocol is loaded (needs a tiny delay for DOM to be ready)
-const originalLoadProtocol = loadProtocol;
-loadProtocol = function(p, highlightText = '') {
-    originalLoadProtocol(p, highlightText);
-    const pId = p.section || p.title;
-    setTimeout(() => renderComments(pId), 50);
-};
+
 
 function getLegalFooterHtml() {
     return `

@@ -1967,7 +1967,8 @@ async function syncCloudComments() {
                         pId: item.pId, 
                         pTitle: item.pTitle, 
                         author: item.author, 
-                        text: item.text 
+                        text: item.text,
+                        date: item.date
                     })
                 });
                 if (res.ok) importedCount++;
