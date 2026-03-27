@@ -5,6 +5,9 @@ const postsList = document.getElementById('posts-list');
 const navItems = document.getElementById('top-nav-items');
 
 // History stack for better navigation
+// CONFIGURACIÓN DE NUBE (OPCIÓN B)
+const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbzRRNwjwp86B33O5rUjOG-uCVXUzieMAHijuOCq08k6BQ1SNmWARHytwUDjUijywGze/exec';
+
 let viewHistory = [{ type: 'home' }];
 
 // Fallback configuration if not found in data.js
@@ -1401,10 +1404,25 @@ async function submitComment(pId) {
     const confirmEmail = confirm('Estás en la versión online del manual. Para procesar este comentario, se abrirá tu gestor de correo para enviarlo a Administración. ¿Continuar?');
     
     if (confirmEmail) {
-        window.location.href = `mailto:${mailTo}?subject=${subject}&body=${body}`;
-        authorEl.value = '';
-        textEl.value = '';
-        alert('Gracias. Por favor, asegúrate de enviar el correo que se ha generado.');
+        // First try silent Cloud Posting (Option B)
+        try {
+            const cloudResponse = await fetch(CLOUD_GATEWAY_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Google Apps Script requires no-cors for simple silent POSTs
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pId, pTitle, author, text })
+            });
+            alert('¡Enviado directamente! Tu comentario ha sido registrado en la base de datos de la nube y administración ha recibido un aviso. Aparecerá una vez autorizado.');
+            authorEl.value = '';
+            textEl.value = '';
+            return;
+        } catch (e) {
+            console.error('Error en Cloud Gateway, usando mailto:', e);
+            window.location.href = `mailto:${mailTo}?subject=${subject}&body=${body}`;
+            authorEl.value = '';
+            textEl.value = '';
+            alert('Gracias. Por favor, asegúrate de enviar el correo que se ha generado.');
+        }
     }
 }
 

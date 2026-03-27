@@ -1775,6 +1775,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btnRefreshComments.addEventListener('click', loadAdminComments);
     }
     
+    const btnSyncCloud = document.getElementById('btn-sync-cloud-comments');
+    if (btnSyncCloud) {
+        btnSyncCloud.addEventListener('click', syncCloudComments);
+    }
+    
     const btnAddManualComment = document.getElementById('btn-add-manual-comment');
     if (btnAddManualComment) {
         btnAddManualComment.addEventListener('click', createManualComment);
@@ -1935,5 +1940,47 @@ async function createManualComment() {
         }
     } catch (e) {
         alert('Error conectando con el servidor para registro manual: ' + e.message);
+    }
+}
+
+async function syncCloudComments() {
+    const btn = document.getElementById('btn-sync-cloud-comments');
+    if (!btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(CLOUD_GATEWAY_URL);
+        const cloudData = await response.json();
+        
+        if (cloudData && Array.isArray(cloudData)) {
+            let importedCount = 0;
+            for (const item of cloudData) {
+                // Submit each as a "pending" or "authorized" comment based on your flow
+                // Here we submit them to your local server for record
+                const res = await fetch('/api/comments/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        pId: item.pId, 
+                        pTitle: item.pTitle, 
+                        author: item.author, 
+                        text: item.text 
+                    })
+                });
+                if (res.ok) importedCount++;
+            }
+            showToast(`¡Sincronización completa! Se han procesado ${importedCount} mensajes de la nube.`);
+            loadAdminComments();
+            updatePendingBadge();
+        }
+    } catch (e) {
+        console.error('Error Sync:', e);
+        alert('Error sincronizando con la nube (Google Sheets). Asegúrate de que el script está publicado correctamente.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
