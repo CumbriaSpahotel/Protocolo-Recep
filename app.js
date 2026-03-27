@@ -1721,6 +1721,29 @@ function getExcerpt(html, maxLength = 120) {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
+// Extract key bullet points from protocol HTML for a meaningful summary
+function getKeyPoints(html, maxPoints = 3) {
+    if (!html) return null;
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    
+    // Try <li> items first
+    const items = Array.from(temp.querySelectorAll('li'))
+        .map(li => li.textContent.trim())
+        .filter(t => t.length > 5 && t.length < 200)
+        .slice(0, maxPoints);
+    
+    if (items.length > 0) return items;
+    
+    // Fallback: first non-empty paragraphs
+    const paras = Array.from(temp.querySelectorAll('p'))
+        .map(p => p.textContent.trim())
+        .filter(t => t.length > 10)
+        .slice(0, maxPoints);
+    
+    return paras.length > 0 ? paras : null;
+}
+
 function generateBotResponse(userInput) {
     const input = userInput.toLowerCase();
     
@@ -1774,24 +1797,46 @@ function generateBotResponse(userInput) {
     if (matches.length > 0) {
         appendChatMessage('bot', 'He analizado los protocolos y esto es lo más relevante:');
         
-        matches.slice(0, 2).forEach(m => {
+        // Store protocols in a global index to avoid inline string escaping issues
+        if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
+        
+        matches.slice(0, 3).forEach((m, i) => {
             const p = m.protocol;
             const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
-            const excerpt = getExcerpt(p.info_html || p.content);
+            const idxKey = 'p_' + Date.now() + '_' + i;
+            window._chatProtocolIndex[idxKey] = p;
+            
+            // Resolve category name from section's top-level ID
+            const CAT_MAP = getCatMap();
+            const catId = p.section ? String(p.section).split('.')[0] : null;
+            const catName = catId && CAT_MAP[catId] ? CAT_MAP[catId].name : null;
+            
+            // Build key-points summary
+            const keyPoints = getKeyPoints(p.info_html || p.content);
+            let summaryHtml = '';
+            if (keyPoints && keyPoints.length > 0) {
+                summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#555; line-height:1.5;">${
+                    keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')
+                }</ul>`;
+            } else {
+                const fallback = getExcerpt(p.info_html || p.content, 130);
+                summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
+            }
             
             const linkHtml = `
                 <div style="margin-bottom: 12px;">
-                    <a href="#" class="chat-link" onclick="handleChatLinkClick('${p.section || ''}', '${p.title.replace(/'/g, "\\'")}')">
+                    ${catName ? `<div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#888; margin-bottom:4px;"><i class="fas fa-folder" style="margin-right:4px;"></i>${catName}</div>` : ''}
+                    <a href="#" class="chat-link" onclick="event.preventDefault(); window.handleChatLinkByKey('${idxKey}')">
                         <i class="fas fa-file-alt"></i> ${p.section ? p.section + ' - ' : ''}${cleanTitle}
                     </a>
-                    <div class="chat-excerpt">${excerpt}</div>
+                    ${summaryHtml}
                 </div>
             `;
             appendChatMessage('bot', linkHtml, true);
         });
         
-        if (matches.length > 2) {
-            appendChatMessage('bot', `También he encontrado otros ${matches.length - 2} resultados. ¿Necesitas algo más específico?`);
+        if (matches.length > 3) {
+            appendChatMessage('bot', `También he encontrado otros ${matches.length - 3} resultados. ¿Necesitas algo más específico?`);
         }
     } else {
         appendChatMessage('bot', 'No he encontrado una coincidencia exacta en los manuales actuales. ¿Te refieres a algo de esto?');
@@ -1836,6 +1881,20 @@ window.handleChatLinkClick = (sectionId, title) => {
             const chatbotContainer = document.getElementById('chatbot-container');
             if (chatbotContainer) chatbotContainer.style.display = 'none';
         }
+    }
+};
+
+// New index-based handler — avoids all escaping issues with title/section strings
+window.handleChatLinkByKey = (idxKey) => {
+    const p = window._chatProtocolIndex && window._chatProtocolIndex[idxKey];
+    if (!p) return;
+    if (typeof viewHistory !== 'undefined') {
+        viewHistory.push({ type: 'protocol', payload: p });
+    }
+    loadProtocol(p);
+    const chatbotContainer = document.getElementById('chatbot-container');
+    if (chatbotContainer && window.innerWidth < 768) {
+        chatbotContainer.style.display = 'none';
     }
 };
 
