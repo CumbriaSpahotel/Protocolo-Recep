@@ -42,6 +42,7 @@
             <button class="tab-btn active" data-tab="listado"><i class="fas fa-file-alt"></i> Protocolos</button>
             <button class="tab-btn" data-tab="menus"><i class="fas fa-list-ul"></i> Gestión de Menús</button>
             <button class="tab-btn" data-tab="inicio"><i class="fas fa-home"></i> Gestión Inicio</button>
+            <button class="tab-btn" data-tab="canales"><i class="fas fa-satellite-dish"></i> Canales</button>
             <button class="tab-btn" data-tab="comentarios"><i class="fas fa-comments"></i> Comentarios <span id="pending-comments-badge" class="badge" style="display:none; background:#ffc107; color:black;">0</span></button>
         </div>
     </div>
@@ -241,6 +242,26 @@
                 </div>
 
                 <div style="display: none;"><textarea id="edit-home-json"></textarea></div>
+            </div>
+        </section>
+
+        <!-- Canales View -->
+        <section id="tab-canales" class="tab-page">
+            <div class="list-header">
+                <h2>Gestión de Singularidades por Canal</h2>
+                <div style="display:flex; gap: 10px;">
+                    <button id="btn-add-channel" class="btn-secondary" style="background:var(--accent);"><i class="fas fa-plus"></i> Añadir Canal</button>
+                    <button id="btn-save-canales" class="btn-primary"><i class="fas fa-save"></i> Guardar Configuración</button>
+                </div>
+            </div>
+            <div class="editor-body">
+                <p style="margin-bottom: 20px; color: #666;">Configura las peculiaridades de cada canal de venta (Booking, Expedia, etc.) para que se muestren en el protocolo central.</p>
+                
+                <div id="canales-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px;">
+                    <!-- Channel editors injected dynamically -->
+                </div>
+                
+                <div style="display: none;"><textarea id="edit-canales-json"></textarea></div>
             </div>
         </section>
 

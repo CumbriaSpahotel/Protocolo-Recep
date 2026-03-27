@@ -728,6 +728,14 @@ function switchTab(tabId) {
         
         const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
         if (activeBtn) activeBtn.classList.add('active');
+
+        if (tabId === 'canales') {
+            initCanalesTab();
+        }
+        
+        if (tabId === 'comentarios') {
+            loadAdminComments();
+        }
     }
 }
 
@@ -1980,6 +1988,113 @@ async function syncCloudComments() {
     } catch (e) {
         console.error('Error Sync:', e);
         alert('Error sincronizando con la nube (Google Sheets). Asegúrate de que el script está publicado correctamente.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// --- GESTIÓN DE CANALES ---
+function initCanalesTab() {
+    renderCanales();
+    
+    document.getElementById('btn-add-channel').onclick = () => {
+        channels_config.push({
+            id: 'nuevo-' + Date.now(),
+            name: 'NUEVO CANAL',
+            icon: '🌍',
+            summary: 'Descripción corta',
+            content: 'Normativa general...',
+            notes: ''
+        });
+        renderCanales();
+    };
+    
+    document.getElementById('btn-save-canales').onclick = saveCanales;
+}
+
+function renderCanales() {
+    const container = document.getElementById('canales-container');
+    if (!container) return;
+    
+    container.innerHTML = channels_config.map((c, idx) => `
+        <div class="channel-editor-card" style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
+                <h3 style="margin:0; font-size:1rem; color:var(--primary);"><i class="fas fa-satellite-dish"></i> Canal #${idx + 1}</h3>
+                <button class="btn-link" style="color:#e74c3c;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i> Eliminar</button>
+            </div>
+            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px; margin-bottom:15px;">
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Icono</label>
+                    <input type="text" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:1.2rem;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Nombre del Canal</label>
+                    <input type="text" value="${c.name || ''}" onchange="updateChannelData(${idx}, 'name', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-weight:bold;">
+                </div>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Resumen / Subtítulo</label>
+                <input type="text" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Contenido Principal (Procedimiento)</label>
+                <textarea rows="3" onchange="updateChannelData(${idx}, 'content', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.9rem;">${c.content || ''}</textarea>
+            </div>
+            <div>
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Notas Adicionales / Peculiaridades</label>
+                <textarea rows="2" onchange="updateChannelData(${idx}, 'notes', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.85rem; background:#f9f9f9;">${c.notes || ''}</textarea>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.updateChannelData = (idx, field, value) => {
+    channels_config[idx][field] = value;
+    // Update ID from name if it's default
+    if (field === 'name') {
+        channels_config[idx].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    }
+};
+
+window.removeChannel = (idx) => {
+    if (confirm('¿Eliminar este canal permanentemente?')) {
+        channels_config.splice(idx, 1);
+        renderCanales();
+    }
+};
+
+async function saveCanales() {
+    const btn = document.getElementById('btn-save-canales');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    btn.disabled = true;
+
+    try {
+        // Enlazar con el backend (asumiendo que hay un endpoint similar a save-data)
+        // Como solución temporal para estático local, mostramos en el textarea oculto
+        const json = JSON.stringify(channels_config, null, 2);
+        const encoded = btoa(unescape(encodeURIComponent(json)));
+        
+        const response = await fetch('/save-channels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: encoded })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast('¡Configuración de canales guardada con éxito!');
+        } else {
+            // Fallback: Si no existe el endpoint, intentamos usar el de guardado general
+            // o simplemente alertamos al usuario (en local file:// no funcionará fetch POST)
+            console.warn('Endpoint /save-channels no encontrado. Usando persistencia local si está disponible.');
+            alert('Cambios aplicados en memoria. Recuerda que para persistencia permanente necesitas el servidor backend activo.');
+        }
+    } catch (e) {
+        console.error('Error al guardar canales:', e);
+        // Fallback for simple local setups
+        alert('Configuración guardada en memoria. Para guardado permanente, copia el array channels_config al inicio de data.js');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;

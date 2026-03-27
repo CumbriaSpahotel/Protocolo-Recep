@@ -1,4 +1,22 @@
+let channels_config = [
+  { id: 'synxis', name: 'SYNXIS', icon: '🌐', summary: 'Web Propia y Sercotel', content: 'Gestión de reservas procedentes del motor oficial. Prioridad máxima en validación de depósitos.', notes: 'Verificar prepago en bandeja de entrada. Confirmar asignación automática en PMS.' },
+  { id: 'booking', name: 'BOOKING.COM', icon: '🟦', summary: 'Extranet Directa', content: 'Control de tarjetas no válidas y gestión de cobros remotos.', notes: 'Marcar CVC ausente en extranet si falla. Informar al cliente vía chat interno.' },
+  { id: 'expedia', name: 'EXPEDIA / HOTELS.COM', icon: '🟨', summary: 'Portal Comercial', content: 'Cobros vía VCC (Virtual Credit Card) y depósitos previos.', notes: '' },
+  { id: 'bonos', name: 'BONOS DE REGALO', icon: '🎁', summary: 'Venta Directa Cupón', content: 'Validación de códigos y canje en sistema.', notes: '' }
+];
 const protocols_data = [
+  {
+    "title": "{🟢} CANALES DE VENTA ONLINE Y SINGULARIDADES",
+    "section": "2.1.0",
+    "source": "Ambos hoteles",
+    "status": "Activo",
+    "published": "2026-03-27T18:00:00Z",
+    "updated": "2026-03-27T18:00:00Z",
+    "categories": [
+      "2ª Sección"
+    ],
+    "content": "<!--Línea informativa-->\n<p style=\"color: #7a7a7a; font-size: 0.98em; margin-bottom: 0.5em;\">Última revisión: 6 de Agosto 25 &nbsp; | &nbsp; \n      <b>Estado:</b> 🟢 Activo &nbsp; | &nbsp;\n      <b>Ámbito:</b> Cumbria Spa & Hotel\n    </p>\n<!--Línea decorativa-->\n<hr style=\"border: 2px solid rgb(165, 140, 95); margin: 10px auto 30px; width: 100px;\" />\n\n<div class=\"channel-explorer-container\">\n  <nav class=\"channel-nav-sticky\">\n    <a href=\"#synxis\" class=\"channel-tab\">SYNXIS</a>\n    <a href=\"#booking\" class=\"channel-tab\">BOOKING</a>\n    <a href=\"#expedia\" class=\"channel-tab\">EXPEDIA</a>\n    <a href=\"#bonos\" class=\"channel-tab\">BONOS</a>\n    <a href=\"#directas\" class=\"channel-tab\">DIRECTAS</a>\n  </nav>\n\n  <div id=\"synxis\" class=\"channel-section\">\n    <h2>🌐 SYNXIS (Web Propia y Sercotel)</h2>\n    <div class=\"channel-card\">\n      <p>Gestión de reservas procedentes del motor oficial. Prioridad máxima en validación de depósitos.</p>\n      <ul>\n        <li>Verificar prepago en bandeja de entrada.</li>\n        <li>Confirmar asignación automática en PMS.</li>\n      </ul>\n    </div>\n  </div>\n\n  <div id=\"booking\" class=\"channel-section\">\n    <h2>🟦 BOOKING.COM</h2>\n    <div class=\"channel-card\">\n      <p>Control de tarjetas no válidas y gestión de cobros remotos.</p>\n      <ul>\n        <li>Marcar CVC ausente en extranet si falla.</li>\n        <li>Informar al cliente vía chat interno.</li>\n      </ul>\n    </div>\n  </div>\n\n  <div id=\"expedia\" class=\"channel-section\">\n    <h2>🟨 EXPEDIA / HOTELS.COM</h2>\n    <div class=\"channel-card\">\n      <p>Cobros vía VCC (Virtual Credit Card) y depósitos previos.</p>\n    </div>\n  </div>\n\n  <div id=\"bonos\" class=\"channel-section\">\n    <h2>🎁 BONOS DE REGALO</h2>\n    <div class=\"channel-card\">\n      <p>Validación de códigos y canje en sistema.</p>\n    </div>\n  </div>\n</div>\n\n<style>\n  .channel-explorer-container { position: relative; }\n  .channel-nav-sticky {\n    position: sticky;\n    top: -20px;\n    z-index: 100;\n    display: flex;\n    gap: 10px;\n    background: #004a66;\n    padding: 15px;\n    border-radius: 10px;\n    box-shadow: 0 4px 15px rgba(0,0,0,0.1);\n    margin-bottom: 30px;\n    overflow-x: auto;\n  }\n  .channel-tab {\n    color: white;\n    text-decoration: none;\n    padding: 8px 16px;\n    border-radius: 6px;\n    background: rgba(255,255,255,0.1);\n    font-weight: bold;\n    font-size: 0.9rem;\n    transition: background 0.3s;\n    white-space: nowrap;\n  }\n  .channel-tab:hover { background: rgba(255,255,255,0.25); }\n  .channel-section { scroll-margin-top: 100px; margin-bottom: 50px; }\n  .channel-section h2 { color: #004a66; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px; }\n  .channel-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }\n</style>"
+  },
   {
     "title": "🌐 Channel manager y plataformas",
     "section": "9.6",
@@ -411,12 +429,12 @@ const protocols_data = [
     "source": "Mínimos Recepción - Guadiana & Cumbria"
   },
   {
-    "title": "📡 Canales de venta online y singularidades {🟢}",
+    "title": "📡 Canales de venta online y singularidades",
     "section": "3.1",
     "source": "Ambos hoteles",
     "status": "Activo",
     "published": "2025-09-19T07:45:00Z",
-    "updated": "2026-03-27T15:41:44.320Z",
+    "updated": "2026-03-27T17:28:49.855Z",
     "content": "<!DOCTYPE html>\n<html lang=\"es\" data-version=\"1.0\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Acuerdo Agencias – Sercotel Guadiana & Cumbria Spa & Hotel</title>\n  <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap\" rel=\"stylesheet\" />\n  <style>\n    :root{\n      --ink:#232323; --muted:#6f6f6f; --gold:#A58C5F;\n      --bg:#fafafa; --paper:#ffffff; --line:#e9edf2;\n      --brand:#234d20; --brand-2:#2e6b2b; --brand-g:#1f3a5f;\n      --r:12px; --shadow:0 8px 20px rgba(0,0,0,.08);\n      --fs:clamp(.98rem,.9rem + .22vw,1.08rem);\n    }\n    html,body{background:var(--bg)}\n    body{margin:0;color:var(--ink);font:var(--fs)/1.58 Georgia,\"Times New Roman\",serif}\n    .wrap{max-width:980px;margin:14px auto;padding:0 12px}\n    .card{background:var(--paper);border-radius:var(--r);box-shadow:var(--shadow);overflow:clip}\n\n   /* CABECERA BLOGGER (estándar) */\n.post-header{\n  position:relative;\n  padding:14px 14px 10px;\n  background:linear-gradient(90deg,var(--brand),var(--brand-2));\n  color:#fff;\n  overflow:hidden;\n}\n.post-header .content{\n  display:flex;align-items:center;gap:12px;flex-wrap:wrap;\n  position:relative;z-index:1;\n}\n/* 🔧 Clave: usa contain (no recorta) y un marco blanco */\n.post-header .illustration{\n  width:110px;                /* 92px si lo prefieres más compacto */\n  height:110px;               /* caja cuadrada */\n  object-fit:contain !important;   /* evita el corte */\n  background:#fff;\n  border:1px solid #ffffffaa;\n  box-shadow:0 6px 16px rgba(0,0,0,.18);\n  border-radius:14px;\n  padding:8px;\n}\n@media (max-width:520px){\n  .post-header .illustration{ width:88px; height:88px; padding:6px; }\n}\n.post-header .phrase{\n  margin:0;font:600 1.08rem/1.2 Montserrat,system-ui,sans-serif;letter-spacing:.2px;\n}\n.post-header .adornment{\n  margin-top:8px;height:6px;border-radius:999px;\n  background:linear-gradient(90deg,#d7c59a,var(--gold),#d7c59a);\n}\n\n    /* Meta compacta */\n    .meta{\n      display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid var(--line);\n      font-size:.95em;color:#3b3b3b\n    }\n    .meta b{font-weight:700}\n    .status{display:inline-flex;align-items:center;gap:.35rem}\n    .dot{width:.6rem;height:.6rem;border-radius:50%}\n    .dot-green{background:#10b981}\n\n    /* Intro */\n    .intro{padding:10px 12px;border-bottom:1px solid var(--line)}\n    .intro p{margin:.45rem 0;color:#3a4655}\n\n    /* Grid / Tarjetas */\n    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}\n    .tile{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;background:#fff}\n    .tile h3{margin:0;font:600 1rem/1.2 Montserrat,sans-serif;color:#1f2937}\n    .tile p{margin:0;color:#6b7280;font-size:.94rem}\n    .row-btns{display:flex;gap:8px;flex-wrap:wrap}\n    .btn{\n      text-decoration:none;border:1px solid var(--brand);color:#fff;background:var(--brand);\n      border-radius:10px;padding:7px 10px;font:600 .9rem Montserrat,sans-serif;display:inline-flex;align-items:center;gap:6px\n    }\n    .btn.secondary{background:#fff;color:var(--brand)}\n    .btn:hover{filter:brightness(1.05)}\n    .badge{display:inline-block;font:700 .75rem/1 Montserrat,sans-serif;padding:.28rem .5rem;border-radius:999px}\n    .badge-g{color:#fff;background:var(--brand-g)}\n    .badge-c{color:#fff;background:var(--brand-2)}\n    .disabled{opacity:.6;pointer-events:none}\n\n    /* Pie visual unificado */\n    .doc-end-rule{height:9px;border:0;border-radius:999px;margin:10px 12px 6px;background:linear-gradient(90deg,#c8b489,var(--gold),#c8b489)}\n    .doc-end-space{height:22px}\n\n    /* Accesibilidad / impresión */\n    a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:8px}\n    @media print{\n      .post-header,.doc-end-rule,.doc-end-space,.row-btns .btn.secondary{display:none!important}\n      .card{box-shadow:none}\n      body{background:#fff}\n      a[href]:after{content:\" (\" attr(href) \")\";font-size:.9em;color:#555}\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrap\">\n    <div class=\"card\">\n\n      <!-- CABECERA BLOGGER -->\n      <div class=\"post-header\">\n        <div class=\"content\">\n          <!-- Imagen de portada (coma codificada %2C) -->\n          <img class=\"illustration\" alt=\"Hoteles Guadiana & Cumbria\" loading=\"eager\" decoding=\"async\" referrerpolicy=\"no-referrer\"\n               src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgX67Z7nbm5KEw3tg83h5_AlKA9fCG8x8-SHklQVApmYVnxoyuT3CpuxI6kwbD0gJZfnEAHJeAT7Ns-z0d2lx4HBmPH1NCGXUq77oV6hcsWzJsRLmD1EL-mLftVPAH82koGAI9ivxIKVqN7xJVHDpbjMf19UbUjy3P_vNtz9TIwLjljQOxtW0O7Ef96U8gZ/s1536/ChatGPT%20Image%2024%20may%202025%2C%2017_26_56.png\" />\n          <h1 class=\"phrase\">Acuerdo de Colaboración con Agencias · <span style=\"white-space:nowrap\">Sercotel Guadiana</span> & <span style=\"white-space:nowrap\">Cumbria Spa & Hotel</span></h1>\n        </div>\n        <div class=\"adornment\" aria-hidden=\"true\"></div>\n      </div>\n\n      <!-- META -->\n      <div class=\"meta\" role=\"group\" aria-label=\"Metadatos del documento\">\n        <span><b>Versión:</b> <span id=\"auto-version\">1.0</span></span>\n        <span><b>Última revisión:</b> <span id=\"auto-date\">—</span></span>\n        <span class=\"status\"><b>Estado:</b> <span class=\"dot dot-green\" aria-hidden=\"true\"></span> 🟢 Activo</span>\n        <span><b>Ámbito:</b> Ambos hoteles</span>\n      </div>\n\n      <!-- INTRO -->\n      <section class=\"intro\" aria-label=\"Introducción\">\n        <p>Marco unificado para acuerdos con agencias y TTOO en <b>Sercotel Guadiana</b> y <b>Cumbria Spa & Hotel</b>, con paridad, control desde PMS/Channel y trazabilidad contractual. Diseño ultracompacto.</p>\n      </section>\n\n      <!-- RECURSOS – CUMBRIA -->\n      <section class=\"section\" id=\"sec-cumbria\" aria-label=\"Recursos Cumbria\">\n        <h2 class=\"h2\">📂 Cumbria Spa & Hotel · Documentos y recursos</h2>\n        <div class=\"grid\">\n          <article class=\"tile\">\n            <div class=\"badge badge-c\" aria-label=\"Cumbria\">Cumbria</div>\n            <h3>3.1/2 · Canales y Operativa </h3>\n            <p>Procedimientos, facturación y ejemplos visuales.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://procedimientoshotelguadiana.blogspot.com/p/312-canales-de-venta-online-y-sus.html\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://procedimientoshotelguadiana.blogspot.com/p/312-canales-de-venta-online-y-sus.html\">Copiar enlace</a>\n            </div>\n          </article>\n\n          <article class=\"tile\">\n            <div class=\"badge badge-c\" aria-label=\"Cumbria\">Cumbria</div>\n            <h3>Carpeta Drive · Acuerdos Cumbria</h3>\n            <p>Material contractual y anexos.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://1drv.ms/f/c/7cdc5f6b199a606e/EoFYJQY8YC5DuLglsQVseVsBdo7tZf9HjQiwm264hs6oLg?e=3lCwit\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://1drv.ms/f/c/7cdc5f6b199a606e/EoFYJQY8YC5DuLglsQVseVsBdo7tZf9HjQiwm264hs6oLg?e=3lCwit\">Copiar enlace</a>\n            </div>\n          </article>\n        </div>\n      </section>\n\n      <!-- RECURSOS – GUADIANA -->\n      <section class=\"section\" id=\"sec-guadiana\" aria-label=\"Recursos Guadiana\">\n        <h2 class=\"h2\">📂 Sercotel Guadiana · Documentos y recursos</h2>\n        <div class=\"grid\">\n          <article class=\"tile\">\n            <div class=\"badge badge-g\" aria-label=\"Guadiana\">Guadiana</div>\n            <h3>3.1/1 · Canales y Operativa )</h3>\n            <p>Procedimientos, facturación y ejemplos visuales.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://procedimientoshotelguadiana.blogspot.com/p/311-canales-de-venta-online-y-sus.html\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://procedimientoshotelguadiana.blogspot.com/p/311-canales-de-venta-online-y-sus.html\">Copiar enlace</a>\n            </div>\n          </article>\n\n          <article class=\"tile\">\n            <div class=\"badge badge-g\" aria-label=\"Guadiana\">Guadiana</div>\n            <h3>Contratos Agencias y las condiciones</h3>\n            <p>Agencias con las que tenemos acuerdos establecidos y las condiciones específicas de cada una</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://procedimientoshotelguadiana.blogspot.com/p/ggsdfgsdf.html\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://procedimientoshotelguadiana.blogspot.com/p/ggsdfgsdf.html\">Copiar enlace</a>\n            </div>\n          </article>\n\n          <article class=\"tile\">\n            <div class=\"badge badge-g\" aria-label=\"Guadiana\">Guadiana</div>\n            <h3>Carpeta Drive · Acuerdos Sercotel</h3>\n            <p>Históricos, versiones y documentación complementaria.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://1drv.ms/f/c/7cdc5f6b199a606e/EiI8tlEGxlJIjvGYaMI_KB4BwSmCbdbMF7fT9EwjUnhDWg?e=wX2ewe\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://1drv.ms/f/c/7cdc5f6b199a606e/EiI8tlEGxlJIjvGYaMI_KB4BwSmCbdbMF7fT9EwjUnhDWg?e=wX2ewe\">Copiar enlace</a>\n            </div>\n          </article>\n           \n          <article class=\"tile\">\n            <div class=\"badge badge-g\" aria-label=\"Guadiana\">Guadiana</div>\n            <h3>Carpeta Drive · Acuerdos Guadiana</h3>\n            <p>Material contractual y anexos.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" target=\"_blank\" rel=\"noopener\" href=\"https://1drv.ms/f/c/7cdc5f6b199a606e/Eu15SkObEfRIjYCa-smmtyEBi8Hkn2Rs5hXCUZEo09_DBg?e=kT1DYB\">Abrir</a>\n              <a class=\"btn secondary\" href=\"#\" data-copy=\"https://1drv.ms/f/c/7cdc5f6b199a606e/Eu15SkObEfRIjYCa-smmtyEBi8Hkn2Rs5hXCUZEo09_DBg?e=kT1DYB\">Copiar enlace</a>\n            </div>\n          </article>\n        </div>\n      </section>\n\n      <!-- PRÓXIMAMENTE -->\n      <section class=\"section\" id=\"sec-proximamente\" aria-label=\"Próximamente\">\n        <h2 class=\"h2\">🧭 Próximamente</h2>\n        <div class=\"grid\">\n          <article class=\"tile disabled\" aria-disabled=\"true\">\n            <h3>Plantillas de contrato unificado</h3>\n            <p>Modelo bilingüe ES/EN con anexos (DP, cancelación, cupos).</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" href=\"#!\" aria-disabled=\"true\">En preparación</a>\n            </div>\n          </article>\n          <article class=\"tile disabled\" aria-disabled=\"true\">\n            <h3>Dashboard de seguimiento</h3>\n            <p>Panel de altas, renovaciones y vencimientos por agencia.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" href=\"#!\" aria-disabled=\"true\">En preparación</a>\n            </div>\n          </article>\n          <article class=\"tile disabled\" aria-disabled=\"true\">\n            <h3>Checklist de control en PMS/Channel</h3>\n            <p>Validaciones automáticas de cupo, release y paridad.</p>\n            <div class=\"row-btns\">\n              <a class=\"btn\" href=\"#!\" aria-disabled=\"true\">En preparación</a>\n            </div>\n          </article>\n        </div>\n      </section>\n\n      <!-- Pie visual -->\n      <hr class=\"doc-end-rule\" />\n      <div class=\"doc-end-space\"></div>\n    </div>\n  </div>\n\n  <script>\n    (function(){\n      // Fecha corta: 04/Oct/25\n      try{\n        const el = document.getElementById('auto-date');\n        if(el){\n          const d = new Date();\n          const dd = String(d.getDate()).padStart(2,'0');\n          const m = [\"Ene\",\"Feb\",\"Mar\",\"Abr\",\"May\",\"Jun\",\"Jul\",\"Ago\",\"Sep\",\"Oct\",\"Nov\",\"Dic\"][d.getMonth()];\n          const yy = String(d.getFullYear()).slice(-2);\n          el.textContent = dd + \"/\" + m + \"/\" + yy;\n        }\n      }catch(e){}\n\n      // Versión x.y (minor ++ si cambia contenido)\n      function djb2(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h)+s.charCodeAt(i);h|=0}return h.toString()}\n      function parseV(v){const m=String(v||\"\").trim().match(/^(\\d+)\\.(\\d+)$/);return m?{maj:+m[1],min:+m[2]}:{maj:1,min:0}}\n      try{\n        const host=document.documentElement;\n        const verEl=document.getElementById('auto-version');\n        const base=(host.getAttribute('data-version')||verEl?.textContent||'1.0').trim();\n        const {maj,min}=parseV(base);\n\n        const probe=document.querySelector('.card').cloneNode(true);\n        // quitar campos dinámicos\n        probe.querySelectorAll('#auto-date,#auto-version').forEach(n=>n && (n.textContent=''));\n        const signature=djb2(probe.textContent.replace(/\\s+/g,' ').trim());\n\n        const key='doc.version.acuerdo-agencias-unificado';\n        const saved=JSON.parse(localStorage.getItem(key)||'{}');\n        let outMaj=maj,outMin=min;\n        if(saved.hash && saved.hash!==signature){outMin=min+1}\n        const out=outMaj+'.'+outMin;\n        verEl.textContent=out; host.setAttribute('data-version',out);\n        localStorage.setItem(key, JSON.stringify({hash:signature,version:out}));\n      }catch(e){}\n\n      // Copiar enlaces de recursos\n      try{\n        document.querySelectorAll('a[data-copy]').forEach(btn=>{\n          btn.addEventListener('click', async (e)=>{\n            e.preventDefault();\n            const url=btn.getAttribute('data-copy');\n            if(!url) return;\n            try{\n              await navigator.clipboard.writeText(url);\n              const old=btn.textContent;\n              btn.textContent='✅ Copiado';\n              setTimeout(()=>btn.textContent=old,1200);\n            }catch(_){}\n          });\n        });\n      }catch(e){}\n\n      // Seguridad target=_blank\n      try{\n        document.querySelectorAll('a[target=\"_blank\"]').forEach(a=>{\n          const rel=(a.getAttribute('rel')||'').split(/\\s+/);\n          if(!rel.includes('noopener')) rel.push('noopener');\n          a.setAttribute('rel', rel.join(' ').trim());\n        });\n      }catch(e){}\n    })();\n  </script>\n</body>\n</html>\n",
     "categories": [
       "3ª Sección"
@@ -921,61 +939,53 @@ const navigation_config = {
     "links": []
   },
   "2": {
-    "name": "Tareas de apoyo a otros departamentos",
-    "icon": "fa-hands-helping",
+    "name": "Operativa Diaria",
+    "icon": "fa-calendar-check",
     "subsections": {
-      "2.4": "🔧 Mantenimiento"
+      "2.1": "📝Otros Manuales Básicos de Recepción"
     },
     "links": []
   },
   "3": {
-    "name": "Operativa Diaria",
-    "icon": "fa-calendar-check",
-    "subsections": {
-      "3.1": "📝Otros Manuales Básicos de Recepción"
-    },
-    "links": []
-  },
-  "4": {
     "name": "Reservas y Tarifas",
     "icon": "fa-file-invoice-dollar",
     "subsections": {},
     "links": []
   },
-  "5": {
+  "4": {
     "name": "Estancia, Caja y Salidas",
     "icon": "fa-walking",
     "subsections": {},
     "links": []
   },
-  "6": {
+  "5": {
     "name": "Gestión de Grupos",
     "icon": "fa-users-cog",
     "subsections": {},
     "links": []
   },
-  "7": {
+  "6": {
     "name": "Coordinación Interna",
     "icon": "fa-sync-alt",
     "subsections": {},
     "links": []
   },
-  "8": {
+  "7": {
     "name": "Seguridad y Emergencias",
     "icon": "fa-shield-alt",
     "subsections": {},
     "links": []
   },
-  "9": {
+  "8": {
     "name": "Sistemas y Plataformas",
     "icon": "fa-desktop",
     "subsections": {
-      "9.1": "Channel manager y plataformas"
+      "8.1": "Channel manager y plataformas"
     },
     "links": []
   },
-  "10": {
-    "name": "📁 RECURSOS Y DOCUMENTOS ÚTILES",
+  "9": {
+    "name": "Recursos y documentos útiles",
     "icon": "fa-folder",
     "subsections": {},
     "links": [
@@ -1011,13 +1021,13 @@ const navigation_config = {
       }
     ]
   },
-  "11": {
+  "10": {
     "name": "Manuales Básicos",
     "icon": "fa-book",
     "subsections": {},
     "links": []
   },
-  "12": {
+  "11": {
     "name": "Gestión de Personal",
     "icon": "fa-user-tie",
     "subsections": {},
@@ -1029,25 +1039,25 @@ const navigation_config = {
       }
     ]
   },
-  "13": {
+  "12": {
     "name": "Cumbria Bienstar",
     "icon": "fa-spa",
     "subsections": {},
     "links": []
   },
-  "14": {
+  "13": {
     "name": "Noticias",
     "icon": "fa-newspaper",
     "subsections": {},
     "links": []
   },
-  "15": {
+  "14": {
     "name": "Restaurante",
     "icon": "fa-utensils",
     "subsections": {},
     "links": []
   },
-  "16": {
+  "15": {
     "name": "Otros",
     "icon": "fa-plus",
     "subsections": {},

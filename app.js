@@ -204,8 +204,10 @@ function initApp() {
     const adminBtn = document.getElementById('admin-access');
     if (adminBtn) {
         adminBtn.addEventListener('click', () => {
-            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            if (isLocalhost) {
+            const isLocal = window.location.hostname === 'localhost' || 
+                            window.location.hostname === '127.0.0.1' || 
+                            window.location.protocol === 'file:';
+            if (isLocal) {
                 window.location.href = 'admin.html';
                 return;
             }
@@ -262,12 +264,6 @@ function renderNavigation() {
     inicioItem.innerHTML = '<i class="fas fa-th-large"></i> Inicio <i class="fas fa-caret-down"></i>';
     inicioItem.onclick = (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        
-        const isActive = inicioWrapper.classList.contains('active-dropdown');
-        document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
-        if (!isActive) inicioWrapper.classList.add('active-dropdown');
-        
         viewHistory = [{ type: 'home' }];
         renderHome();
         setActiveNav(inicioItem);
@@ -409,12 +405,6 @@ function renderNavigation() {
                         
                         a.onclick = (e) => {
                             e.preventDefault();
-                            e.stopPropagation();
-                            const isActive = wrapper.classList.contains('active-sub');
-                            // Close siblings at this level
-                            wrapper.parentElement.querySelectorAll('.sub-dropdown-wrapper').forEach(s => s.classList.remove('active-sub'));
-                            if (!isActive) wrapper.classList.add('active-sub');
-                            
                             if (item.protocol) {
                                 viewHistory.push({ type: 'protocol', payload: item.protocol });
                                 loadProtocol(item.protocol);
@@ -427,19 +417,11 @@ function renderNavigation() {
                         if (item.protocol) {
                             a.onclick = (e) => {
                                 e.preventDefault();
-                                e.stopPropagation();
-                                // Close all sub-dropdowns when a terminal item is clicked
-                                document.querySelectorAll('.sub-dropdown-wrapper').forEach(w => w.classList.remove('active-sub'));
-                                document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
-                                
                                 viewHistory.push({ type: 'protocol', payload: item.protocol });
                                 loadProtocol(item.protocol);
                             };
                         } else {
-                            a.onclick = (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            };
+                            a.onclick = (e) => e.preventDefault();
                         }
                         wrapper.appendChild(a);
                     }
@@ -458,16 +440,6 @@ function renderNavigation() {
 
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                
-                const isActive = linkWrapper.classList.contains('active-dropdown');
-                // Close all other top-level dropdowns
-                document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
-                
-                if (!isActive) {
-                    linkWrapper.classList.add('active-dropdown');
-                }
-                
                 setActiveNav(link);
                 viewHistory.push({ type: 'category', name: cat.name, id: id });
                 renderCategory(cat.name, id);
@@ -482,12 +454,6 @@ function setActiveNav(el) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     el.classList.add('active');
 }
-
-// Global click listener to close dropdowns when clicking outside
-document.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item-wrapper').forEach(w => w.classList.remove('active-dropdown'));
-    document.querySelectorAll('.sub-dropdown-wrapper').forEach(w => w.classList.remove('active-sub'));
-});
 function toggleHomeComponents(isHome) {
     const efficiencyWidget = document.getElementById('sidebar-efficiency-widget');
     if (efficiencyWidget) {
@@ -598,6 +564,11 @@ function renderHome() {
             </div>
         </div>
 
+        <div class="recent-protocols-box" style="margin-top: 2rem;">
+            <h2 class="section-title"><i class="fas fa-history"></i> Protocolos Actualizados Recientemente</h2>
+            <div id="posts-list" class="recent-posts-grid"></div>
+        </div>
+
         <div class="recent-updates-box">
             <h2 class="section-title"><i class="fas fa-clock"></i> Actualizaciones y Novedades</h2>
             <div id="home-updates-list"></div>
@@ -655,7 +626,9 @@ function renderHome() {
     });
     
     // Show top 8 recent
-    renderList(sorted.slice(0, 8), list);
+    if (list) {
+        renderList(sorted.slice(0, 8), list);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -713,6 +686,17 @@ function renderList(items, container, options = {}) {
            
            statusBadge = { emoji, text: statusText, class: statusClass };
            cleanTitle = originalTitle.replace(emojiMatch[0], '').trim();
+        } else if (p.status) {
+           // Fallback to p.status field if no emoji in title
+           let statusText = p.status;
+           let statusClass = 'status-unknown';
+           let emoji = '⚪';
+           
+           if (statusText === 'Activo') { emoji = '🟢'; statusClass = 'status-active'; }
+           else if (statusText === 'En redacción') { emoji = '🟠'; statusClass = 'status-draft'; }
+           else if (statusText === 'En proceso') { emoji = '🔴'; statusClass = 'status-process'; }
+           
+           statusBadge = { emoji, text: statusText, class: statusClass };
         }
 
         let displayTitle = cleanTitle;
@@ -819,6 +803,68 @@ function loadProtocol(p, highlightText = '') {
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
     let content = p.content;
+    
+    // Special Case: CANALES DE VENTA (Dynamic rendering from channels_config)
+    if (p.section === '2.1.0' && typeof channels_config !== 'undefined') {
+        content = `
+            <div class="channel-explorer-container">
+                <nav class="channel-nav-sticky">
+                    ${channels_config.map(c => `<a href="#${c.id}" class="channel-tab">${c.name}</a>`).join('')}
+                </nav>
+                ${channels_config.map(c => `
+                    <div id="${c.id}" class="channel-section">
+                        <h2>${c.icon} ${c.name}</h2>
+                        <div class="channel-card">
+                            <p style="font-weight:600; color:var(--primary); margin-bottom:10px;">${c.summary || ''}</p>
+                            <div class="channel-procedimiento">
+                                ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
+                            </div>
+                            ${c.notes ? `
+                                <div class="channel-notes" style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid var(--accent); border-radius:4px;">
+                                    <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#555;"><i class="fas fa-info-circle"></i> PECULIARIDADES Y NOTAS:</h4>
+                                    <p style="margin:0; font-size:0.9rem; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <style>
+                .channel-explorer-container { position: relative; }
+                .channel-nav-sticky {
+                    position: sticky;
+                    top: -20px;
+                    z-index: 100;
+                    display: flex;
+                    gap: 10px;
+                    background: #004a66;
+                    padding: 15px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    margin-bottom: 30px;
+                    overflow-x: auto;
+                    scrollbar-width: thin;
+                }
+                .channel-tab {
+                    color: white;
+                    text-decoration: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    background: rgba(255,255,255,0.1);
+                    font-weight: bold;
+                    font-size: 0.9rem;
+                    transition: all 0.3s;
+                    white-space: nowrap;
+                }
+                .channel-tab:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+                .channel-section { scroll-margin-top: 100px; margin-bottom: 50px; }
+                .channel-section h2 { color: #004a66; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px; }
+                .channel-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+                .channel-procedimiento { color: #444; line-height: 1.6; }
+            </style>
+        `;
+    }
+
     let originalTitle = p.title;
 
     // Parse "{🟢}" status tags from title
@@ -837,6 +883,12 @@ function loadProtocol(p, highlightText = '') {
        
        estadoHtml = `${emoji} <span style="color: var(--text-muted); font-weight: normal;">${statusText}</span>`;
        cleanTitle = originalTitle.replace(emojiMatch[0], '').trim();
+    } else if (p.status) {
+       let emoji = '⚪';
+       if (p.status === 'Activo') emoji = '🟢';
+       else if (p.status === 'En redacción') emoji = '🟠';
+       else if (p.status === 'En proceso') emoji = '🔴';
+       estadoHtml = `${emoji} <span style="color: var(--text-muted); font-weight: normal;">${p.status}</span>`;
     }
 
     let displayTitle = cleanTitle;
@@ -975,6 +1027,19 @@ function loadProtocol(p, highlightText = '') {
     articleLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (!href) return;
+
+        // Anchor links within the same protocol (e.g. #synxis)
+        if (href.startsWith('#') && !href.includes('/') && href.length > 1) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = href.slice(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+            return;
+        }
 
         // Vínculos internos entre apartados (e.g. #section/1.1)
         if (href.startsWith('#section/')) {

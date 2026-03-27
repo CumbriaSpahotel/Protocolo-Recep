@@ -145,7 +145,7 @@ body.dark-mode .top-nav {
     width: 100%;
 }
 
-.sub-dropdown-wrapper.active-sub > .dropdown-content.nested {
+.sub-dropdown-wrapper:hover > .dropdown-content.nested {
     display: block;
     animation: fadeInSmall 0.2s ease-out;
 }
@@ -182,7 +182,7 @@ body.dark-mode .top-nav {
     padding-left: 25px; /* Subtle slide effect */
 }
 
-.nav-item-wrapper.active-dropdown .dropdown-content {
+.nav-item-wrapper:hover .dropdown-content {
     display: block;
     animation: fadeIn 0.2s ease;
 }
@@ -256,7 +256,7 @@ body.dark-mode .top-nav {
     color: var(--accent-blue);
 }
 
-.nav-item-wrapper.active-dropdown .dropdown-content {
+.nav-item-wrapper:hover .dropdown-content {
     display: block;
 }
 
