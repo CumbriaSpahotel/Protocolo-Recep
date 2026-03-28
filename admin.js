@@ -6,6 +6,75 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+// --- HTML Quick Link Editor logic ---
+window.scanHtmlLinks = function() {
+    const editor = document.getElementById('html-editor');
+    const htmlText = editor.value;
+    const list = document.getElementById('html-links-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    const regex = /(href|src)=["']([^"']+)["']/gi;
+    let match;
+    let matches = [];
+    
+    while ((match = regex.exec(htmlText)) !== null) {
+        matches.push({ type: match[1], url: match[2], original: match[0], index: match.index });
+    }
+    
+    if (matches.length === 0) {
+        list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado enlaces ni imágenes editables.</div>';
+        return;
+    }
+    
+    matches.forEach((m, idx) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.gap = '10px';
+        item.style.background = '#fff';
+        item.style.padding = '8px 12px';
+        item.style.borderRadius = '6px';
+        item.style.border = '1px solid #e1e8ed';
+        item.style.alignItems = 'center';
+        
+        const typeBadge = m.type.toLowerCase() === 'href' ? 
+            `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; width: 65px; text-align: center;"><i class="fas fa-link"></i> LINK</span>` :
+            `<span style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; width: 65px; text-align: center;"><i class="fas fa-image"></i> IMG</span>`;
+            
+        const inputId = `html-link-input-${idx}`;
+        
+        item.innerHTML = `
+            ${typeBadge}
+            <input type="text" id="${inputId}" value="${m.url}" style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; font-family: monospace;">
+            <button type="button" class="btn-apply-link" data-idx="${idx}" data-orig="${m.original.replace(/"/g, '&quot;')}" style="background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: 600; min-width: 90px;"><i class="fas fa-check"></i> Aplicar</button>
+        `;
+        list.appendChild(item);
+    });
+
+    document.querySelectorAll('.btn-apply-link').forEach(btn => {
+        btn.addEventListener('click', function() {
+            window.applyHtmlLink(this.getAttribute('data-idx'), this.getAttribute('data-orig'));
+        });
+    });
+};
+
+window.applyHtmlLink = function(idx, originalMatchString) {
+    const editor = document.getElementById('html-editor');
+    const newVal = document.getElementById(`html-link-input-${idx}`).value;
+    const type = originalMatchString.split('=')[0]; 
+    const replacement = `${type}="${newVal}"`; 
+    
+    editor.value = editor.value.replace(originalMatchString, replacement);
+    window.scanHtmlLinks();
+    
+    const newBtn = document.querySelector(`.btn-apply-link[data-idx="${idx}"]`);
+    if(newBtn) {
+        newBtn.innerHTML = '<i class="fas fa-check-double"></i> ¡Hecho!';
+        newBtn.style.background = '#0a6aa1';
+        setTimeout(() => { newBtn.innerHTML = '<i class="fas fa-check"></i> Aplicar'; newBtn.style.background = '#27ae60'; }, 1500);
+    }
+};
+
 // Cloud gateway URL (A)
 let CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec';
 // Cloud Spreadsheet ID (B)
@@ -605,6 +674,9 @@ function initAdmin() {
             document.querySelector('.ql-toolbar').style.display = 'none';
             document.getElementById('quill-editor').style.display = 'none';
             htmlEditor.style.display = 'block';
+            
+            document.getElementById('html-links-manager').style.display = 'block';
+            setTimeout(() => window.scanHtmlLinks(), 50);
 
             btn.innerHTML = '<i class="fas fa-eye"></i> Editor Visual';
             btn.classList.add('btn-primary');
@@ -623,6 +695,7 @@ function initAdmin() {
             
             isHtmlMode = false;
             htmlEditor.style.display = 'none';
+            document.getElementById('html-links-manager').style.display = 'none';
             document.querySelector('.ql-toolbar').style.display = 'block';
             document.getElementById('quill-editor').style.display = 'block';
 
@@ -1260,6 +1333,9 @@ function openEditor(index = -1) {
             document.getElementById('quill-editor').style.display = 'none';
             htmlEditor.style.display = 'block';
             
+            document.getElementById('html-links-manager').style.display = 'block';
+            setTimeout(() => window.scanHtmlLinks(), 50);
+            
             btnHtml.innerHTML = '<i class="fas fa-eye"></i> Editor Visual';
             btnHtml.classList.add('btn-primary');
             btnHtml.classList.remove('btn-secondary');
@@ -1270,6 +1346,7 @@ function openEditor(index = -1) {
         } else {
             isHtmlMode = false;
             htmlEditor.style.display = 'none';
+            document.getElementById('html-links-manager').style.display = 'none';
             document.querySelector('.ql-toolbar').style.display = 'block';
             document.getElementById('quill-editor').style.display = 'block';
             
