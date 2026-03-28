@@ -1557,11 +1557,15 @@ async function submitComment(pId) {
     if (confirmEmail) {
         // First try silent Cloud Posting (Option B)
         try {
-            const cloudResponse = await fetch(CLOUD_GATEWAY_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ pId: String(pId), pTitle: String(pTitle), author: String(author), text: String(text) })
+            const targetUrl = new URL(CLOUD_GATEWAY_URL);
+            targetUrl.searchParams.append('pId', String(pId));
+            targetUrl.searchParams.append('pTitle', String(pTitle));
+            targetUrl.searchParams.append('author', String(author));
+            targetUrl.searchParams.append('text', String(text));
+
+            const cloudResponse = await fetch(targetUrl.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
             });
             alert('¡Enviado directamente! Tu comentario ha sido registrado en la base de datos de la nube y administración ha recibido un aviso. Aparecerá una vez autorizado.');
             authorEl.value = '';
