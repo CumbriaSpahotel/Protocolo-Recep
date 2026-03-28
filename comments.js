@@ -10,16 +10,6 @@ const comments_data = [
     "reply": "fgsdfsdfsgsdfsgdf"
   },
   {
-    "id": 1774719105783,
-    "pId": "42",
-    "pTitle": "TestDeFuego",
-    "author": "Ghost",
-    "text": "EsteEsUnMensajeDePruebaFinal",
-    "date": "Sat Mar 28 2026 18:30:39 GMT+0100 (hora estándar de Europa central)",
-    "status": "approved",
-    "reply": null
-  },
-  {
     "id": 1774719276066,
     "pId": "4.7",
     "pTitle": "👪 Gestión reservas grupos",

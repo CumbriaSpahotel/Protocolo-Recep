@@ -2101,6 +2101,7 @@ function renderCommentStats(comments) {
     const total = comments.length;
     const pending = comments.filter(c => c.status === 'pending').length;
     const approved = comments.filter(c => c.status === 'approved').length;
+    const rejected = comments.filter(c => c.status === 'rejected').length;
     const replied = comments.filter(c => c.reply && c.reply.trim()).length;
     
     const stat = (icon, label, value, color) => `
@@ -2116,6 +2117,7 @@ function renderCommentStats(comments) {
         stat('fa-comments', 'Total', total, '#607d8b') +
         stat('fa-clock', 'Pendientes', pending, '#ffc107') +
         stat('fa-check-circle', 'Autorizados', approved, '#28a745') +
+        stat('fa-times-circle', 'Rechazados', rejected, '#dc3545') +
         stat('fa-reply', 'Respondidos', replied, '#6c5ce7');
 }
 
@@ -2126,8 +2128,8 @@ function setCommentFilter(filter, btn) {
     // Update button styles
     document.querySelectorAll('.comment-filter-btn').forEach(b => {
         const f = b.getAttribute('data-filter');
-        const colors = { all: '#0a6aa1', pending: '#ffc107', approved: '#28a745', replied: '#6c5ce7' };
-        const textColors = { all: 'white', pending: '#856404', approved: '#155724', replied: '#6c5ce7' };
+        const colors = { all: '#0a6aa1', pending: '#ffc107', approved: '#28a745', rejected: '#dc3545', replied: '#6c5ce7' };
+        const textColors = { all: 'white', pending: '#856404', approved: '#155724', rejected: 'white', replied: '#6c5ce7' };
         const col = colors[f] || '#0a6aa1';
         if (b === btn) {
             b.style.background = col;
@@ -2147,6 +2149,7 @@ function renderCommentFilter() {
     let filtered = _allComments;
     if (_commentFilter === 'pending') filtered = _allComments.filter(c => c.status === 'pending');
     else if (_commentFilter === 'approved') filtered = _allComments.filter(c => c.status === 'approved');
+    else if (_commentFilter === 'rejected') filtered = _allComments.filter(c => c.status === 'rejected');
     else if (_commentFilter === 'replied') filtered = _allComments.filter(c => c.reply && c.reply.trim());
     
     renderCommentPage(filtered);
@@ -2169,8 +2172,9 @@ function renderCommentPage(filtered) {
     pageItems.forEach(c => {
         const tr = document.createElement('tr');
         const isPending = c.status === 'pending';
-        const statusClass = isPending ? 'badge-warning' : 'badge-success';
-        const statusText = isPending ? '⏳ Pendiente' : '✅ Autorizado';
+        const isRejected = c.status === 'rejected';
+        let statusClass = isPending ? 'badge-warning' : (isRejected ? 'badge-danger' : 'badge-success');
+        let statusText = isPending ? '⏳ Pendiente' : (isRejected ? '❌ Rechazado' : '✅ Autorizado');
         
         tr.innerHTML = `
             <td style="font-size: 0.8rem; color: #666; white-space:nowrap;">${new Date(c.date).toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'})}<br><span style="font-size:0.72rem; color:#bbb;">${new Date(c.date).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})}</span></td>
@@ -2182,8 +2186,8 @@ function renderCommentPage(filtered) {
             </td>
             <td><span class="badge ${statusClass}" style="white-space:nowrap;">${statusText}</span></td>
             <td class="actions-cell" style="display: flex; gap: 5px; flex-wrap: wrap; align-items:center;">
-                ${isPending ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
-                ${!isPending ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #e67e22; border:none; color: white;" onclick="moderateComment(${c.id}, 'reject')" title="Ocultar de la vista pública"><i class="fas fa-eye-slash"></i> Ocultar</button>` : ''}
+                ${(isPending || isRejected) ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
+                ${!isRejected ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #dc3545; border:none; color: white;" onclick="moderateComment(${c.id}, 'reject')" title="Rechazar comentario"><i class="fas fa-times"></i> Rechazar</button>` : ''}
                 <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; background: #0a6aa1; color: white;" onclick="openReplyModal(${c.id})"><i class="fas fa-reply"></i> ${c.reply ? 'Editar Rpta' : 'Contestar'}</button>
                 <button class="btn-icon btn-delete" style="padding: 4px 8px;" onclick="moderateComment(${c.id}, 'delete')" title="Eliminar comentario"><i class="fas fa-trash"></i></button>
             </td>

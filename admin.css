@@ -175,6 +175,16 @@ body {
     color: #1e7e34;
 }
 
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-danger {
+    background-color: #f8dbdb;
+    color: #a30e1f;
+}
+
 .btn-primary {
     background-color: var(--success);
     color: var(--white);
