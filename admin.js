@@ -7,9 +7,9 @@ let quill;
 let isHtmlMode = false;
 
 // Cloud gateway URL (A)
-let CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbyshfXBDm77Hx_30Tm_3_usSC9tczT8_88paDOs6dn4HmwD8zEWY_Ilcc-b0GpE0frr/exec';
+let CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec';
 // Cloud Spreadsheet ID (B)
-let CLOUD_SPREADSHEET_ID = '1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74'; 
+let CLOUD_SPREADSHEET_ID = '1bJF6nCVDKnsS6fTUdGNQ3bGncvP_6WKCudtP1lH2XIw'; 
 
 // --- Comment module state ---
 let _allComments = [];
