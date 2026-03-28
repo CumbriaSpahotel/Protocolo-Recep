@@ -1559,9 +1559,9 @@ async function submitComment(pId) {
         try {
             const cloudResponse = await fetch(CLOUD_GATEWAY_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Google Apps Script requires no-cors for simple silent POSTs
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pId, pTitle, author, text })
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ pId: String(pId), pTitle: String(pTitle), author: String(author), text: String(text) })
             });
             alert('¡Enviado directamente! Tu comentario ha sido registrado en la base de datos de la nube y administración ha recibido un aviso. Aparecerá una vez autorizado.');
             authorEl.value = '';
