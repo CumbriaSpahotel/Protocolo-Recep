@@ -1558,7 +1558,7 @@ async function submitComment(pId) {
         // First try silent Cloud Posting (Option B)
         try {
             const targetUrl = new URL(CLOUD_GATEWAY_URL);
-            targetUrl.searchParams.append('pId', String(pId));
+            targetUrl.searchParams.append('pId', "ID-" + String(pId));
             targetUrl.searchParams.append('pTitle', String(pTitle));
             targetUrl.searchParams.append('author', String(author));
             targetUrl.searchParams.append('text', String(text));
@@ -1592,10 +1592,12 @@ function renderComments(pId) {
     
     // Robust identifier matching (trimmed strings)
     const normalizedId = String(pId).trim();
-    const filteredComments = comments_data.filter(c => 
-        (c.pId && String(c.pId).trim() === normalizedId) || 
-        (c.pTitle && String(c.pTitle).trim() === normalizedId)
-    );
+    const safeId = "ID-" + normalizedId; // Check for our safe prefix
+    
+    const filteredComments = comments_data.filter(c => {
+        const cId = c.pId ? String(c.pId).trim() : "";
+        return cId === normalizedId || cId === safeId || (c.pTitle && String(c.pTitle).trim() === normalizedId);
+    });
     
     if (filteredComments.length === 0) {
         // We keep the "No comments" placeholder

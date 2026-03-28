@@ -21,7 +21,7 @@ const comments_data = [
   },
   {
     "id": 1774719276066,
-    "pId": "Sat Jul 04 2026 00:00:00 GMT+0200 (hora de verano de Europa central)",
+    "pId": "4.7",
     "pTitle": "👪 Gestión reservas grupos",
     "author": "pedro",
     "text": "cuarta prueba ",

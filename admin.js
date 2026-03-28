@@ -2183,6 +2183,7 @@ function renderCommentPage(filtered) {
             <td><span class="badge ${statusClass}" style="white-space:nowrap;">${statusText}</span></td>
             <td class="actions-cell" style="display: flex; gap: 5px; flex-wrap: wrap; align-items:center;">
                 ${isPending ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #28a745;" onclick="moderateComment(${c.id}, 'approve')"><i class="fas fa-check"></i> Autorizar</button>` : ''}
+                ${!isPending ? `<button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: #e67e22; border:none; color: white;" onclick="moderateComment(${c.id}, 'reject')" title="Ocultar de la vista pública"><i class="fas fa-eye-slash"></i> Ocultar</button>` : ''}
                 <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; background: #0a6aa1; color: white;" onclick="openReplyModal(${c.id})"><i class="fas fa-reply"></i> ${c.reply ? 'Editar Rpta' : 'Contestar'}</button>
                 <button class="btn-icon btn-delete" style="padding: 4px 8px;" onclick="moderateComment(${c.id}, 'delete')" title="Eliminar comentario"><i class="fas fa-trash"></i></button>
             </td>

@@ -212,6 +212,8 @@ app.post('/api/comments/moderate', (req, res) => {
             comments.splice(index, 1);
         } else if (action === 'reply') {
             comments[index].reply = replyText;
+        } else if (action === 'reject') {
+            comments[index].status = 'pending';
         }
 
         fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2), 'utf-8');
