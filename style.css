@@ -1814,20 +1814,65 @@ body.dark-mode .quick-reply-btn {
     color: white;
 }
 
+/* Chat KWIC Snippets */
+.chat-kwic-list {
+    margin: 10px 0 0 4px;
+    padding-left: 12px;
+    font-size: 0.82rem;
+    color: #444;
+    line-height: 1.6;
+    list-style: none;
+    border-left: 2px solid rgba(10, 106, 161, 0.2);
+}
+
+.chat-kwic-list li {
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.chat-kwic-list li::before {
+    content: "•";
+    position: absolute;
+    left: -10px;
+    color: var(--accent-blue);
+    font-weight: bold;
+}
+
+body.dark-mode .chat-kwic-list {
+    color: #ccc;
+    border-left-color: rgba(79, 195, 247, 0.3);
+}
+
+.chat-category-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+body.dark-mode .chat-category-tag {
+    color: #777;
+}
+
 /* Excerpt styling */
 .chat-excerpt {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: #666;
-    background: #fdfdfd;
+    background: rgba(0,0,0,0.02);
     border-left: 3px solid #eee;
-    padding: 6px 10px;
-    margin: 8px 0;
+    padding: 8px 12px;
+    margin: 10px 0;
     font-style: italic;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 8px 8px 0;
 }
 
 body.dark-mode .chat-excerpt {
-    background: #252525;
+    background: rgba(255,255,255,0.03);
     color: #aaa;
     border-color: #444;
 }

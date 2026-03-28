@@ -5,6 +5,7 @@ const path = require('path');
 const open = require('open').default;
 const multer = require('multer');
 const nodemailer = require('nodemailer');
+const https = require('https');
 
 const app = express();
 const PORT = 3000;
@@ -287,6 +288,47 @@ app.post('/api/publish', (req, res) => {
             });
         });
     });
+});
+
+// Proxy para sincronización con Google Sheets (evita CORS desde localhost)
+app.get('/api/sync-cloud', async (req, res) => {
+    const targetUrl = req.query.url;
+    if (!targetUrl) {
+        return res.status(400).json({ success: false, message: 'Falta el parámetro url' });
+    }
+    // Only allow Google Apps Script URLs for security
+    if (!targetUrl.startsWith('https://script.google.com/')) {
+        return res.status(403).json({ success: false, message: 'URL no permitida' });
+    }
+    try {
+        const fetchData = (url) => new Promise((resolve, reject) => {
+            https.get(url, { headers: { 'Accept': 'application/json' } }, (response) => {
+                // Follow redirects (Google Apps Script always redirects)
+                if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    return resolve(fetchData(response.headers.location));
+                }
+                let data = '';
+                response.on('data', chunk => data += chunk);
+                response.on('end', () => {
+                    console.log(`🌐 Respuesta recibida de Google (${response.statusCode}). Tamaño: ${data.length} chars.`);
+                    try { 
+                        resolve(JSON.parse(data)); 
+                    } catch(e) { 
+                        console.error('❌ Error parseando JSON de Google. Respuesta recibida:');
+                        console.error(data.substring(0, 800)); // Log much more
+                        reject(new Error('La respuesta de la nube es HTML, no JSON. Posiblemente falta configuración de Acceso Público ("Anyone").')); 
+                    }
+                });
+            }).on('error', reject);
+        });
+        
+        const cloudData = await fetchData(targetUrl);
+        console.log(`☁️ Sync cloud: ${Array.isArray(cloudData) ? cloudData.length : '?'} registros obtenidos de Google Sheets`);
+        res.json(cloudData);
+    } catch (e) {
+        console.error('❌ Error en sync-cloud proxy:', e.message);
+        res.status(502).json({ success: false, message: 'Error al conectar con Google Sheets: ' + e.message });
+    }
 });
 
 // Middleware para archivos estáticos al FINAL

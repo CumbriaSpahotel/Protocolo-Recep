@@ -1774,7 +1774,7 @@ function getContextSnippets(html, searchTerms, maxSnippets = 3) {
                     if (t.length < 3) return;
                     try {
                         const regex = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                        highlighted = highlighted.replace(regex, '<mark style="background:#fff3cd; color:#856404; border-radius:3px; padding:0 2px; font-weight:700;">$1</mark>');
+                        highlighted = highlighted.replace(regex, '<mark style="background:#fff3cd; color:#c67c00; border-radius:3px; padding:0 3px; font-weight:800; border-bottom:1px solid #f90;">$1</mark>');
                     } catch(e) {}
                 });
                 results.push(highlighted);
@@ -1838,10 +1838,10 @@ function generateBotResponse(userInput) {
     }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
 
     if (matches.length > 0) {
-        appendChatMessage('bot', 'He analizado los protocolos y esto es lo más relevante:');
-        
         // Store protocols in a global index to avoid inline string escaping issues
         if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
+        
+        let combinedLinksHtml = '<div style="margin-bottom: 8px;">He analizado los protocolos y esto es lo más relevante:</div>';
         
         matches.slice(0, 3).forEach((m, i) => {
             const p = m.protocol;
@@ -1849,42 +1849,43 @@ function generateBotResponse(userInput) {
             const idxKey = 'p_' + Date.now() + '_' + i;
             window._chatProtocolIndex[idxKey] = p;
             
-            // Resolve category name from section's top-level ID
-            const CAT_MAP = getCatMap();
-            const catId = p.section ? String(p.section).split('.')[0] : null;
-            const catName = catId && CAT_MAP[catId] ? CAT_MAP[catId].name : null;
+            // Resolve category name
+            const CAT_MAP = typeof getCatMap === 'function' ? getCatMap() : {};
+            const sectionStr = String(p.section || '');
+            const catId = sectionStr.split('.')[0];
+            const catName = CAT_MAP[catId] ? CAT_MAP[catId].name : null;
             
-            // Build context snippets: sentences containing the search terms
+            // Build context snippets (KWIC)
             const snippets = getContextSnippets(p.info_html || p.content, searchTerms);
             let summaryHtml = '';
             if (snippets && snippets.length > 0) {
-                summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#444; line-height:1.6;">${
+                summaryHtml = `<ul class="chat-kwic-list">${
                     snippets.map(s => `<li>${s}</li>`).join('')
                 }</ul>`;
             } else {
-                // Fallback to key points if no direct mention found
-                const keyPoints = getKeyPoints(p.info_html || p.content);
+                const keyPoints = typeof getKeyPoints === 'function' ? getKeyPoints(p.info_html || p.content) : null;
                 if (keyPoints && keyPoints.length > 0) {
-                    summaryHtml = `<ul style="margin:6px 0 0 4px; padding-left:16px; font-size:0.8rem; color:#555; line-height:1.5;">${
+                    summaryHtml = `<ul class="chat-kwic-list">${
                         keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')
                     }</ul>`;
                 } else {
-                    const fallback = getExcerpt(p.info_html || p.content, 130);
+                    const fallback = typeof getExcerpt === 'function' ? getExcerpt(p.info_html || p.content, 130) : '';
                     summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
                 }
             }
             
-            const linkHtml = `
-                <div style="margin-bottom: 12px;">
-                    ${catName ? `<div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#888; margin-bottom:4px;"><i class="fas fa-folder" style="margin-right:4px;"></i>${catName}</div>` : ''}
+            combinedLinksHtml += `
+                <div style="margin: 15px 0; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px;">
+                    ${catName ? `<div class="chat-category-tag"><i class="fas fa-folder"></i>${catName}</div>` : ''}
                     <a href="#" class="chat-link" onclick="event.preventDefault(); window.handleChatLinkByKey('${idxKey}')">
                         <i class="fas fa-file-alt"></i> ${p.section ? p.section + ' - ' : ''}${cleanTitle}
                     </a>
                     ${summaryHtml}
                 </div>
             `;
-            appendChatMessage('bot', linkHtml, true);
         });
+        
+        appendChatMessage('bot', combinedLinksHtml, true);
         
         if (matches.length > 3) {
             appendChatMessage('bot', `También he encontrado otros ${matches.length - 3} resultados. ¿Necesitas algo más específico?`);

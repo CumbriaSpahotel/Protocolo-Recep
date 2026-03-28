@@ -879,7 +879,9 @@ function switchTab(tabId) {
         }
         
         if (tabId === 'comentarios') {
-            loadAdminComments();
+            if (IS_LOCAL_SERVER) {
+                loadAdminComments();
+            }
         }
     }
 }
@@ -2043,6 +2045,12 @@ async function loadAdminComments() {
     const tbody = document.getElementById('comments-table-body');
     if (!tbody) return;
     
+    // On GitHub Pages: no server available
+    if (!IS_LOCAL_SERVER) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:40px; color:#999;"><i class="fas fa-server" style="font-size:2rem; display:block; margin-bottom:10px;"></i>Los comentarios solo se gestionan desde el <strong>administrador local</strong> (Abrir_Administrador.bat).</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando comentarios...</td></tr>';
     
     try {
@@ -2330,20 +2338,43 @@ async function syncCloudComments() {
     const btn = document.getElementById('btn-sync-cloud-comments');
     if (!btn) return;
     
+    if (!IS_LOCAL_SERVER) {
+        alert('⚠️ La sincronización con la nube solo está disponible desde el administrador local.');
+        return;
+    }
+    
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
     btn.disabled = true;
 
     try {
-        const response = await fetch(CLOUD_GATEWAY_URL);
-        const cloudData = await response.json();
+        // Use the server as a proxy to avoid CORS issues when fetching Google Sheets from localhost
+        const baseUrl = window.location.protocol === 'file:'
+            ? 'http://localhost:3000'
+            : window.location.origin;
+        const proxyUrl = `${baseUrl}/api/sync-cloud?url=${encodeURIComponent(CLOUD_GATEWAY_URL)}`;
+        
+        let cloudData = null;
+        try {
+            const proxyRes = await fetch(proxyUrl);
+            if (proxyRes.ok) {
+                cloudData = await proxyRes.json();
+            } else {
+                throw new Error(`Proxy no disponible (${proxyRes.status})`);
+            }
+        } catch(e) {
+            console.warn('Proxy no disponible, intentando fetch directo:', e.message);
+            // Direct fetch — may fail on localhost due to CORS, but works on server
+            const directRes = await fetch(CLOUD_GATEWAY_URL);
+            cloudData = await directRes.json();
+        }
         
         if (cloudData && Array.isArray(cloudData)) {
             // Fetch existing to avoid duplicates
             let existingIds = new Set();
-            let existingKeys = new Set(); // author+date fallback
+            let existingKeys = new Set();
             try {
-                const existing = await fetch('/api/comments/all');
+                const existing = await fetch(`${baseUrl}/api/comments/all`);
                 const existingText = await existing.text();
                 if (existingText.trim().startsWith('[')) {
                     const existingComments = JSON.parse(existingText);
@@ -2360,9 +2391,9 @@ async function syncCloudComments() {
                 const itemKey = `${item.author}|${item.date}`;
                 if ((item.id && existingIds.has(String(item.id))) || existingKeys.has(itemKey)) {
                     skippedCount++;
-                    continue; // Skip duplicate
+                    continue;
                 }
-                const res = await fetch('/api/comments/submit', {
+                const res = await fetch(`${baseUrl}/api/comments/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
