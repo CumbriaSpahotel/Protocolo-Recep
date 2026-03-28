@@ -539,6 +539,42 @@ function initAdmin() {
         btnLinkInternal.addEventListener('click', openLinkModal);
     }
 
+    // Insert Image Event
+    const btnInsertImage = document.getElementById('btn-insert-image');
+    if (btnInsertImage) {
+        btnInsertImage.addEventListener('click', () => {
+            const imgUrl = prompt('🖼️ Introduce la ruta de la foto (ej: Imagenes/mifoto.jpg) o enlace:');
+            if (!imgUrl) return;
+            
+            const altText = prompt('📝 Introduce la explicación o pie de foto (opcional):', '');
+            if (altText === null) return;
+            
+            const figureHtml = `
+<figure style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    <img src="${imgUrl}" alt="${altText}" style="max-width: 100%; height: auto; border-radius: 8px;">
+    ${altText ? `<figcaption style="margin-top: 10px; font-size: 0.85rem; color: #666; font-style: italic;"><i class="fas fa-info-circle" style="color: #0a6aa1; margin-right: 5px;"></i> ${altText}</figcaption>` : ''}
+</figure>
+`;
+            
+            if (isHtmlMode) {
+                const htmlEditor = document.getElementById('html-editor');
+                const startPos = htmlEditor.selectionStart;
+                const endPos = htmlEditor.selectionEnd;
+                htmlEditor.value = htmlEditor.value.substring(0, startPos) + figureHtml + htmlEditor.value.substring(endPos, htmlEditor.value.length);
+                htmlEditor.focus();
+                htmlEditor.selectionStart = startPos + figureHtml.length;
+                htmlEditor.selectionEnd = startPos + figureHtml.length;
+            } else {
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(range.index, figureHtml);
+                quill.setSelection(range.index + 1);
+                
+                // Alert if using visual editor
+                alert("✅ Foto insertada en modo visual. Si notas que tras guardar se desconfigura, te recomendamos insertarla siempre estado en modo 'Editar en HTML puro' para proteger sus estilos avanzados.");
+            }
+        });
+    }
+
     const btnCloseLinks = document.getElementById('btn-close-links-modal');
     if (btnCloseLinks) {
         btnCloseLinks.addEventListener('click', () => {

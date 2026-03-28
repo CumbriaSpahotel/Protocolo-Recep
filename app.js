@@ -1231,18 +1231,41 @@ function renderOperationalGuide() {
         let protocolsHtml = '';
         sectionProtocols.forEach(p => {
             const isSubItem = p.section.split('.').length > 2;
-            const statusMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
-            let statusBadge = '';
             
-            if (statusMatch) {
-                const emoji = statusMatch[1];
-                let className = 'guide-status-active';
-                let text = 'Activo';
-                
+            // 1. Check for Status
+            let statusBadge = '';
+            let emoji = '🟢';
+            let className = 'guide-status-active';
+            let text = 'Activo';
+
+            if (p.status) {
+                text = p.status;
+                if (text === 'En redacción') { className = 'guide-status-draft'; emoji = '🟠'; }
+                else if (text === 'En proceso') { className = 'guide-status-process'; emoji = '🔴'; }
+                statusBadge = `<span class="guide-status-badge ${className}">${emoji} ${text}</span>`;
+            } else if (p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/)) {
+                // Legacy support for emoji brackets
+                const statusMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                emoji = statusMatch[1];
                 if (emoji === '🟠' || emoji === '🟡') { className = 'guide-status-draft'; text = 'En redacción'; }
                 else if (emoji === '🔴') { className = 'guide-status-process'; text = 'En proceso'; }
-                
                 statusBadge = `<span class="guide-status-badge ${className}">${emoji} ${text}</span>`;
+            }
+
+            // 2. Check for Source (Hotel)
+            let sourceBadge = '';
+            if (p.source && p.source !== 'Ambos hoteles' && p.source !== 'General') {
+                let sColor = '#0a6aa1'; let sBg = '#eff6ff';
+                if (p.source === 'Sercotel Guadiana') { sColor = '#c0392b'; sBg = '#fdf2e9'; }
+                else if (p.source.includes('Cumbria')) { sColor = '#0b6623'; sBg = '#e9f7ef'; }
+                
+                sourceBadge = `<span style="margin-left: 10px; font-size: 0.65rem; padding: 3px 7px; border-radius: 6px; background: ${sBg}; color: ${sColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid ${sColor}40; display: inline-flex; align-items: center; gap: 4px; opacity: 0.9;">
+                    <i class="fas fa-building"></i> ${p.source}
+                </span>`;
+            } else if (p.source === 'Ambos hoteles') {
+                sourceBadge = `<span style="margin-left: 10px; font-size: 0.65rem; padding: 3px 7px; border-radius: 6px; background: #f3f4f6; color: #4b5563; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #d1d5db; display: inline-flex; align-items: center; gap: 4px; opacity: 0.8;">
+                    <i class="fas fa-city"></i> Ambos Hoteles
+                </span>`;
             }
 
             const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
@@ -1252,12 +1275,13 @@ function renderOperationalGuide() {
 
             protocolsHtml += `
                 <div class="guide-item ${isSubItem ? 'sub-item' : ''}" onclick="window.loadProtocolById('${p.section}')">
-                    <div class="guide-item-info">
+                    <div class="guide-item-info" style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
                         ${iconHtml}
                         <span class="guide-number">${p.section}</span>
-                        <span class="guide-protocol-title">${cleanTitle}</span>
+                        <span class="guide-protocol-title" style="margin-right: 5px;">${cleanTitle}</span>
+                        ${sourceBadge}
                     </div>
-                    ${statusBadge}
+                    ${statusBadge ? `<div style="flex-shrink:0;">${statusBadge}</div>` : ''}
                 </div>
             `;
         });
