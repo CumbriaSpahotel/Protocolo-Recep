@@ -57,7 +57,11 @@ app.post('/api/save', (req, res) => {
         const home = data.homeConfig || (typeof home_config !== 'undefined' ? home_config : {});
         jsContent += 'const home_config = ' + JSON.stringify(home, null, 2) + ';\n\n';
 
-        // 5. Menus Data
+        // 5. Cloud Config (Added dynamically)
+        const cloud = data.cloudConfig || (typeof cloud_config !== 'undefined' ? cloud_config : { scriptUrl: '', sheetId: '' });
+        jsContent += 'var cloud_config = ' + JSON.stringify(cloud, null, 2) + ';\n\n';
+
+        // 6. Menus Data
         const menus = data.menusConfig || (typeof menus_data !== 'undefined' ? menus_data : []);
         jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
 
@@ -302,32 +306,61 @@ app.get('/api/sync-cloud', async (req, res) => {
     }
     try {
         const fetchData = (url) => new Promise((resolve, reject) => {
-            https.get(url, { headers: { 'Accept': 'application/json' } }, (response) => {
+            const client = url.startsWith('https') ? https : http;
+            client.get(url, { headers: { 'Accept': 'application/json, text/csv, text/plain' } }, (response) => {
                 // Follow redirects (Google Apps Script always redirects)
                 if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    return resolve(fetchData(response.headers.location));
+                    const redirectUrl = response.headers.location;
+                    console.log(`📡 Siguiendo redirección a: ${redirectUrl.substring(0, 100)}...`);
+                    return resolve(fetchData(redirectUrl));
                 }
                 let data = '';
                 response.on('data', chunk => data += chunk);
                 response.on('end', () => {
-                    console.log(`🌐 Respuesta recibida de Google (${response.statusCode}). Tamaño: ${data.length} chars.`);
+                    console.log(`🌐 Respuesta recibida (${response.statusCode}). Tamaño: ${data.length} chars.`);
+                    
+                    // Attempt JSON parse
                     try { 
-                        resolve(JSON.parse(data)); 
+                        return resolve(JSON.parse(data)); 
                     } catch(e) { 
-                        console.error('❌ Error parseando JSON de Google. Respuesta recibida:');
-                        console.error(data.substring(0, 800)); // Log much more
-                        reject(new Error('La respuesta de la nube es HTML, no JSON. Posiblemente falta configuración de Acceso Público ("Anyone").')); 
+                        // If JSON fails, check if it looks like CSV
+                        if (data.includes(',') && data.includes('\n')) {
+                            console.log('📄 Detectada posible respuesta CSV, par seando...');
+                            return resolve(parseCSV(data));
+                        }
+                        
+                        console.error('❌ Error parseando respuesta de Google.');
+                        console.error(data.substring(0, 500)); 
+                        reject(new Error('La respuesta no es JSON ni CSV válido. Revisa los permisos del documento.')); 
                     }
                 });
             }).on('error', reject);
         });
+
+        // Simple CSV Parser: Assumes headers: pId, pTitle, author, text, date
+        function parseCSV(csv) {
+            const lines = csv.split(/\r?\n/).filter(line => line.trim());
+            if (lines.length < 2) return [];
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            return lines.slice(1).map(line => {
+                // Simple split by comma (doesn't handle commas inside quotes, but better than nothing for now)
+                // A better regex for CSV split: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
+                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
+                const obj = {};
+                headers.forEach((h, i) => {
+                    obj[h === 'timestamp' ? 'date' : h] = values[i];
+                });
+                return obj;
+            });
+        }
         
         const cloudData = await fetchData(targetUrl);
-        console.log(`☁️ Sync cloud: ${Array.isArray(cloudData) ? cloudData.length : '?'} registros obtenidos de Google Sheets`);
+        console.log(`☁️ Sync cloud: ${Array.isArray(cloudData) ? cloudData.length : '?'} registros obtenidos`);
         res.json(cloudData);
     } catch (e) {
         console.error('❌ Error en sync-cloud proxy:', e.message);
-        res.status(502).json({ success: false, message: 'Error al conectar con Google Sheets: ' + e.message });
+        res.status(502).json({ success: false, message: 'Error al conectar con la nube: ' + e.message });
     }
 });
 

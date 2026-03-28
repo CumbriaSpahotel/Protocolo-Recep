@@ -6,7 +6,7 @@ const navItems = document.getElementById('top-nav-items');
 
 // History stack for better navigation
 // CONFIGURACIÓN DE NUBE (OPCIÓN B)
-const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbzRRNwjwp86B33O5rUjOG-uCVXUzieMAHijuOCq08k6BQ1SNmWARHytwUDjUijywGze/exec';
+const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbwyUt8-VuCH6bUNAH6xYhb4l8iu9SCE9-hnJSymQlpcDyJyheNmGarF6po1Oz13JFPI/exec';
 
 let viewHistory = [{ type: 'home' }];
 

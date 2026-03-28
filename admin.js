@@ -6,8 +6,10 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
-// Cloud gateway URL (same as app.js)
-const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbzRRNwjwp86B33O5rUjOG-uCVXUzieMAHijuOCq08k6BQ1SNmWARHytwUDjUijywGze/exec';
+// Cloud gateway URL (A)
+let CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbyshfXBDm77Hx_30Tm_3_usSC9tczT8_88paDOs6dn4HmwD8zEWY_Ilcc-b0GpE0frr/exec';
+// Cloud Spreadsheet ID (B)
+let CLOUD_SPREADSHEET_ID = '1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74'; 
 
 // --- Comment module state ---
 let _allComments = [];
@@ -923,6 +925,13 @@ function renderAdminTable(data) {
                 valA = a.source || 'Ambos';
                 valB = b.source || 'Ambos';
                 break;
+            case 'category':
+                const navC = typeof navigation_config !== 'undefined' ? navigation_config : {};
+                const cIdA = (a.section || '0').split('.')[0];
+                const cIdB = (b.section || '0').split('.')[0];
+                valA = navC[cIdA] ? navC[cIdA].name : '';
+                valB = navC[cIdB] ? navC[cIdB].name : '';
+                break;
             default:
                 valA = a.section || '';
                 valB = b.section || '';
@@ -990,15 +999,19 @@ function renderAdminTable(data) {
         tr.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                        <span style="background: #f1f3f5; color: #0a6aa1; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-family: monospace; font-size: 0.95rem; border: 1px solid #dee2e6; min-width: 45px; text-align: center;">${secVal}</span>
-                        ${catName ? `<span style="font-size:0.62rem; color:#999; font-weight:600; text-transform:uppercase; letter-spacing:0.02em; text-align:center; line-height:1.2; max-width:90px; word-break:break-word; white-space:normal;">${catName}</span>` : ''}
-                    </div>
+                    <span class="section-number">${secVal}</span>
                     <strong style="font-size: 1rem; color: #333; display: flex; align-items: center;">${statusIcon} ${p.title || 'Sin Título'}</strong>
                 </div>
             </td>
             <td>
-                <span class="badge" style="background: white; color: #455a64; border: 1px solid #dee2e6; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px;">
+                ${catName ? `
+                    <span class="category-pill">
+                        <i class="fas fa-folder-open" style="color: #0a6aa1; margin-right: 4px;"></i> ${catName}
+                    </span>
+                ` : '<span style="color:#ccc; font-size:0.8rem;">Sin categoría</span>'}
+            </td>
+            <td>
+                <span class="hotel-badge">
                     <i class="fas fa-hotel" style="color: #0a6aa1; font-size: 0.8rem;"></i> ${sourceVal}
                 </span>
             </td>
@@ -2334,6 +2347,53 @@ function promptReply(commentId) {
     openReplyModal(commentId);
 }
 
+// Direct CSV Fallback URL Builder
+function getCloudCsvUrl() {
+    return `https://docs.google.com/spreadsheets/d/${CLOUD_SPREADSHEET_ID}/export?format=csv&id=${CLOUD_SPREADSHEET_ID}&gid=0`;
+}
+
+// GUI for Cloud Config
+window.toggleCloudConfig = () => {
+    const panel = document.getElementById('cloud-config-panel');
+    if (!panel) return;
+    const isVisible = panel.style.display === 'block';
+    panel.style.display = isVisible ? 'none' : 'block';
+    
+    if (!isVisible) {
+        document.getElementById('config-cloud-url').value = CLOUD_GATEWAY_URL;
+        document.getElementById('config-spreadsheet-id').value = CLOUD_SPREADSHEET_ID;
+    }
+};
+
+window.saveCloudConfig = async () => {
+    const newUrl = document.getElementById('config-cloud-url').value.trim();
+    const newId = document.getElementById('config-spreadsheet-id').value.trim();
+    
+    if (newUrl) CLOUD_GATEWAY_URL = newUrl;
+    if (newId) CLOUD_SPREADSHEET_ID = newId;
+    
+    showToast('💾 Guardando configuración en el servidor...');
+    
+    try {
+        const res = await fetch('/api/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                cloudConfig: {
+                    scriptUrl: CLOUD_GATEWAY_URL,
+                    sheetId: CLOUD_SPREADSHEET_ID
+                }
+            })
+        });
+        if (res.ok) {
+            showToast('✅ Configuración guardada correctamente');
+            toggleCloudConfig();
+        }
+    } catch (e) {
+        showToast('❌ Error guardando configuración');
+    }
+};
+
 async function syncCloudComments() {
     const btn = document.getElementById('btn-sync-cloud-comments');
     if (!btn) return;
@@ -2348,71 +2408,84 @@ async function syncCloudComments() {
     btn.disabled = true;
 
     try {
-        // Use the server as a proxy to avoid CORS issues when fetching Google Sheets from localhost
-        const baseUrl = window.location.protocol === 'file:'
-            ? 'http://localhost:3000'
-            : window.location.origin;
-        const proxyUrl = `${baseUrl}/api/sync-cloud?url=${encodeURIComponent(CLOUD_GATEWAY_URL)}`;
+        const baseUrl = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
         
         let cloudData = null;
+        let methodUsed = 'Proxy JSON';
+
+        // --- Try Stage 1: Proxy JSON (App Script) ---
         try {
+            console.log('📡 Intentando sincronización Modo A (Proxy JSON)...');
+            const urlToUse = CLOUD_GATEWAY_URL;
+            const proxyUrl = `${baseUrl}/api/sync-cloud?url=${encodeURIComponent(urlToUse)}`;
             const proxyRes = await fetch(proxyUrl);
             if (proxyRes.ok) {
                 cloudData = await proxyRes.json();
             } else {
-                throw new Error(`Proxy no disponible (${proxyRes.status})`);
+                throw new Error(`Proxy error ${proxyRes.status}`);
             }
-        } catch(e) {
-            console.warn('Proxy no disponible, intentando fetch directo:', e.message);
-            // Direct fetch — may fail on localhost due to CORS, but works on server
-            const directRes = await fetch(CLOUD_GATEWAY_URL);
-            cloudData = await directRes.json();
+        } catch (e) {
+            console.warn('❌ Fallo Modo A, intentando Modo B (Direct CSV Fallback)...', e.message);
+            // --- Try Stage 2: Direct CSV Fallback ---
+            const csvUrl = getCloudCsvUrl();
+            if (csvUrl) {
+                methodUsed = 'CSV Fallback';
+                const csvProxyUrl = `${baseUrl}/api/sync-cloud?url=${encodeURIComponent(csvUrl)}`;
+                const csvRes = await fetch(csvProxyUrl);
+                if (csvRes.ok) {
+                    cloudData = await csvRes.json();
+                } else {
+                    throw new Error(`CSV Error ${csvRes.status}`);
+                }
+            } else {
+                throw e; // No fallback configured
+            }
         }
         
         if (cloudData && Array.isArray(cloudData)) {
             // Fetch existing to avoid duplicates
-            let existingIds = new Set();
             let existingKeys = new Set();
             try {
                 const existing = await fetch(`${baseUrl}/api/comments/all`);
-                const existingText = await existing.text();
-                if (existingText.trim().startsWith('[')) {
-                    const existingComments = JSON.parse(existingText);
-                    existingComments.forEach(c => {
-                        if (c.id) existingIds.add(String(c.id));
-                        existingKeys.add(`${c.author}|${c.date}`);
-                    });
-                }
+                const existingComments = await existing.json();
+                existingComments.forEach(c => existingKeys.add(`${c.author}|${c.text.substring(0,20)}|${c.date}`));
             } catch(e) {}
             
             let importedCount = 0;
             let skippedCount = 0;
             for (const item of cloudData) {
-                const itemKey = `${item.author}|${item.date}`;
-                if ((item.id && existingIds.has(String(item.id))) || existingKeys.has(itemKey)) {
+                // Check required fields for a valid comment
+                if (!item.author || !item.text) continue;
+
+                const itemKey = `${item.author}|${item.text.substring(0,20)}|${item.date}`;
+                if (existingKeys.has(itemKey)) {
                     skippedCount++;
                     continue;
                 }
+
                 const res = await fetch(`${baseUrl}/api/comments/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        pId: item.pId, 
-                        pTitle: item.pTitle, 
+                        pId: item.pId || 's/s', 
+                        pTitle: item.pTitle || 'Protocolo Importado', 
                         author: item.author, 
                         text: item.text,
-                        date: item.date
+                        date: item.date || new Date().toISOString()
                     })
                 });
                 if (res.ok) importedCount++;
             }
-            showToast(`✅ Sync completo: ${importedCount} nuevos${skippedCount > 0 ? `, ${skippedCount} duplicados omitidos` : ''}`);
+            
+            showToast(`✅ Sincronizado (${methodUsed}): ${importedCount} nuevos, ${skippedCount} duplicados.`);
             loadAdminComments();
             updatePendingBadge();
+        } else {
+            throw new Error('No se recibieron datos válidos de la nube.');
         }
     } catch (e) {
         console.error('Error Sync:', e);
-        alert('Error sincronizando con la nube (Google Sheets). Asegúrate de que el script está publicado correctamente.');
+        alert(`❌ Error en la sincronización.\n\nDetalle: ${e.message}\n\nPosibles causas:\n1. El Script de Google no está publicado como "Anyone".\n2. La URL del Script ha cambiado.\n3. El documento de Google no es público para lectura.`);
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -2474,57 +2547,57 @@ function renderCanales() {
     if (!container) return;
     
     container.innerHTML = window.channels_config.map((c, idx) => `
-        <div class="channel-editor-card" style="background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
-                <h3 style="margin:0; font-size:1rem; color:var(--primary);"><i class="fas fa-satellite-dish"></i> Canal #${idx + 1}</h3>
-                <button class="btn-link" style="color:#e74c3c;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i> Eliminar</button>
+        <div class="channel-editor-card">
+            <div class="channel-card-header">
+                <h3><i class="fas fa-satellite-dish"></i> Canal #${idx + 1}: ${c.name || 'Sin nombre'}</h3>
+                <button class="btn-link" style="color:#e74c3c; font-size: 0.85rem;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i> Eliminar</button>
             </div>
             
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
-                <div>
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#0a6aa1; margin-bottom:4px;"><i class="fas fa-hotel"></i> Destinatario / Hotel</label>
-                    <select onchange="updateChannelData(${idx}, 'hotel', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-weight: 500;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; background: #f8faff; padding: 15px; border-radius: 8px;">
+                <div class="channel-form-group">
+                    <label><i class="fas fa-hotel"></i> Destinatario / Hotel</label>
+                    <select class="channel-input" onchange="updateChannelData(${idx}, 'hotel', this.value)" style="font-weight: 600; background: white;">
                         <option value="Ambos hoteles" ${c.hotel === 'Ambos hoteles' ? 'selected' : ''}>Ambos hoteles</option>
                         <option value="Sercotel Guadiana" ${c.hotel === 'Sercotel Guadiana' ? 'selected' : ''}>Sercotel Guadiana</option>
                         <option value="Cumbria Spa & Hotel" ${c.hotel === 'Cumbria Spa & Hotel' ? 'selected' : ''}>Cumbria Spa & Hotel</option>
                     </select>
                 </div>
-                <div>
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Nombre del Canal</label>
-                    <input type="text" value="${c.name || ''}" onchange="updateChannelData(${idx}, 'name', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-weight:bold;">
+                <div class="channel-form-group">
+                    <label>Nombre del Canal</label>
+                    <input type="text" class="channel-input" value="${c.name || ''}" onchange="updateChannelData(${idx}, 'name', this.value)" style="font-weight:bold;" placeholder="Ej: Booking.com">
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px; margin-bottom:15px;">
-                <div>
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Icono</label>
-                    <input type="text" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:1.2rem;">
+            <div style="display:grid; grid-template-columns: 100px 1fr; gap:15px; margin-bottom:15px;">
+                <div class="channel-form-group">
+                    <label>Icono / Emoji</label>
+                    <input type="text" class="channel-input" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="text-align:center; font-size:1.2rem;" placeholder="🌍">
                 </div>
-                <div>
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Resumen / Subtítulo</label>
-                    <input type="text" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                <div class="channel-form-group">
+                    <label>Resumen / Subtítulo</label>
+                    <input type="text" class="channel-input" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" placeholder="Peculiaridades breves...">
                 </div>
             </div>
 
-            <div style="margin-bottom:15px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Contenido Principal (Procedimiento)</label>
-                <textarea rows="3" onchange="updateChannelData(${idx}, 'content', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.9rem;">${c.content || ''}</textarea>
+            <div class="channel-form-group" style="margin-bottom:15px;">
+                <label>Contenido Principal (Procedimiento)</label>
+                <textarea class="channel-input" rows="3" onchange="updateChannelData(${idx}, 'content', this.value)" placeholder="Escribe aquí el procedimiento estándar para este canal...">${c.content || ''}</textarea>
             </div>
             
-            <div style="margin-bottom:15px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; color:#555; margin-bottom:4px;">Notas Adicionales / Peculiaridades</label>
-                <textarea rows="2" onchange="updateChannelData(${idx}, 'notes', this.value)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; font-size:0.85rem; background:#f9f9f9;">${c.notes || ''}</textarea>
+            <div class="channel-form-group" style="margin-bottom:15px;">
+                <label>Notas Adicionales / Peculiaridades</label>
+                <textarea class="channel-input" rows="2" onchange="updateChannelData(${idx}, 'notes', this.value)" style="background:#f9f9f9; font-size: 0.85rem;" placeholder="Notas internas o avisos...">${c.notes || ''}</textarea>
             </div>
 
-            <div style="background: #eef7ff; padding: 12px; border-radius: 8px; border: 1px dashed #0a6aa1;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#0a6aa1; margin-bottom:0;"><i class="fas fa-code"></i> HTML Personalizado para este Canal</label>
+            <div class="channel-html-area">
+                <div class="channel-html-label">
+                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado</label>
                     <div style="display:flex; gap:8px;">
-                        <button type="button" onclick="selectChannelMedia(${idx}, 'image')" class="btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; background: #27ae60 !important; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-image"></i> + Imagen</button>
-                        <button type="button" onclick="selectChannelMedia(${idx}, 'video')" class="btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; background: #f39c12 !important; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="fas fa-video"></i> + Video</button>
+                        <button type="button" onclick="selectChannelMedia(${idx}, 'image')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #27ae60 !important; border-radius: 20px;"><i class="fas fa-image"></i> + Imagen</button>
+                        <button type="button" onclick="selectChannelMedia(${idx}, 'video')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #f39c12 !important; border-radius: 20px;"><i class="fas fa-video"></i> + Video</button>
                     </div>
                 </div>
-                <textarea id="channel-html-${idx}" rows="4" onchange="updateChannelData(${idx}, 'htmlContent', this.value)" style="width:100%; padding:8px; border:1px solid #b8d9f5; border-radius:4px; resize:vertical; font-size:0.85rem; font-family: monospace;" placeholder="Introduce aquí HTML si este canal requiere una tabla o diseño especial...">${c.htmlContent || ''}</textarea>
+                <textarea id="channel-html-${idx}" class="channel-input" rows="4" onchange="updateChannelData(${idx}, 'htmlContent', this.value)" style="font-family: monospace; font-size:0.85rem;" placeholder="Tablas, enlaces o diseños especiales...">${c.htmlContent || ''}</textarea>
             </div>
         </div>
     `).join('');
@@ -2612,4 +2685,10 @@ async function saveCanales() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
+}
+
+// Load cloud config from global window if it exists (from data.js)
+if (typeof cloud_config !== 'undefined') {
+    if (cloud_config.scriptUrl) CLOUD_GATEWAY_URL = cloud_config.scriptUrl;
+    if (cloud_config.sheetId) CLOUD_SPREADSHEET_ID = cloud_config.sheetId;
 }
