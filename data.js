@@ -994,10 +994,41 @@ const navigation_config = {
     ]
   },
   "13": {
-    "name": "Otros",
-    "icon": "fa-plus",
+    "name": "RECURSOS Y DOCUMENTOS ÚTILES",
+    "icon": "fa-book-reader",
     "subsections": {},
-    "links": []
+    "links": [
+      {
+        "icon": "fa-link",
+        "text": "🗂️Archivos Guadiana →☁️",
+        "url": "https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&resid=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&ithint=folder&e=edtxgO&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsV3NERWhMU1YxRWpMVDRlXzhyTEJZQkdheERuNmNuRVZWRXM1QWdRSUZTdXc_ZT1lZHR4Z08"
+      },
+      {
+        "icon": "fa-link",
+        "text": "🗂️Archivos Cumbria →☁️",
+        "url": "https://drive.google.com/drive/folders/1vlrQc_O67MuKNQxHwXXlKdyNel5JW0gg"
+      },
+      {
+        "icon": "fa-link",
+        "text": "🗂️Procedimientos Sercotel →☁️",
+        "url": "https://drive.google.com/drive/folders/1KETvtJnPCuXuguPc6EP3WGNl5MYhJZn5"
+      },
+      {
+        "icon": "fa-link",
+        "text": "📷 Guadiana →☁️",
+        "url": "https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&resid=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&ithint=folder&e=HHXrIF&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VtMG5nQXZjZ3I5R3VhZTBfUVNyYzFnQkFJQ2dXZnM4UVYyR0RmdTYzNzBDTWc_ZT1ISFhySUY"
+      },
+      {
+        "icon": "fa-link",
+        "text": "📷 Cumbria →☁️",
+        "url": "https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&resid=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&ithint=folder&e=9yGzl6&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsOGFNalB2cVNaTXZNd1ZFZGhSYUswQlhQRXBPZ1ZmWmpZMV9oQk1YSFlRRHc_ZT05eUd6bDY&v=validatepermission"
+      },
+      {
+        "icon": "fa-link",
+        "text": "🎥 Video manuales y tutoriales→☁️",
+        "url": "https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VoYlBLUm5XXzlSUHZCSDMyY3ZUZXRrQkgyYmpmYWZseTVaUXcyY2x2R3Z6WkE%5FZT1DTWdyYm4&id=7CDC5F6B199A606E%21s1929cf16ffd64fd4bc11f7d9cbd37ad9&cid=7CDC5F6B199A606E"
+      }
+    ]
   },
   "14": {
     "name": "Calidad",
