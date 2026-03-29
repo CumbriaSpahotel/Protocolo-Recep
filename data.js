@@ -1006,7 +1006,7 @@ const navigation_config = {
       {
         "icon": "fa-link",
         "text": "🗂️Archivos Cumbria →☁️",
-        "url": "https://onedrive.live.com/?id=%2Fpersonal%2F7cdc5f6b199a606e%2FDocuments%2F02%2E%20Comp%2E%20Min%20Recepci%C3%B3n%2F5%2E%20Archivos%20Recepci%C3%B3n%2FArchivos%20Cumbria"
+        "url": "https://1drv.ms/f/c/7cdc5f6b199a606e/IgC2zNimWu27R5bEXKYkEjr1ARJwRIHuHL7FFZQO-EpPXBw?e=i9MRJB"
       },
       {
         "icon": "fa-link",
