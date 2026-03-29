@@ -320,6 +320,24 @@ function renderNavigation() {
             
             // 2. Build a map of all unique section IDs present in these protocols
             const subMap = new Map();
+            
+            // 2a. First, seed the subMap with manually defined subsections from navigation_config
+            if (cat.subsections && typeof cat.subsections === 'object') {
+                Object.entries(cat.subsections).forEach(([subId, subLabel]) => {
+                    // Only include numeric-style subsection IDs (e.g. "8.1", "14.1") not named ones
+                    if (!subMap.has(subId) && /^\d+\.\d/.test(subId)) {
+                        const matchedP = protocols.find(pr => String(pr.section) === subId);
+                        subMap.set(subId, {
+                            id: subId,
+                            name: subLabel,
+                            emoji: null,
+                            protocol: matchedP || null,
+                            children: []
+                        });
+                    }
+                });
+            }
+            
             catProtocols.forEach(p => {
                 const sId = String(p.section);
                 if (sId === id) return; // Top-level handled by click on link itself or special entry
@@ -411,6 +429,10 @@ function renderNavigation() {
                             if (item.protocol) {
                                 viewHistory.push({ type: 'protocol', payload: item.protocol });
                                 loadProtocol(item.protocol);
+                            } else {
+                                // Filter category by subsection prefix
+                                viewHistory.push({ type: 'category', name: item.name, id: item.id });
+                                renderCategory(item.name, item.id);
                             }
                         };
                         
@@ -424,7 +446,12 @@ function renderNavigation() {
                                 loadProtocol(item.protocol);
                             };
                         } else {
-                            a.onclick = (e) => e.preventDefault();
+                            // No direct protocol: filter category by this subsection
+                            a.onclick = (e) => {
+                                e.preventDefault();
+                                viewHistory.push({ type: 'category', name: item.name, id: item.id });
+                                renderCategory(item.name, item.id);
+                            };
                         }
                         wrapper.appendChild(a);
                     }
@@ -755,7 +782,12 @@ function renderCategory(name, id) {
     
     const catProtocols = protocols.filter(p => {
         if (!p.section) return false;
-        const parts = p.section.split('.');
+        const sId = String(p.section);
+        // If id contains a dot, it's a subsection – match exactly or prefix
+        if (id.includes('.')) {
+            return sId === id || sId.startsWith(id + '.');
+        }
+        const parts = sId.split('.');
         const pId = parts[0];
         // Match by ID if possible, otherwise fallback to name match
         return pId === id || (CAT_MAP[pId] && CAT_MAP[pId].name === name) || (p.categories && p.categories.includes(name));
