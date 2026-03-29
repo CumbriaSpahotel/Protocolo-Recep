@@ -1148,14 +1148,32 @@ function populateCategories() {
     
     if (navConf) {
         Object.entries(navConf).sort((a,b) => parseInt(a[0]) - parseInt(b[0])).forEach(([id, cat]) => {
+            // Parent category option
             const option = document.createElement('option');
             option.value = id;
             option.textContent = `${id}. ${cat.name}`;
             select.appendChild(option);
+
+            // Subsection options (indented) — only numeric-style IDs like "8.1"
+            if (cat.subsections && typeof cat.subsections === 'object') {
+                const numericSubs = Object.entries(cat.subsections)
+                    .filter(([subId]) => /^\d+\.\d/.test(subId))
+                    .sort((a, b) => {
+                        const nA = parseFloat(a[0].split('.').slice(1).join('.'));
+                        const nB = parseFloat(b[0].split('.').slice(1).join('.'));
+                        return nA - nB;
+                    });
+
+                numericSubs.forEach(([subId, subName]) => {
+                    const subOption = document.createElement('option');
+                    subOption.value = subId;
+                    subOption.textContent = `\u00A0\u00A0\u2514 ${subId}. ${subName}`;
+                    subOption.style.color = '#0a6aa1';
+                    select.appendChild(subOption);
+                });
+            }
         });
     }
-
-
 }
 
 function updateParentSections(selectedParent = '') {
