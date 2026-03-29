@@ -14,66 +14,198 @@ window.scanHtmlLinks = function() {
     if (!list) return;
     list.innerHTML = '';
     
-    const regex = /(href|src)=["']([^"']+)["']/gi;
-    let match;
-    let matches = [];
+    const parser = new DOMParser();
+    const elements = [];
     
-    while ((match = regex.exec(htmlText)) !== null) {
-        matches.push({ type: match[1], url: match[2], original: match[0], index: match.index });
+    // Usamos Rexex avanzados para encontrar los fragmentos EXACTOS de texto en el editor.
+    // Esta regex mejorada maneja correctamente atributos que contienen '>' dentro de comillas (como el onerror).
+    
+    // 1. Buscamos Imágenes: <img ... >
+    const imgRegex = /<img\s+(?:[^"'>]|"[^"]*"|'[^']*')*>/gi;
+    let match;
+    while ((match = imgRegex.exec(htmlText)) !== null) {
+        const fullTag = match[0];
+        // Parseamos el fragmento para extraer valores
+        const tagDoc = parser.parseFromString(fullTag, 'text/html');
+        const el = tagDoc.querySelector('img');
+        if (el) {
+            elements.push({
+                type: 'img',
+                src: el.getAttribute('src') || '',
+                alt: el.getAttribute('alt') || '',
+                original: fullTag // Guardamos el texto exacto tal cual está en el editor
+            });
+        }
     }
     
-    if (matches.length === 0) {
-        list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado enlaces ni imágenes editables.</div>';
+    // 2. Buscamos Enlaces: <a ...>...</a>
+    const linkRegex = /<a\s+(?:[^"'>]|"[^"]*"|'[^']*')*>([\s\S]*?)<\/a>/gi;
+    while ((match = linkRegex.exec(htmlText)) !== null) {
+        const fullTag = match[0];
+        const tagDoc = parser.parseFromString(fullTag, 'text/html');
+        const el = tagDoc.querySelector('a');
+        if (el && el.getAttribute('href')) {
+            elements.push({
+                type: 'link',
+                href: el.getAttribute('href') || '',
+                text: el.innerText.trim(),
+                original: fullTag
+            });
+        }
+    }
+    
+    if (elements.length === 0) {
+        list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado elementos editables en el código.</div>';
         return;
     }
     
-    matches.forEach((m, idx) => {
+    elements.forEach((m, idx) => {
         const item = document.createElement('div');
-        item.style.display = 'flex';
-        item.style.gap = '10px';
+        item.style.display = 'grid';
+        item.style.gridTemplateColumns = '85px 1fr 1fr 100px 40px';
+        item.style.gap = '8px';
         item.style.background = '#fff';
-        item.style.padding = '8px 12px';
-        item.style.borderRadius = '6px';
+        item.style.padding = '10px 15px';
+        item.style.borderRadius = '8px';
         item.style.border = '1px solid #e1e8ed';
         item.style.alignItems = 'center';
+        item.style.marginBottom = '5px';
+        item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
         
-        const typeBadge = m.type.toLowerCase() === 'href' ? 
-            `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; width: 65px; text-align: center;"><i class="fas fa-link"></i> LINK</span>` :
-            `<span style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; width: 65px; text-align: center;"><i class="fas fa-image"></i> IMG</span>`;
+        const isImg = m.type === 'img';
+        const badge = isImg ? 
+            `<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-image"></i> FOTO</span>` :
+            `<span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-link"></i> LINK</span>`;
             
-        const inputId = `html-link-input-${idx}`;
+        const input1Id = `html-item-url-${idx}`;
+        const input2Id = `html-item-text-${idx}`;
         
         item.innerHTML = `
-            ${typeBadge}
-            <input type="text" id="${inputId}" value="${m.url}" style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; font-family: monospace;">
-            <button type="button" class="btn-apply-link" data-idx="${idx}" data-orig="${m.original.replace(/"/g, '&quot;')}" style="background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: 600; min-width: 90px;"><i class="fas fa-check"></i> Aplicar</button>
+            <div>${badge}</div>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : 'ENLACE'}</label>
+                <input type="text" id="${input1Id}" value="${(isImg ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 6px; font-size: 0.8rem; font-family: monospace;">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : 'TEXTO VISIBLE'}</label>
+                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : m.text).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 6px; font-size: 0.8rem;">
+            </div>
+            <div style="display: flex; align-items: flex-end; height: 100%;">
+                <button type="button" class="btn-apply-item" 
+                    data-idx="${idx}" 
+                    style="background: #27ae60; color: white; border: none; width: 100%; height:34px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 600; display:flex; align-items:center; justify-content:center; gap:5px; transition: all 0.2s;">
+                    <i class="fas fa-check"></i> Aplicar
+                </button>
+            </div>
+            <div style="display: flex; align-items: flex-end; height: 100%;">
+                <button type="button" class="btn-delete-item" 
+                    data-idx="${idx}" 
+                    title="Eliminar elemento del código"
+                    style="background: #fff; color: #e74c3c; border: 1px solid #ffcfca; width: 100%; height:34px; border-radius: 6px; cursor: pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
         `;
         list.appendChild(item);
+        
+        item.dataset.originalHtml = m.original;
+        item.dataset.isImg = isImg;
     });
 
-    document.querySelectorAll('.btn-apply-link').forEach(btn => {
-        btn.addEventListener('click', function() {
-            window.applyHtmlLink(this.getAttribute('data-idx'), this.getAttribute('data-orig'));
-        });
+    // Eventos Aplicar
+    document.querySelectorAll('.btn-apply-item').forEach(btn => {
+        btn.onclick = function() {
+            const idx = this.dataset.idx;
+            const parent = this.closest('div[data-original-html]');
+            const originalHtml = parent.dataset.originalHtml;
+            const isImg = parent.dataset.isImg === 'true';
+            
+            const val1 = document.getElementById(`html-item-url-${idx}`).value;
+            const val2 = document.getElementById(`html-item-text-${idx}`).value;
+            
+            // Re-parseamos el pedazo original para inyectar los valores
+            const parser = new DOMParser();
+            const tagDoc = parser.parseFromString(originalHtml, 'text/html');
+            const el = tagDoc.querySelector(isImg ? 'img' : 'a');
+            
+            if (!el) return;
+            
+            if (isImg) {
+                el.setAttribute('src', val1);
+                el.setAttribute('alt', val2);
+            } else {
+                el.setAttribute('href', val1);
+                el.innerText = val2;
+            }
+            
+            const newHtml = el.outerHTML;
+            const editor = document.getElementById('html-editor');
+            
+            if (editor.value.includes(originalHtml)) {
+                editor.value = editor.value.replace(originalHtml, newHtml);
+                showToast('✅ Cambios aplicados');
+                window.scanHtmlLinks(); 
+            } else {
+                alert('No se pudo encontrar el fragmento de código original. Por favor, pulsa "Refrescar Lista" e inténtalo de nuevo.');
+            }
+        };
+    });
+
+    // Eventos Borrar
+    document.querySelectorAll('.btn-delete-item').forEach(btn => {
+        btn.onclick = function() {
+            const parent = this.closest('div[data-original-html]');
+            const originalHtml = parent.dataset.originalHtml;
+            
+            if (!confirm('¿Seguro que quieres borrar este elemento permanentemente?')) return;
+            
+            const editor = document.getElementById('html-editor');
+            let searchStr = originalHtml;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(editor.value, 'text/html');
+            
+            // Intento de borrar el figure completo si existe
+            let figureFound = false;
+            doc.querySelectorAll('figure').forEach(fig => {
+                if (fig.outerHTML.includes(originalHtml)) {
+                    if(confirm('He detectado que esta imagen está dentro de un "figure" (contenedor). ¿Quieres borrar todo el bloque de la foto con su pie?')) {
+                        searchStr = fig.outerHTML;
+                        figureFound = true;
+                    }
+                }
+            });
+
+            // Si el figureFound es falso pero queremos ser precisos con el string replacement:
+            if (editor.value.includes(searchStr)) {
+                editor.value = editor.value.replace(searchStr, '');
+            } else {
+                // Fallback a borrar solo el tag si por alguna razón el figure outerHTML varió
+                editor.value = editor.value.replace(originalHtml, '');
+            }
+
+            showToast('🗑️ Elemento eliminado');
+            window.scanHtmlLinks();
+        };
     });
 };
 
 window.applyHtmlLink = function(idx, originalMatchString) {
-    const editor = document.getElementById('html-editor');
-    const newVal = document.getElementById(`html-link-input-${idx}`).value;
-    const type = originalMatchString.split('=')[0]; 
-    const replacement = `${type}="${newVal}"`; 
-    
-    editor.value = editor.value.replace(originalMatchString, replacement);
-    window.scanHtmlLinks();
-    
-    const newBtn = document.querySelector(`.btn-apply-link[data-idx="${idx}"]`);
-    if(newBtn) {
-        newBtn.innerHTML = '<i class="fas fa-check-double"></i> ¡Hecho!';
-        newBtn.style.background = '#0a6aa1';
-        setTimeout(() => { newBtn.innerHTML = '<i class="fas fa-check"></i> Aplicar'; newBtn.style.background = '#27ae60'; }, 1500);
-    }
+    // Esta función queda depreciada por el nuevo sistema agrupado btn-apply-item
+    // Pero la mantenemos vacía por compatibilidad de llamadas antiguas si las hubiera
 };
+
+// Listener para escaneo automático en tiempo real
+document.addEventListener('DOMContentLoaded', () => {
+    const htmlArea = document.getElementById('html-editor');
+    if (htmlArea) {
+        htmlArea.addEventListener('input', () => {
+            if (isHtmlMode) {
+                clearTimeout(window._scanTimeout);
+                window._scanTimeout = setTimeout(window.scanHtmlLinks, 500);
+            }
+        });
+    }
+});
 
 // Cloud gateway URL (A)
 let CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec';
