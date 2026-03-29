@@ -547,3 +547,24 @@ body {
     align-items: center;
     margin-bottom: 10px;
 }
+
+/* Alert Labels in Admin Table */
+.category-pill.alert-critical {
+    background: #fff5f5;
+    color: #d32f2f;
+    border-color: #ffcdd2;
+}
+.category-pill.alert-critical i {
+    color: #d32f2f;
+    margin-right: 4px;
+}
+
+.category-pill.alert-announce {
+    background: #e3f2fd;
+    color: #1976d2;
+    border-color: #bbdefb;
+}
+.category-pill.alert-announce i {
+    color: #1976d2;
+    margin-right: 4px;
+}

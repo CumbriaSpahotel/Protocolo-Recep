@@ -1097,7 +1097,52 @@ function renderAdminTable(data) {
         // Resolve category name from navigation_config
         const navConf = typeof navigation_config !== 'undefined' ? navigation_config : {};
         const catId = p.section ? String(p.section).split('.')[0] : null;
-        const catName = catId && navConf[catId] ? navConf[catId].name : null;
+        let catName = catId && navConf[catId] ? navConf[catId].name : null;
+
+        // Check alerts status for extra labels
+        let extraLabels = [];
+        
+        // 1. Agregar etiquetas basadas en configuración de alertas
+        if (typeof home_config !== 'undefined' && home_config.alerts) {
+            if (home_config.alerts.critical_errors?.items?.some(i => i.id === p.section)) {
+                extraLabels.push('<span class="category-pill alert-critical"><i class="fas fa-exclamation-circle"></i> Error Crítico</span>');
+            }
+            if (home_config.alerts.announcements?.items?.some(i => i.id === p.section)) {
+                extraLabels.push('<span class="category-pill alert-announce"><i class="fas fa-bullhorn"></i> Comunicado</span>');
+            }
+        }
+
+        // 2. Agregar etiquetas basadas en categorías del protocolo (solo si no se agregaron ya por alerta)
+        if (p.categories && p.categories.length > 0) {
+            p.categories.forEach(c => {
+                const isError = c.toLowerCase().includes('error');
+                const isAnnouncement = c.toLowerCase().includes('comunicado');
+                
+                // Evitar duplicados si ya se agregó vía alerta arriba
+                const isCriticalAlready = extraLabels.some(l => l.includes('alert-critical'));
+                const isAnnounceAlready = extraLabels.some(l => l.includes('alert-announce'));
+                
+                if (isError && !isCriticalAlready) {
+                    extraLabels.push('<span class="category-pill alert-critical"><i class="fas fa-exclamation-circle"></i> ' + c + '</span>');
+                } else if (isAnnouncement && !isAnnounceAlready) {
+                    extraLabels.push('<span class="category-pill alert-announce"><i class="fas fa-bullhorn"></i> ' + c + '</span>');
+                } else if (!isError && !isAnnouncement) {
+                    // Solo agregamos categorías "normales" (como "1ª Sección")
+                    extraLabels.push(`<span class="category-pill"><i class="fas fa-folder-open"></i> ${c}</span>`);
+                }
+            });
+        }
+
+        const categoryHtml = (catName || extraLabels.length > 0) ? `
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${catName ? `
+                    <span class="category-pill">
+                        <i class="fas fa-folder-open" style="color: #0a6aa1; margin-right: 4px;"></i> ${catName}
+                    </span>
+                ` : ''}
+                ${extraLabels.join('')}
+            </div>
+        ` : '<span style="color:#ccc; font-size:0.8rem;">Sin categoría</span>';
 
         let statusIcon = '';
         if (p.status === 'Activo') statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
@@ -1113,11 +1158,7 @@ function renderAdminTable(data) {
                 </div>
             </td>
             <td>
-                ${catName ? `
-                    <span class="category-pill">
-                        <i class="fas fa-folder-open" style="color: #0a6aa1; margin-right: 4px;"></i> ${catName}
-                    </span>
-                ` : '<span style="color:#ccc; font-size:0.8rem;">Sin categoría</span>'}
+                ${categoryHtml}
             </td>
             <td>
                 <span class="hotel-badge">
@@ -1182,14 +1223,26 @@ function updateParentSections(selectedParent = '') {
     parentSelect.innerHTML = '<option value="">-- Es apartado principal --</option>';
     
     if (!categoryId) return;
-    
-    // Find all top-level protocols in this EXACT category (X.Y)
-    const parents = adminProtocols.filter(p => {
-        if (!p.section) return false;
-        const parts = p.section.split('.');
-        // Check if first segment matches EXACTLY and depth is 2 (X.Y)
-        return parts.length === 2 && parts[0] === categoryId;
-    });
+
+    const isSubsection = categoryId.includes('.');
+
+    let parents;
+    if (isSubsection) {
+        // categoryId is e.g. "8.1" — find protocols at depth 3 (8.1.X)
+        const subParts = categoryId.split('.');
+        parents = adminProtocols.filter(p => {
+            if (!p.section) return false;
+            const parts = p.section.split('.');
+            return parts.length === 3 && parts[0] === subParts[0] && parts[1] === subParts[1];
+        });
+    } else {
+        // categoryId is e.g. "8" — find protocols at depth 2 (8.Y)
+        parents = adminProtocols.filter(p => {
+            if (!p.section) return false;
+            const parts = p.section.split('.');
+            return parts.length === 2 && parts[0] === categoryId;
+        });
+    }
     
     // Natural Sort
     parents.sort((a, b) => a.section.localeCompare(b.section, undefined, { numeric: true }));
@@ -1219,28 +1272,44 @@ function generateNextId(force = false) {
     if (editingIndex !== -1 && sectionInput.value && !force) return;
 
     let highest = 0;
+    const isSubsectionCategory = categoryId.includes('.');
 
     if (parentSection) {
-        // Creating a SUB-PROTOCOL (X.Y.Z)
-        // Parent is X.Y
+        // Creating a SUB-PROTOCOL under an existing parent (X.Y.Z or X.Y.Z.W)
         const parentParts = parentSection.split('.');
-        
         adminProtocols.forEach(p => {
             if (!p.section) return;
             const parts = p.section.split('.');
-            // Match parent segments exactly (parts 0 and 1) and must be depth 3
-            if (parts.length === 3 && parts[0] === parentParts[0] && parts[1] === parentParts[1]) {
-                const num = parseInt(parts[2]);
-                if (!isNaN(num) && num > highest) highest = num;
+            // Must be exactly one level deeper than parent
+            if (parts.length === parentParts.length + 1) {
+                const matchesParent = parentParts.every((seg, i) => parts[i] === seg);
+                if (matchesParent) {
+                    const num = parseInt(parts[parentParts.length]);
+                    if (!isNaN(num) && num > highest) highest = num;
+                }
             }
         });
         sectionInput.value = `${parentSection}.${highest + 1}`;
-    } else {
-        // Creating a MAIN-PROTOCOL (X.Y)
+    } else if (isSubsectionCategory) {
+        // categoryId is e.g. "8.1" — next protocol is 8.1.Y
+        const subParts = categoryId.split('.');
         adminProtocols.forEach(p => {
             if (!p.section) return;
             const parts = p.section.split('.');
-            // Match category segment exactly (part 0) and must be depth 2
+            if (parts.length === subParts.length + 1) {
+                const matchesParent = subParts.every((seg, i) => parts[i] === seg);
+                if (matchesParent) {
+                    const num = parseInt(parts[subParts.length]);
+                    if (!isNaN(num) && num > highest) highest = num;
+                }
+            }
+        });
+        sectionInput.value = `${categoryId}.${highest + 1}`;
+    } else {
+        // Creating a MAIN-PROTOCOL (X.Y) under top-level category X
+        adminProtocols.forEach(p => {
+            if (!p.section) return;
+            const parts = p.section.split('.');
             if (parts.length === 2 && parts[0] === categoryId) {
                 const num = parseInt(parts[1]);
                 if (!isNaN(num) && num > highest) highest = num;
@@ -1321,20 +1390,20 @@ function openEditor(index = -1) {
         document.getElementById('edit-status').value = p.status || '';
         document.getElementById('edit-date').value = 'Automática';
 
-        // Check alerts
-        let isCritical = false;
-        let isAnnouncement = false;
-        try {
-            const hConf = JSON.parse(document.getElementById('edit-home-json').value || '{}');
-            if (hConf.alerts && p.section) {
-                if (hConf.alerts.critical_errors?.items) {
-                    isCritical = hConf.alerts.critical_errors.items.some(i => i.id === p.section);
-                }
-                if (hConf.alerts.announcements?.items) {
-                    isAnnouncement = hConf.alerts.announcements.items.some(i => i.id === p.section);
-                }
+        // Check isCritical and isAnnouncement from protocol or fallback to home_config
+        let isCritical = p.isCritical === true;
+        let isAnnouncement = p.isAnnouncement === true;
+        
+        // Fallback to searching in global home_config if not set on object
+        if (!p.isCritical && !p.isAnnouncement && typeof home_config !== 'undefined' && home_config.alerts) {
+            if (home_config.alerts.critical_errors?.items) {
+                isCritical = home_config.alerts.critical_errors.items.some(i => i.id === p.section);
             }
-        } catch(e) {}
+            if (home_config.alerts.announcements?.items) {
+                isAnnouncement = home_config.alerts.announcements.items.some(i => i.id === p.section);
+            }
+        }
+        
         document.getElementById('edit-is-critical').checked = isCritical;
         document.getElementById('edit-is-announcement').checked = isAnnouncement;
         
@@ -1965,6 +2034,9 @@ function saveProtocol() {
         publishedDate = adminProtocols[editingIndex].published || now;
     }
 
+    const isCritical = document.getElementById('edit-is-critical').checked;
+    const isAnnouncement = document.getElementById('edit-is-announcement').checked;
+
     const p = {
         title: title,
         section: section,
@@ -1973,6 +2045,8 @@ function saveProtocol() {
         published: publishedDate,
         updated: updatedDate,
         content: content,
+        isCritical: isCritical,
+        isAnnouncement: isAnnouncement,
         categories: [section ? `${section.split('.')[0]}ª Sección` : 'General']
     };
 
@@ -1983,9 +2057,6 @@ function saveProtocol() {
     }
 
     // Process alerts sync to home_config
-    const isCritical = document.getElementById('edit-is-critical').checked;
-    const isAnnouncement = document.getElementById('edit-is-announcement').checked;
-
     if (typeof home_config !== 'undefined') {
         const protocolId = section || ('new-' + Date.now()); 
         
