@@ -1102,8 +1102,16 @@ function renderAdminTable(data) {
         // Check alerts status for extra labels
         let extraLabels = [];
         
-        // 1. Agregar etiquetas basadas en configuración de alertas
-        if (typeof home_config !== 'undefined' && home_config.alerts) {
+        // 1. Agregar etiquetas basadas en propiedades directas del protocolo (Prioridad)
+        if (p.isCritical) {
+            extraLabels.push('<span class="category-pill alert-critical"><i class="fas fa-exclamation-circle"></i> Error Crítico</span>');
+        }
+        if (p.isAnnouncement) {
+            extraLabels.push('<span class="category-pill alert-announce"><i class="fas fa-bullhorn"></i> Comunicado</span>');
+        }
+
+        // 2. Si no tiene marcas directas, intentar buscar por sección en home_config (compatibilidad)
+        if (extraLabels.length === 0 && typeof home_config !== 'undefined' && home_config.alerts) {
             if (home_config.alerts.critical_errors?.items?.some(i => i.id === p.section)) {
                 extraLabels.push('<span class="category-pill alert-critical"><i class="fas fa-exclamation-circle"></i> Error Crítico</span>');
             }
@@ -1112,23 +1120,25 @@ function renderAdminTable(data) {
             }
         }
 
-        // 2. Agregar etiquetas basadas en categorías del protocolo (solo si no se agregaron ya por alerta)
+        // 3. Agregar etiquetas basadas en categorías del protocolo
         if (p.categories && p.categories.length > 0) {
             p.categories.forEach(c => {
                 const isError = c.toLowerCase().includes('error');
-                const isAnnouncement = c.toLowerCase().includes('comunicado');
+                const isAnnounce = c.toLowerCase().includes('comunicado');
                 
-                // Evitar duplicados si ya se agregó vía alerta arriba
-                const isCriticalAlready = extraLabels.some(l => l.includes('alert-critical'));
-                const isAnnounceAlready = extraLabels.some(l => l.includes('alert-announce'));
+                // Evitar duplicar si ya lo pusimos arriba
+                const hasCritical = extraLabels.some(l => l.includes('alert-critical'));
+                const hasAnnounce = extraLabels.some(l => l.includes('alert-announce'));
                 
-                if (isError && !isCriticalAlready) {
+                if (isError && !hasCritical) {
                     extraLabels.push('<span class="category-pill alert-critical"><i class="fas fa-exclamation-circle"></i> ' + c + '</span>');
-                } else if (isAnnouncement && !isAnnounceAlready) {
+                } else if (isAnnounce && !hasAnnounce) {
                     extraLabels.push('<span class="category-pill alert-announce"><i class="fas fa-bullhorn"></i> ' + c + '</span>');
-                } else if (!isError && !isAnnouncement) {
-                    // Solo agregamos categorías "normales" (como "1ª Sección")
-                    extraLabels.push(`<span class="category-pill"><i class="fas fa-folder-open"></i> ${c}</span>`);
+                } else if (!isError && !isAnnounce) {
+                    // Solo categorías normales (ej: "1ª Sección") si no es "General" cuando ya hay alertas
+                    if (c !== 'General' || extraLabels.length === 0) {
+                        extraLabels.push(`<span class="category-pill"><i class="fas fa-folder-open"></i> ${c}</span>`);
+                    }
                 }
             });
         }
