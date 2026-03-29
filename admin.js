@@ -17,15 +17,14 @@ window.scanHtmlLinks = function() {
     const parser = new DOMParser();
     const elements = [];
     
-    // Usamos Rexex avanzados para encontrar los fragmentos EXACTOS de texto en el editor.
-    // Esta regex mejorada maneja correctamente atributos que contienen '>' dentro de comillas (como el onerror).
+    // Usamos Rexex ultra-avanzados para encontrar los fragmentos EXACTOS de texto en el editor.
+    // Esta versión maneja incluso comillas escapadas dentro de los atributos (ej: onerror="...\'...")
     
     // 1. Buscamos Imágenes: <img ... >
-    const imgRegex = /<img\s+(?:[^"'>]|"[^"]*"|'[^']*')*>/gi;
+    const imgRegex = /<img\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>/gi;
     let match;
     while ((match = imgRegex.exec(htmlText)) !== null) {
         const fullTag = match[0];
-        // Parseamos el fragmento para extraer valores
         const tagDoc = parser.parseFromString(fullTag, 'text/html');
         const el = tagDoc.querySelector('img');
         if (el) {
@@ -33,13 +32,13 @@ window.scanHtmlLinks = function() {
                 type: 'img',
                 src: el.getAttribute('src') || '',
                 alt: el.getAttribute('alt') || '',
-                original: fullTag // Guardamos el texto exacto tal cual está en el editor
+                original: fullTag
             });
         }
     }
     
     // 2. Buscamos Enlaces: <a ...>...</a>
-    const linkRegex = /<a\s+(?:[^"'>]|"[^"]*"|'[^']*')*>([\s\S]*?)<\/a>/gi;
+    const linkRegex = /<a\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>([\s\S]*?)<\/a>/gi;
     while ((match = linkRegex.exec(htmlText)) !== null) {
         const fullTag = match[0];
         const tagDoc = parser.parseFromString(fullTag, 'text/html');
@@ -84,16 +83,16 @@ window.scanHtmlLinks = function() {
             <div>${badge}</div>
             <div style="display:flex; flex-direction:column; gap:2px;">
                 <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : 'ENLACE'}</label>
-                <input type="text" id="${input1Id}" value="${(isImg ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 6px; font-size: 0.8rem; font-family: monospace;">
+                <input type="text" id="${input1Id}" value="${(isImg ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
                 <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : 'TEXTO VISIBLE'}</label>
-                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : m.text).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 6px; font-size: 0.8rem;">
+                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : m.text).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem;">
             </div>
             <div style="display: flex; align-items: flex-end; height: 100%;">
                 <button type="button" class="btn-apply-item" 
                     data-idx="${idx}" 
-                    style="background: #27ae60; color: white; border: none; width: 100%; height:34px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 600; display:flex; align-items:center; justify-content:center; gap:5px; transition: all 0.2s;">
+                    style="background: #27ae60; color: white; border: none; width: 100%; height:34px; border-radius: 10px; font-size: 0.8rem; cursor: pointer; font-weight: 600; display:flex; align-items:center; justify-content:center; gap:5px; transition: all 0.2s;">
                     <i class="fas fa-check"></i> Aplicar
                 </button>
             </div>
@@ -101,7 +100,7 @@ window.scanHtmlLinks = function() {
                 <button type="button" class="btn-delete-item" 
                     data-idx="${idx}" 
                     title="Eliminar elemento del código"
-                    style="background: #fff; color: #e74c3c; border: 1px solid #ffcfca; width: 100%; height:34px; border-radius: 6px; cursor: pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                    style="background: #fff; color: #e74c3c; border: 1px solid #ffcfca; width: 100%; height:34px; border-radius: 10px; cursor: pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
@@ -123,17 +122,19 @@ window.scanHtmlLinks = function() {
             const val1 = document.getElementById(`html-item-url-${idx}`).value;
             const val2 = document.getElementById(`html-item-text-${idx}`).value;
             
-            // Re-parseamos el pedazo original para inyectar los valores
             const parser = new DOMParser();
             const tagDoc = parser.parseFromString(originalHtml, 'text/html');
             const el = tagDoc.querySelector(isImg ? 'img' : 'a');
             
             if (!el) return;
             
+            let oldVisibleText = "";
             if (isImg) {
+                oldVisibleText = el.getAttribute('alt') || "";
                 el.setAttribute('src', val1);
                 el.setAttribute('alt', val2);
             } else {
+                oldVisibleText = el.innerText.trim();
                 el.setAttribute('href', val1);
                 el.innerText = val2;
             }
@@ -142,7 +143,23 @@ window.scanHtmlLinks = function() {
             const editor = document.getElementById('html-editor');
             
             if (editor.value.includes(originalHtml)) {
+                // 1. Reemplazamos el tag original
                 editor.value = editor.value.replace(originalHtml, newHtml);
+                
+                // 2. SINCRONIZACIÓN INTELIGENTE: Si el texto antiguo también estaba visible en el manual, lo actualizamos
+                if (oldVisibleText && oldVisibleText.length > 2) {
+                    // Escapamos para regex
+                    const escapedOld = oldVisibleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // Buscamos el texto entre etiquetas >Texto< (ignorando espacios laterales)
+                    const syncRegex = new RegExp('>([\\s\\n\\t]*)' + escapedOld + '([\\s\\n\\t]*)<', 'g');
+                    
+                    // Solo reemplazamos si el texto realmente existe en el editor
+                    if (syncRegex.test(editor.value)) {
+                        editor.value = editor.value.replace(syncRegex, `>$1${val2}$2<`);
+                        showToast('🔄 Texto sincronizado en el manual');
+                    }
+                }
+
                 showToast('✅ Cambios aplicados');
                 window.scanHtmlLinks(); 
             } else {
