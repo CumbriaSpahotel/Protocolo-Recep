@@ -1724,20 +1724,29 @@ function addMenuRow(id, name, icon, subsections = {}, description = '') {
             <textarea class="menu-description" rows="2" placeholder="Texto descriptivo que aparece bajo el título de la sección en la Guía Operativa..." style="width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:0.88rem; resize:vertical; font-family:inherit; color:#444;">${description}</textarea>
         </div>
         
-        <div style="display: flex; gap: 20px; margin-left: 42px; margin-top: 10px;">
-            <div style="flex: 1;">
-                <label style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform:uppercase; margin-bottom: 5px; display: block;">Subsecciones Internas (Protocolos)</label>
-                <div class="subsections-container" style="border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Subrows go here -->
-                </div>
-                <button type="button" class="btn-add-sub" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.8rem; margin-top:8px; display:flex; align-items:center; gap:5px;"><i class="fas fa-plus-circle"></i> Añadir Subsección Interna</button>
-            </div>
-            <div style="flex: 1;">
-                <label style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform:uppercase; margin-bottom: 5px; display: block;">Enlaces Externos (URLs)</label>
-                <div class="links-container" style="border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="margin-left: 42px; margin-top: 15px;">
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #27ae60; text-transform:uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-external-link-alt"></i> Enlaces Externos de la Categoría
+                </label>
+                <div class="links-container" style="border-left: 2px solid #eef2f5; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
                     <!-- Link rows go here -->
                 </div>
-                <button type="button" class="btn-add-external" style="background:none; border:none; color:#27ae60; cursor:pointer; font-size:0.8rem; margin-top:8px; display:flex; align-items:center; gap:5px;"><i class="fas fa-external-link-alt"></i> Añadir Enlace Externo</button>
+                <button type="button" class="btn-add-external" style="background:none; border:none; color:#27ae60; cursor:pointer; font-size:0.8rem; margin-top:10px; display:flex; align-items:center; gap:5px; font-weight: 600;">
+                    <i class="fas fa-plus-circle"></i> Añadir Enlace Externo a la Categoría
+                </button>
+            </div>
+
+            <div style="border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #0a6aa1; text-transform:uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-sitemap"></i> Subsecciones Internas (Estructura de Protocolos)
+                </label>
+                <div class="subsections-container" style="border-left: 2px dashed #eee; padding-left: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Subrows go here -->
+                </div>
+                <button type="button" class="btn-add-sub" style="background:none; border:none; color:#0a6aa1; cursor:pointer; font-size:0.8rem; margin-top:12px; display:flex; align-items:center; gap:5px; font-weight: 600;">
+                    <i class="fas fa-plus-circle"></i> Añadir Nueva Subsección Interna
+                </button>
             </div>
         </div>
     `;

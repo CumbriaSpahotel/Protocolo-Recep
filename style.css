@@ -13,6 +13,10 @@
     --transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 body.dark-mode {
     --primary: #f8f9fa;
     --secondary: #adb5bd;
@@ -437,41 +441,49 @@ body.dark-mode .top-nav {
 .dash-search-container {
     position: relative;
     display: flex;
-    align-items: center;
-    background: #f1f3f5;
-    border-radius: 12px;
-    padding: 2px;
+    align-items: stretch;
+    background: #f1f3f5 !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
     transition: all 0.3s;
+    overflow: hidden !important;
+    border: 2px solid transparent !important;
 }
 
 .dash-search-container:focus-within {
-    background: #fff;
-    box-shadow: 0 0 0 2px var(--accent-blue);
+    background: #fff !important;
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 5px 15px rgba(0, 106, 161, 0.1) !important;
 }
 
 #dash-search-input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    padding: 0.8rem 1rem;
-    font-size: 0.95rem;
-    outline: none;
-    color: var(--text-dark);
+    flex: 1 !important;
+    min-width: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0.8rem 1.2rem !important;
+    font-size: 1rem !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: var(--text-dark) !important;
 }
 
 .dash-search-btn {
     background: var(--accent-blue);
     color: white;
     border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 10px;
+    padding: 0 1.2rem;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
 }
 
 .dash-search-btn:hover {
-    transform: scale(1.05);
     background: #085a8a;
+    width: 60px; /* Slight expansion effect */
 }
 
 /* Alerts Dashboard Card */

@@ -743,7 +743,21 @@ function renderList(items, container, options = {}) {
         // Add a numeric data attribute for potential sorting/filtering
         item.dataset.section = p.section || '';
         
-        let excerpt = stripHtml(p.content).substring(0, 180) + '...';
+        // Generate a smart snippet around the search term
+        const rawContent = stripHtml(p.content);
+        let excerpt = '';
+        if (highlightText) {
+            const idx = rawContent.toLowerCase().indexOf(highlightText.toLowerCase());
+            if (idx !== -1) {
+                const start = Math.max(0, idx - 80);
+                const end = Math.min(rawContent.length, start + 180);
+                excerpt = (start > 0 ? '...' : '') + rawContent.substring(start, end) + (end < rawContent.length ? '...' : '');
+            } else {
+                excerpt = rawContent.substring(0, 180) + '...';
+            }
+        } else {
+            excerpt = rawContent.substring(0, 180) + '...';
+        }
         let originalTitle = p.title;
         let cleanTitle = originalTitle;
         let statusBadge = null;
@@ -1085,7 +1099,20 @@ function loadProtocol(p, highlightText = '') {
         }
     });
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 5. Final positioning
+    if (highlightText) {
+        setTimeout(() => {
+            const firstHighlight = mainColumn.querySelector('.highlight');
+            if (firstHighlight) {
+                firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }, 500);
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
     setTimeout(() => {
         if (typeof renderComments === 'function') renderComments(pId);
     }, 100);

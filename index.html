@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- La CSS se carga vía JS abajo con cache-buster -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -115,9 +115,16 @@
 
     <script>
 
-        // Cargador dinámico para evitar que el navegador guarde versiones viejas de los datos
+        // Cargador dinámico para evitar que el navegador guarde versiones viejas de los datos y estilos
         (function() {
             const timestamp = Date.now();
+            
+            // Cargar CSS con cache-buster
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'style.css?t=' + timestamp;
+            document.head.appendChild(link);
+
             const scripts = [
                 'data.js?t=' + timestamp,
                 'comments.js?t=' + timestamp,
