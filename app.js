@@ -833,17 +833,18 @@ function renderList(items, container, options = {}) {
         item.innerHTML = `
             <div class="post-card-content">
                 <div class="post-header-meta">
-                    <div class="post-section-tag">${p.section ? `<i class="fas ${p.isChannel ? 'fa-satellite-dish' : 'fa-hashtag'}"></i> ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
+                    <div class="post-date"><i class="far fa-calendar-alt"></i> ${formatDate(bestDate)}</div>
+                    <div class="post-meta-separator">|</div>
+                    <div class="post-section-tag">${p.section ? `<i class="fas fa-hashtag"></i> ID ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
                     ${statusBadge ? `<div class="post-status-pill ${statusBadge.class}">${statusBadge.emoji} ${statusBadge.text}</div>` : ''}
-                    <div class="post-date"><i class="far fa-clock"></i> ${formatDate(bestDate)}</div>
                 </div>
                 
-                <h3 class="post-title">${displayTitle}</h3>
-                <p class="post-excerpt" style="line-clamp: 2; -webkit-line-clamp: 2;">${excerpt}</p>
+                <h3 class="post-title">${p.isChannel ? '📢 ' : ''}${displayTitle}</h3>
+                <p class="post-excerpt">${excerpt}</p>
                 
                 <div class="post-footer">
                     <div class="post-scope"><i class="fas fa-map-marker-alt"></i> ${scope}</div>
-                    <div class="post-action">${p.isChannel ? 'Ver canal' : 'Leer documento'} <i class="fas fa-chevron-right"></i></div>
+                    <div class="post-action-link">Leer más <i class="fas fa-long-arrow-alt-right"></i></div>
                 </div>
             </div>
         `;
@@ -1089,11 +1090,12 @@ function loadProtocol(p, highlightText = '') {
     `;
 
     // 4. Cleanup & Interactive Elements
-    // Scripts evaluation
+    // Scripts evaluation - Wrapped in IIFE to avoid global namespace collisions (e.g. STORAGE_NS)
     mainColumn.querySelectorAll('script').forEach(oldScript => {
         const newScript = document.createElement('script');
         Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-        newScript.textContent = oldScript.textContent;
+        // Use an IIFE and a generic block scope to isolate constants/lets
+        newScript.textContent = `(function(){\n${oldScript.textContent}\n})();`;
         oldScript.parentNode.replaceChild(newScript, oldScript);
     });
 
@@ -1347,7 +1349,7 @@ function handleSearch(query, pushHistory = true) {
 
     const allResults = [...protocolResults, ...channelResults];
     
-    renderList(allResults, list, query);
+    renderList(allResults, list, { highlightText: query });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1438,39 +1440,97 @@ function renderAlertsList(type) {
     const alertConfig = home_config.alerts[type];
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
+    // Premium header
+    const accentColor = type === 'critical_errors' ? '#ef4444' : '#0ea5e9';
+    const bgColor = type === 'critical_errors' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(14, 165, 233, 0.05)';
+
     mainColumn.innerHTML = `
-        <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
-        <h2 class="section-title">${alertConfig.icon} ${alertConfig.title}</h2>
-        <div id="posts-list" class="alerts-list"></div>
+        <div class="back-btn" onclick="goBack()" style="margin-bottom: 2rem;"><i class="fas fa-arrow-left"></i> Volver</div>
+        
+        <div style="background: ${bgColor}; border: 1px solid ${accentColor}33; padding: 2.5rem; border-radius: 24px; margin-bottom: 2.5rem; border-left: 8px solid ${accentColor};">
+            <div style="color: ${accentColor}; font-size: 2.5rem; margin-bottom: 1rem;">
+                <i class="fas ${alertConfig.icon || 'fa-bell'}"></i>
+            </div>
+            <h2 style="font-size: 2.2rem; color: #0f172a; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800;">${alertConfig.title || 'Comunicados'}</h2>
+            <p style="color: #64748b; margin-top: 0.5rem; font-size: 1.1rem;">Últimas notificaciones y avisos importantes para la recepción.</p>
+        </div>
+
+        <div id="posts-list" class="alerts-list" style="display: grid; gap: 1.2rem;"></div>
     `;
 
     const listContainer = document.getElementById('posts-list');
     
     if (!alertConfig.items || alertConfig.items.length === 0) {
-        listContainer.innerHTML = '<div class="no-results">No hay alertas activas en este momento.</div>';
+        listContainer.innerHTML = `
+            <div style="text-align: center; padding: 4rem; background: #f8fafc; border-radius: 20px; border: 2px dashed #e2e8f0; color: #94a3b8;">
+                <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                <p style="font-size: 1.1rem; font-weight: 500;">No hay alertas activas en este momento.</p>
+            </div>
+        `;
         return;
     }
 
     alertConfig.items.forEach(item => {
         const itemEl = document.createElement('div');
-        itemEl.className = 'post-item alert-item';
-        itemEl.innerHTML = `
-            <div class="post-meta">
-                <span><i class="far fa-calendar-alt"></i> ${item.date}</span>
-                ${item.id ? `<span><i class="fas fa-hashtag"></i> ID ${item.id}</span>` : ''}
-            </div>
-            <h3>${item.title}</h3>
+        itemEl.className = 'post-item alert-item premium-shadow';
+        
+        // Determinate hotel by text or ID (heuristic)
+        let hotelTag = '';
+        if (item.title.includes('Guadiana') || (item.id && item.id.startsWith('G'))) {
+            hotelTag = '<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">Guadiana</span>';
+        } else if (item.title.includes('Cumbria') || (item.id && item.id.startsWith('C'))) {
+            hotelTag = '<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">Cumbria</span>';
+        }
+
+        itemEl.style = `
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 18px; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
         `;
         
+        itemEl.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.75rem; font-weight: 600;">
+                    <span><i class="far fa-calendar-alt"></i> ${item.date}</span>
+                    ${item.id ? `<span style="color: #e2e8f0;">|</span><span><i class="fas fa-hashtag"></i> ID ${item.id}</span>` : ''}
+                </div>
+                ${hotelTag}
+            </div>
+            <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${item.title}</h3>
+            <div style="margin-top: 4px; display: flex; align-items: center; color: ${accentColor}; font-size: 0.8rem; font-weight: 700; gap: 6px;">
+                <span>Leer más</span> <i class="fas fa-arrow-right"></i>
+            </div>
+            <div style="position: absolute; right: -10px; bottom: -10px; font-size: 4rem; opacity: 0.03; color: ${accentColor}; transform: rotate(-15deg);">
+                <i class="fas ${alertConfig.icon || 'fa-bell'}"></i>
+            </div>
+        `;
+        
+        itemEl.onmouseenter = () => {
+            itemEl.style.transform = 'translateY(-4px) scale(1.01)';
+            itemEl.style.boxShadow = '0 12px 30px rgba(0,0,0,0.08)';
+            itemEl.style.borderColor = accentColor + '33';
+        };
+        itemEl.onmouseleave = () => {
+            itemEl.style.transform = 'none';
+            itemEl.style.boxShadow = 'none';
+            itemEl.style.borderColor = '#eef2f6';
+        };
+
         itemEl.addEventListener('click', () => {
             if (item.id) {
-                // If there's an ID, try to find the matching protocol
-                const protocol = protocols.find(p => p.section === item.id);
+                const protocol = protocols.find(p => String(p.section) === String(item.id));
                 if (protocol) {
                     viewHistory.push({ type: 'protocol', payload: protocol });
                     loadProtocol(protocol);
                 } else {
-                    // Search by title if ID match fails
                     handleSearch(item.title);
                 }
             } else {

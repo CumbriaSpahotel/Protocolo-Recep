@@ -720,12 +720,27 @@ body.dark-mode .top-nav {
     color: var(--text-muted);
 }
 
-.post-action {
+.post-action-link {
     font-size: 0.85rem;
-    color: var(--accent-blue);
-    font-weight: 600;
-    max-width: 700px;
-    line-height: 1.6;
+    color: #e74c3c;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.post-item:hover .post-action-link {
+    transform: translateX(5px);
+}
+
+.post-meta-separator {
+    color: #ddd;
+    font-size: 0.8rem;
+}
+
+.post-header-meta .post-date {
+    margin-left: 0;
 }
 
 .stats-container {
