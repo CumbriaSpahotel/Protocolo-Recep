@@ -4,6 +4,42 @@ const mainColumn = document.getElementById('main-column');
 const postsList = document.getElementById('posts-list');
 const navItems = document.getElementById('top-nav-items');
 
+// Hotel Context Management
+let currentHotel = localStorage.getItem('selectedHotel') || 'Ambos hoteles';
+
+function setHotel(hotel) {
+    currentHotel = hotel;
+    localStorage.setItem('selectedHotel', hotel);
+    // Refresh UI
+    renderNavigation();
+    const currentView = viewHistory[viewHistory.length - 1];
+    if (currentView.type === 'home') renderHome();
+    else if (currentView.type === 'protocol') loadProtocol(currentView.payload);
+    else if (currentView.type === 'category') renderCategory(currentView.name, currentView.id);
+    
+    updateHotelSelectorUI();
+}
+
+function updateHotelSelectorUI() {
+    document.querySelectorAll('.hotel-sel-btn').forEach(btn => {
+        if (btn.dataset.hotel === currentHotel) {
+            btn.classList.add('active');
+            btn.style.backgroundColor = 'var(--accent-blue)';
+            btn.style.color = 'white';
+        } else {
+            btn.classList.remove('active');
+            btn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            btn.style.color = 'white';
+        }
+    });
+
+    // Also update the chatbot context if needed
+    const botContext = document.querySelector('.chatbot-header span:last-child');
+    if (botContext) {
+        botContext.innerHTML = `<span style="width:6px; height:6px; background:#4ade80; border-radius:50%; display:inline-block;"></span> IA · ${currentHotel}`;
+    }
+}
+
 // History stack for better navigation
 // CONFIGURACIÓN DE NUBE (OPCIÓN B)
 const CLOUD_GATEWAY_URL = 'https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec';
@@ -85,6 +121,46 @@ function init() {
                 icon.className = 'fas fa-sun';
             }
         }
+    }
+
+    // Inject Hotel Selector into Header
+    const headerContent = document.querySelector('.header-content');
+    if (headerContent) {
+        const selectorDiv = document.createElement('div');
+        selectorDiv.className = 'hotel-selector-global';
+        selectorDiv.style.display = 'flex';
+        selectorDiv.style.gap = '5px';
+        selectorDiv.style.padding = '4px';
+        selectorDiv.style.background = 'rgba(0,0,0,0.2)';
+        selectorDiv.style.borderRadius = '12px';
+        selectorDiv.style.marginLeft = 'auto';
+        selectorDiv.style.marginRight = '15px';
+        
+        const hotels = [
+            { id: 'Sercotel Guadiana', short: 'Guadiana' },
+            { id: 'Cumbria Spa & Hotel', short: 'Cumbria' },
+            { id: 'Ambos hoteles', short: 'Ambos' }
+        ];
+
+        hotels.forEach(h => {
+            const btn = document.createElement('button');
+            btn.className = 'hotel-sel-btn';
+            btn.dataset.hotel = h.id;
+            btn.textContent = h.short;
+            btn.style.border = 'none';
+            btn.style.borderRadius = '8px';
+            btn.style.padding = '6px 12px';
+            btn.style.fontSize = '0.75rem';
+            btn.style.fontWeight = '700';
+            btn.style.cursor = 'pointer';
+            btn.style.transition = 'all 0.3s';
+            btn.onclick = () => setHotel(h.id);
+            selectorDiv.appendChild(btn);
+        });
+        
+        // Insert before theme toggle
+        headerContent.insertBefore(selectorDiv, document.getElementById('admin-access'));
+        updateHotelSelectorUI();
     }
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
@@ -316,7 +392,12 @@ function renderNavigation() {
             
             // --- AUTOMATIC HIERARCHY DISCOVERY ---
             // 1. Find all relevant protocols for this category prefix (e.g., "1.")
-            const catProtocols = protocols.filter(p => p.section && (String(p.section) === id || String(p.section).startsWith(id + '.')));
+            const catProtocols = protocols.filter(p => {
+                const matchSection = p.section && (String(p.section) === id || String(p.section).startsWith(id + '.'));
+                // Filter by hotel context
+                const matchHotel = currentHotel === 'Ambos hoteles' || !p.source || p.source === 'Ambos hoteles' || p.source === 'General' || p.source === currentHotel;
+                return matchSection && matchHotel;
+            });
             
             // 2. Build a map of all unique section IDs present in these protocols
             const subMap = new Map();
@@ -834,47 +915,42 @@ function loadProtocol(p, highlightText = '') {
     const pId = p.section || p.title;
     location.hash = `protocol/${encodeURIComponent(pId)}`;
     toggleHomeComponents(false);
-    // Hide sidebar for reading
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
     let content = p.content;
-    
-    // Special Case: CANALES DE VENTA (Dynamic rendering from channels_config)
     const isChannelProtocol = p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
+    
+    // 1. Prepare Content (Special Channel Case)
     if (isChannelProtocol && typeof channels_config !== 'undefined') {
-        const cumbriaChannels = channels_config.filter(c => c.hotel === 'Cumbria Spa & Hotel' || c.hotel === 'Ambos hoteles');
-        const guadianaChannels = channels_config.filter(c => c.hotel === 'Sercotel Guadiana' || c.hotel === 'Ambos hoteles');
-        const allChannels = channels_config;
+        const relevantChannels = channels_config.filter(c => 
+            currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel
+        );
 
         content = `
             <div class="channel-explorer-container">
-                <div class="hotel-selector-tabs" style="margin-bottom: 20px; display: flex; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-                    <button class="hotel-tab-btn active" onclick="filterChannelsByHotel('todos', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #004a66; background: #004a66; color: white; cursor: pointer; font-weight: 600;">Todos los Canales</button>
-                    <button class="hotel-tab-btn" onclick="filterChannelsByHotel('cumbria', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ccc; background: white; color: #555; cursor: pointer;">Cumbria Spa</button>
-                    <button class="hotel-tab-btn" onclick="filterChannelsByHotel('guadiana', this)" style="padding: 8px 16px; border-radius: 20px; border: 1px solid #ccc; background: white; color: #555; cursor: pointer;">Sercotel Guadiana</button>
+                <div class="hotel-selector-tabs" style="margin-bottom: 20px; display: flex; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #666; width: 100%; margin-bottom: 5px;">Filtrado por Hotel: <span style="color: var(--accent-blue)">${currentHotel}</span></span>
                 </div>
 
-                <nav class="channel-nav-sticky">
-                    ${channels_config.map(c => `<a href="#${c.id}" class="channel-tab" data-hotel="${c.hotel}">${c.name}</a>`).join('')}
+                <nav class="channel-nav-sticky" style="display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: -10px; z-index: 100; background: #004a66; padding: 12px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: visible;">
+                    ${relevantChannels.map(c => `<a href="#${c.id}" class="channel-tab" style="flex: 0 0 auto; white-space: nowrap; padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.1); border-radius: 6px; color: white; text-decoration: none; font-weight: 600;">${c.name}</a>`).join('')}
                 </nav>
 
                 <div id="channels-render-list">
-                    ${channels_config.map(c => `
-                        <div id="${c.id}" class="channel-section" data-hotel="${c.hotel}">
+                    ${relevantChannels.map(c => `
+                        <div id="${c.id}" class="channel-section" style="scroll-margin-top: 100px; margin-bottom: 50px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px;">
-                                <h2 style="border:none; margin:0;">${c.icon} ${c.name}</h2>
+                                <h2 style="border:none; margin:0; color: #004a66;">${c.icon} ${c.name}</h2>
                                 <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#004a66' : c.hotel === 'Sercotel Guadiana' ? '#a58c5f' : '#27ae60'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
                                     ${c.hotel || 'Ambos hoteles'}
                                 </span>
                             </div>
-                            <div class="channel-card">
+                            <div class="channel-card" style="background: white; border-radius: 12px; padding: 25px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
                                 <p style="font-weight:600; color:var(--primary); margin-bottom:10px;">${c.summary || ''}</p>
-                                <div class="channel-procedimiento">
+                                <div class="channel-procedimiento" style="color: #444; line-height: 1.6;">
                                     ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
                                 </div>
-                                
-                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:20px; border-top: 1px solid #eee; padding-top: 20px;">${c.htmlContent}</div>` : ''}
-
+                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:20px;">${c.htmlContent}</div>` : ''}
                                 ${c.notes ? `
                                     <div class="channel-notes" style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid var(--accent); border-radius:4px;">
                                         <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#555;"><i class="fas fa-info-circle"></i> PECULIARIDADES Y NOTAS:</h4>
@@ -886,311 +962,108 @@ function loadProtocol(p, highlightText = '') {
                     `).join('')}
                 </div>
             </div>
-            <script>
-                function filterChannelsByHotel(hotel, btn) {
-                    // Update buttons
-                    document.querySelectorAll('.hotel-tab-btn').forEach(b => {
-                        b.style.background = 'white';
-                        b.style.color = '#555';
-                        b.style.borderColor = '#ccc';
-                    });
-                    btn.style.background = '#004a66';
-                    btn.style.color = 'white';
-                    btn.style.borderColor = '#004a66';
-
-                    // Filter sections
-                    document.querySelectorAll('.channel-section').forEach(sec => {
-                        const secHotel = sec.dataset.hotel;
-                        if (hotel === 'todos' || secHotel === 'Ambos hoteles' || 
-                           (hotel === 'cumbria' && secHotel === 'Cumbria Spa & Hotel') || 
-                           (hotel === 'guadiana' && secHotel === 'Sercotel Guadiana')) {
-                            sec.style.display = 'block';
-                        } else {
-                            sec.style.display = 'none';
-                        }
-                    });
-
-                    // Filter tabs
-                    document.querySelectorAll('.channel-tab').forEach(tab => {
-                        const tabHotel = tab.dataset.hotel;
-                        if (hotel === 'todos' || tabHotel === 'Ambos hoteles' || 
-                           (hotel === 'cumbria' && tabHotel === 'Cumbria Spa & Hotel') || 
-                           (hotel === 'guadiana' && tabHotel === 'Sercotel Guadiana')) {
-                            tab.style.display = 'inline-flex';
-                        } else {
-                            tab.style.display = 'none';
-                        }
-                    });
-                }
-            </script>
             <style>
-                .channel-explorer-container { position: relative; }
-                .channel-nav-sticky {
-                    position: sticky;
-                    top: -20px;
-                    z-index: 100;
-                    display: flex;
-                    gap: 10px;
-                    background: #004a66;
-                    padding: 15px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    margin-bottom: 30px;
-                    overflow-x: auto;
-                    scrollbar-width: thin;
-                }
-                .channel-tab {
-                    color: white;
-                    text-decoration: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    background: rgba(255,255,255,0.1);
-                    font-weight: bold;
-                    font-size: 0.9rem;
-                    transition: all 0.3s;
-                    white-space: nowrap;
-                }
-                .channel-tab:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
-                .channel-section { scroll-margin-top: 100px; margin-bottom: 50px; }
-                .channel-section h2 { color: #004a66; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px; }
-                .channel-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-                .channel-procedimiento { color: #444; line-height: 1.6; }
-                .channel-custom-html img, .channel-custom-html video { 
-                    max-width: 100%; 
-                    height: auto; 
-                    display: block; 
-                    margin: 15px auto; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-                }
+                .channel-tab:hover { background: rgba(255,255,255,0.3) !important; transform: translateY(-2px); }
+                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
             </style>
         `;
     }
 
-    let originalTitle = p.title;
-
-    // Parse "{🟢}" status tags from title
-    let cleanTitle = originalTitle;
-    let estadoHtml = '⚪ Sin definir';
-    const emojiRegex = /\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/;
-    const emojiMatch = originalTitle.match(emojiRegex);
-
-    if (emojiMatch) {
-       const emoji = emojiMatch[1];
-       let statusText = 'Desconocido';
-       if (emoji === '🟢') statusText = 'Activo';
-       else if (emoji === '🟠' || emoji === '🟡') statusText = 'En redacción';
-       else if (emoji === '🔴') statusText = 'En proceso';
-       else statusText = emoji;
-       
-       estadoHtml = `${emoji} <span style="color: var(--text-muted); font-weight: normal;">${statusText}</span>`;
-       cleanTitle = originalTitle.replace(emojiMatch[0], '').trim();
-    } else if (p.status) {
-       let emoji = '⚪';
-       if (p.status === 'Activo') emoji = '🟢';
-       else if (p.status === 'En redacción') emoji = '🟠';
-       else if (p.status === 'En proceso') emoji = '🔴';
-       estadoHtml = `${emoji} <span style="color: var(--text-muted); font-weight: normal;">${p.status}</span>`;
-    }
-
+    // 2. Metadata & Highlighting
+    let cleanTitle = p.title.replace(/\{.*?\}/g, '').trim();
     let displayTitle = cleanTitle;
+    let statusText = p.status || 'Activo';
+    let statusEmoji = '🟢';
+    
+    if (p.title.includes('🟠') || p.title.includes('🟡')) { statusEmoji = '🟠'; statusText = 'En redacción'; }
+    else if (p.title.includes('🔴')) { statusEmoji = '🔴'; statusText = 'En proceso'; }
 
     if (highlightText) {
-        // Careful with highlighting HTML, we only want to highlight text nodes ideally, 
-        // but for a simple implementation we use a regex that ignores HTML tags
-        // A safer robust way:
         const regex = new RegExp(`(?<!<[^>]*>)(${highlightText})`, 'gi');
         content = content.replace(regex, '<span class="highlight">$1</span>');
         displayTitle = displayTitle.replace(new RegExp(`(${highlightText})`, 'gi'), '<span class="highlight">$1</span>');
     }
 
-    const scope = p.source ? p.source : 'Ambos hoteles';
-
+    // 3. Main Render Template
     mainColumn.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <div class="back-btn" onclick="goBack()" id="go-back" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Volver</div>
-            <div class="share-btn" onclick="copyProtocolLink('${pId.replace(/'/g, "\\'")}')" title="Copiar enlace directo">
-                <i class="fas fa-share-alt"></i> Copiar Vínculo
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div class="back-btn" onclick="goBack()" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Volver</div>
+            <div class="share-btn" onclick="copyProtocolLink('${pId.replace(/'/g, "\\'")}')" style="cursor: pointer; font-size: 0.85rem; color: var(--accent-blue); font-weight: 600;">
+                <i class="fas fa-share-alt"></i> Compartir
             </div>
         </div>
-        <article class="protocol-full">
-            <header class="protocol-full-header" style="text-align: center; border-bottom: none; display: flex; flex-direction: column; align-items: center; padding-bottom: 0; margin-bottom: 2rem;">
-                <h1 style="color: #032d4b; font-size: 2rem; margin-bottom: 1rem; margin-top: 1rem;">
-                    ${displayTitle}
-                </h1>
-                <div class="protocol-meta-bar" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #555; font-size: 0.9rem; padding-bottom: 0.5rem;">
-                    <span><i class="fas fa-calendar-alt"></i> <b>Última revisión:</b> ${formatDate(p.published)}</span>
-                    <span style="color: #ccc;">|</span>
-                    <span><b>Estado:</b> ${(() => {
-                        let s = p.status || estadoHtml;
-                        if (s === 'Activo') return '🟢 Activo';
-                        if (s === 'En redacción') return '🟠 En redacción';
-                        if (s === 'En proceso') return '🔴 En proceso';
-                        return s;
-                    })()}</span>
-                    <span style="color: #ccc;">|</span>
-                    <span><i class="fas fa-hotel"></i> <b>Destinatario:</b> <span style="font-weight: normal;">${scope}</span></span>
-                    ${p.section ? `<span style="color: #ccc;">|</span><span><i class="fas fa-folder"></i> <b>Sección:</b> ${p.section}</span>` : ''}
+
+        <article class="protocol-full animate-fade-in" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+            <header style="text-align: center; margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem;">
+                <h1 style="color: #032d4b; font-size: 2.2rem; margin-bottom: 1rem;">${displayTitle}</h1>
+                <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #666; font-size: 0.85rem;">
+                    <span><i class="fas fa-calendar-alt"></i> ${formatDate(p.published)}</span>
+                    <span style="color: #ddd;">|</span>
+                    <span>${statusEmoji} ${statusText}</span>
+                    <span style="color: #ddd;">|</span>
+                    <span><i class="fas fa-hotel"></i> ${p.source || 'General'}</span>
+                    ${p.section ? `<span style="color: #ddd;">|</span><span><i class="fas fa-folder"></i> Sección ${p.section}</span>` : ''}
                 </div>
-                <div style="width: 150px; height: 2px; background-color: #b8955c; margin-top: 0.5rem;"></div>
             </header>
-            <div class="protocol-full-body">
-                ${(() => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(content, 'text/html');
-                    const links = Array.from(doc.querySelectorAll('a'));
-                    
-                    const cards = links.filter(a => {
-                        const href = a.getAttribute('href') || '';
-                        return href.startsWith('#section/') || href.includes('documentos/');
-                    });
-                    
-                    if (cards.length === 0) return content;
-                    
-                    // Re-sort cards: #section first, then documentos
-                    cards.sort((a,b) => {
-                        const ha = a.getAttribute('href');
-                        const hb = b.getAttribute('href');
-                        if (ha.startsWith('#section/') && !hb.startsWith('#section/')) return -1;
-                        if (!ha.startsWith('#section/') && hb.startsWith('#section/')) return 1;
-                        return 0;
-                    });
-                    
-                    // Remove from original content to avoid duplication
-                    cards.forEach(c => c.remove());
-                    
-                    const mainContent = doc.body.innerHTML;
-                    
-                    // Footer with cards
-                    let footer = `
-                        <div class="protocol-footer-links" style="margin-top: 3rem; padding-top: 2rem; border-top: 2px dashed #eee;">
-                            <h3 style="color: #666; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-layer-group"></i> Recursos y Vínculos Relacionados
-                            </h3>
-                            <div class="cards-container" style="display: flex; flex-direction: column; gap: 4px;">
-                                ${cards.map(c => c.outerHTML).join('')}
-                            </div>
-                        </div>
-                    `;
-                    
-                    return mainContent + footer;
-                })()}
-            </div>
-            
-            <!-- Comments Section -->
-            <div class="protocol-comments-section" style="margin-top: 4rem; padding: 2rem; background: #fafafa; border-radius: 12px; border: 1px solid #eee;">
-                <h3 style="margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-comments" style="color: var(--accent-blue);"></i> Apartado de Comentarios
-                </h3>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Deja tus observaciones o dudas sobre este protocolo para que el equipo pueda revisarlas.</p>
-                
-                <div id="comments-container-${pId}" class="comments-list" style="margin-bottom: 2rem;">
-                    <!-- Placeholder for the actual comments logic -->
-                    <div style="text-align: center; color: #999; padding: 1rem; font-style: italic; border: 1px dashed #ddd; border-radius: 8px;">
-                        Actualmente no hay comentarios. Sé el primero en escribir.
-                    </div>
-                </div>
-                
-                <div class="comment-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; gap: 1rem;">
-                        <input type="text" id="comment-author" placeholder="Tu nombre" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                    </div>
-                    <textarea id="comment-text" placeholder="Escribe tu comentario aquí..." style="width: 100%; min-height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical;"></textarea>
-                    <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="align-self: flex-end; padding: 10px 24px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                        Publicar Comentario
-                    </button>
-                    <p style="font-size: 0.8rem; color: #888; text-align: right; margin-top: 0.5rem;"><i class="fas fa-lock"></i> Los comentarios requieren autorización de administración antes de ser públicos.</p>
-                </div>
+
+            <div class="protocol-full-body" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+                ${content}
             </div>
 
-            <!-- Footer Legal Notice -->
-            <footer class="protocol-legal-footer" style="margin-top: 3rem; padding: 1.5rem; border-top: 1px solid #ddd; color: #999; font-size: 0.75rem; line-height: 1.5; text-align: justify; font-style: italic;">
-                <p>
-                    <i class="fas fa-balance-scale" style="margin-right: 5px;"></i>
-                    Esta página es de uso exclusivo del personal autorizado de <strong>Sercotel Guadiana y Cumbria Spa & Hotel</strong>. 
-                    Queda estrictamente prohibido el acceso, uso, reproducción o difusión de su contenido por parte de personas no autorizadas. 
-                    El incumplimiento de esta norma podrá dar lugar a las responsabilidades legales correspondientes.
-                </p>
+            <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.8rem; color: #999; text-align: justify; font-style: italic;">
+                <p><i class="fas fa-info-circle"></i> Documento de uso interno. Queda prohibida la reproducción o difusión no autorizada de este protocolo.</p>
             </footer>
         </article>
+        
+        <div id="comments-section-container"></div>
     `;
-    
-    // Evaluate dynamically injected scripts from the content
-    const scripts = mainColumn.querySelectorAll('script');
-    scripts.forEach(oldScript => {
+
+    // 4. Cleanup & Interactive Elements
+    // Scripts evaluation
+    mainColumn.querySelectorAll('script').forEach(oldScript => {
         const newScript = document.createElement('script');
         Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        newScript.textContent = oldScript.textContent;
         oldScript.parentNode.replaceChild(newScript, oldScript);
     });
-    
-    // Process all links inside the loaded content
-    const articleLinks = mainColumn.querySelectorAll('.protocol-full-body a');
-    articleLinks.forEach(link => {
+
+    // Remove floating navigation bars from content
+    mainColumn.querySelectorAll('nav.fixed, .fixed.top-1\\/2, .floating-nav').forEach(el => el.remove());
+
+    // Setup internal links
+    mainColumn.querySelectorAll('.protocol-full-body a').forEach(link => {
         const href = link.getAttribute('href');
         if (!href) return;
 
-        // Anchor links within the same protocol (e.g. #synxis)
         if (href.startsWith('#') && !href.includes('/') && href.length > 1) {
-            link.addEventListener('click', (e) => {
+            link.onclick = (e) => {
                 e.preventDefault();
-                const targetId = href.slice(1);
-                const target = document.getElementById(targetId);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-            return;
-        }
-
-        // Vínculos internos entre apartados (e.g. #section/1.1)
-        if (href.startsWith('#section/')) {
+                const target = document.getElementById(href.slice(1));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+        } else if (href.startsWith('#section/')) {
             link.classList.add('internal-link');
-            // Añadir icono si no lo tiene
-            if (!link.innerHTML.includes('fa-') && !link.innerHTML.includes('📊')) {
-                link.innerHTML = `<i class="fas fa-external-link-alt" style="font-size: 0.8em; margin-right: 5px; opacity: 0.7;"></i> ${link.innerHTML}`;
-            }
-
-            link.addEventListener('click', (e) => {
+            link.onclick = (e) => {
                 e.preventDefault();
-                const sectionId = href.split('/')[1];
-                const targetProtocol = protocols.find(p => p.section === sectionId);
-                if (targetProtocol) {
-                    viewHistory.push({ type: 'protocol', payload: targetProtocol });
-                    loadProtocol(targetProtocol);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    alert('El apartado vinculado no se encuentra disponible.');
+                const sId = href.split('/')[1];
+                const target = protocols.find(pr => pr.section === sId);
+                if (target) {
+                    viewHistory.push({ type: 'protocol', payload: target });
+                    loadProtocol(target);
                 }
-            });
-            return;
-        }
-
-        // If it's a link to the old or new blog
-        if (href.includes('operativarecepcion2024.blogspot.com') || href.includes('procedimientoshotelguadiana.blogspot.com')) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                // Try to find if we have a protocol that matches a part of this URL (like the slug)
-                // For a static site, we will just search by the text inside the link or a simple fallback
-                const linkText = link.textContent.trim();
-                if (linkText) {
-                    handleSearch(linkText); // Use our search to find the referenced protocol
-                } else {
-                    window.open(href, '_blank'); // Fallback to new tab
-                }
-            });
+            };
         } else if (href.startsWith('http')) {
-            // It's an external link (like an image or another site), always open in new tab
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
         }
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Auto-render comments for this protocol
-    setTimeout(() => renderComments(pId), 100);
+    setTimeout(() => {
+        if (typeof renderComments === 'function') renderComments(pId);
+    }, 100);
 }
+
 
 function goBack() {
     // Pop current view
@@ -1993,6 +1866,10 @@ async function generateBotResponse(userInput) {
             if (infoHtml.includes(term)) score += 5;
         });
 
+        // Filter by hotel context
+        const isMatchHotel = currentHotel === 'Ambos hoteles' || !p.source || p.source === 'Ambos hoteles' || p.source === 'General' || p.source === currentHotel;
+        if (!isMatchHotel) score = 0;
+
         return { protocol: p, score, source: 'protocol' };
     }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
 
@@ -2013,6 +1890,10 @@ async function generateBotResponse(userInput) {
             if (notes.includes(term)) score += 20;
             if (htmlContent.includes(term)) score += 10;
         });
+
+        // Filter by hotel context
+        const isMatchHotel = currentHotel === 'Ambos hoteles' || ch.hotel === 'Ambos hoteles' || ch.hotel === currentHotel;
+        if (!isMatchHotel) score = 0;
 
         return {
             protocol: { title: ch.name, section: 'Canal: ' + ch.name, content: ch.content, info_html: ch.htmlContent },
@@ -2048,7 +1929,8 @@ async function generateBotResponse(userInput) {
             // ============================================================
             // THE PROFESSOR SYSTEM PROMPT
             // ============================================================
-            const systemPrompt = `Eres un FORMADOR EXPERTO de recepción hotelera para los hoteles Sercotel Guadiana y Cumbria Spa. Tu rol es el de un profesor paciente y cercano que enseña a recepcionistas novatos.
+            const systemPrompt = `Eres un FORMADOR EXPERTO de recepción hotelera para los hoteles Sercotel Guadiana y Cumbria Spa.
+CONTEXTO ACTUAL: Estás enseñando en el hotel "${currentHotel}". Tus respuestas deben priorizar los procedimientos específicos de este hotel si existen.
 
 REGLAS DE COMPORTAMIENTO:
 1. EXPLICA como un profesor: no solo digas "qué hacer", explica "POR QUÉ" se hace así.
@@ -2070,7 +1952,7 @@ FORMATO DE RESPUESTA:
 - Usa 💡 para consejos prácticos
 - Usa ✅ para confirmaciones
 
-${contextText ? 'DOCUMENTACIÓN INTERNA DISPONIBLE:' + contextText : 'No he encontrado documentación interna relevante para esta consulta.'}`;
+${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCase()}:` + contextText : 'No he encontrado documentación interna relevante para esta consulta en este hotel.'}`;
 
             // Add to memory
             chatMemory.add('user', userInput);
@@ -2085,7 +1967,8 @@ ${contextText ? 'DOCUMENTACIÓN INTERNA DISPONIBLE:' + contextText : 'No he enco
 
             console.log('[Chatbot] ➡️ Enviando a Gemini con', allMatches.length, 'docs de contexto y', chatMemory.messages.length, 'msgs de memoria');
             
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cloud_config.geminiApiKey}`, {
+            // Use the local server proxy to hide the API Key and avoid CORS/404 issues
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -2106,8 +1989,12 @@ ${contextText ? 'DOCUMENTACIÓN INTERNA DISPONIBLE:' + contextText : 'No he enco
 
             const rawData = await response.json();
             
+            if (response.status === 403 || response.status === 401) {
+                throw new Error('La clave de API es inválida o ha sido bloqueada por seguridad (Exposed Key). Por favor, genera una nueva en Google AI Studio.');
+            }
+
             if (rawData.error) throw new Error(rawData.error.message || 'Error en la API');
-            if (!rawData.candidates || !rawData.candidates[0]) throw new Error('Respuesta vacía');
+            if (!rawData.candidates || !rawData.candidates[0]) throw new Error('Respuesta vacía de la IA');
             
             let answerText = rawData.candidates[0].content.parts[0].text;
             

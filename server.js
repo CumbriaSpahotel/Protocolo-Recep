@@ -335,7 +335,6 @@ app.get('/api/sync-cloud', async (req, res) => {
     if (!targetUrl) {
         return res.status(400).json({ success: false, message: 'Falta el parámetro url' });
     }
-    // Only allow Google Apps Script URLs for security
     if (!targetUrl.startsWith('https://script.google.com/')) {
         return res.status(403).json({ success: false, message: 'URL no permitida' });
     }
@@ -343,59 +342,84 @@ app.get('/api/sync-cloud', async (req, res) => {
         const fetchData = (url) => new Promise((resolve, reject) => {
             const client = url.startsWith('https') ? https : http;
             client.get(url, { headers: { 'Accept': 'application/json, text/csv, text/plain' } }, (response) => {
-                // Follow redirects (Google Apps Script always redirects)
                 if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    const redirectUrl = response.headers.location;
-                    console.log(`📡 Siguiendo redirección a: ${redirectUrl.substring(0, 100)}...`);
-                    return resolve(fetchData(redirectUrl));
+                    return resolve(fetchData(response.headers.location));
                 }
                 let data = '';
                 response.on('data', chunk => data += chunk);
                 response.on('end', () => {
-                    console.log(`🌐 Respuesta recibida (${response.statusCode}). Tamaño: ${data.length} chars.`);
-                    
-                    // Attempt JSON parse
-                    try { 
-                        return resolve(JSON.parse(data)); 
-                    } catch(e) { 
-                        // If JSON fails, check if it looks like CSV
-                        if (data.includes(',') && data.includes('\n')) {
-                            console.log('📄 Detectada posible respuesta CSV, par seando...');
-                            return resolve(parseCSV(data));
-                        }
-                        
-                        console.error('❌ Error parseando respuesta de Google.');
-                        console.error(data.substring(0, 500)); 
-                        reject(new Error('La respuesta no es JSON ni CSV válido. Revisa los permisos del documento.')); 
+                    try { resolve(JSON.parse(data)); } 
+                    catch(e) { 
+                        if (data.includes(',') && data.includes('\n')) resolve(parseCSV(data));
+                        else reject(new Error('Formato no válido'));
                     }
                 });
             }).on('error', reject);
         });
 
-        // Simple CSV Parser: Assumes headers: pId, pTitle, author, text, date
         function parseCSV(csv) {
             const lines = csv.split(/\r?\n/).filter(line => line.trim());
             if (lines.length < 2) return [];
-            
             const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
             return lines.slice(1).map(line => {
-                // Simple split by comma (doesn't handle commas inside quotes, but better than nothing for now)
-                // A better regex for CSV split: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
                 const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
                 const obj = {};
-                headers.forEach((h, i) => {
-                    obj[h === 'timestamp' ? 'date' : h] = values[i];
-                });
+                headers.forEach((h, i) => { obj[h === 'timestamp' ? 'date' : h] = values[i]; });
                 return obj;
             });
         }
-        
-        const cloudData = await fetchData(targetUrl);
-        console.log(`☁️ Sync cloud: ${Array.isArray(cloudData) ? cloudData.length : '?'} registros obtenidos`);
-        res.json(cloudData);
+        res.json(await fetchData(targetUrl));
     } catch (e) {
-        console.error('❌ Error en sync-cloud proxy:', e.message);
-        res.status(502).json({ success: false, message: 'Error al conectar con la nube: ' + e.message });
+        res.status(502).json({ success: false, message: e.message });
+    }
+});
+
+// Chatbot AI Proxy Endpoint (Hides API Key and follows Google's safety rules)
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { contents, generationConfig, safetySettings } = req.body;
+        
+        // 1. Get API Key from current data.js to ensure it's up to date
+        const dataFilePath = path.join(__dirname, 'data.js');
+        let apiKey = '';
+        if (fs.existsSync(dataFilePath)) {
+            const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+            // Regex más robusto para encontrar la clave esté donde esté en el cloud_config
+            const keyMatch = fileContent.match(/"geminiApiKey":\s*"([^"]+)"/);
+            if (keyMatch) apiKey = keyMatch[1];
+        }
+
+        if (!apiKey) {
+            console.error('❌ No se encontró geminiApiKey en data.js');
+            return res.status(401).json({ error: { message: "No se ha configurado ninguna Gemini API Key en el panel de administración." } });
+        }
+
+        // 2. Perform the request from the server side
+        // Usando el alias exacto que funcionó en tu CURL: gemini-flash-latest
+        const apiUri = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent`;
+        
+        console.log(`🤖 LLamando a Gemini (${apiUri}) desde el servidor...`);
+
+        const geminiRes = await fetch(apiUri, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey 
+            },
+            body: JSON.stringify({ contents, generationConfig, safetySettings })
+        });
+
+        const data = await geminiRes.json();
+        
+        if (!geminiRes.ok) {
+            console.error('❌ Error de la API de Gemini:', data);
+        }
+
+        res.status(geminiRes.status).json(data);
+
+    } catch (e) {
+        console.error('❌ Error in AI Proxy:', e);
+        res.status(500).json({ error: { message: 'Error interno en el servidor de IA: ' + e.message } });
     }
 });
 
