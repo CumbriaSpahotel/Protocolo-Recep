@@ -39,38 +39,71 @@ app.use(express.json({limit: '50mb'}));
 app.post('/api/save', (req, res) => {
     try {
         const data = req.body;
-        let jsContent = '';
         
-        // 1. Channels Config (Top of file, global var)
-        const channels = data.channelsConfig || (typeof channels_config !== 'undefined' ? channels_config : []);
+        // ====================================================================
+        // CRITICAL: Read EXISTING data.js first to preserve data not being sent.
+        // The browser only sends what it's updating (e.g. cloudConfig).
+        // We must NOT replace other sections with empty defaults.
+        // ====================================================================
+        let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [] };
+        
+        const dataFilePath = path.join(__dirname, 'data.js');
+        if (fs.existsSync(dataFilePath)) {
+            try {
+                const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+                // Parse each variable from the existing file using regex
+                const extractVar = (varName) => {
+                    // Match: var/const varName = <JSON>;
+                    const regex = new RegExp(`(?:var|const|let)\\s+${varName}\\s*=\\s*([\\s\\S]*?);\\s*(?:(?:var|const|let)\\s|$)`, 'm');
+                    const match = fileContent.match(regex);
+                    if (match && match[1]) {
+                        try { return JSON.parse(match[1].trim()); } catch(e) { return null; }
+                    }
+                    return null;
+                };
+                existing.channels = extractVar('channels_config') || [];
+                existing.protocols = extractVar('protocols_data') || [];
+                existing.nav = extractVar('navigation_config') || {};
+                existing.home = extractVar('home_config') || {};
+                existing.cloud = extractVar('cloud_config') || { scriptUrl: '', sheetId: '', geminiApiKey: '' };
+                existing.menus = extractVar('menus_data') || [];
+                console.log(`📖 Datos existentes leídos: ${existing.protocols.length} protocolos, ${existing.channels.length} canales`);
+            } catch (parseErr) {
+                console.warn('⚠️ No se pudo parsear data.js existente, se usarán valores del request:', parseErr.message);
+            }
+        }
+        
+        // Merge: use request data if provided AND non-empty, otherwise keep existing
+        const hasData = (val) => val !== undefined && val !== null && (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0);
+        
+        const channels = hasData(data.channelsConfig) ? data.channelsConfig : existing.channels;
+        const protocols = hasData(data.protocols) ? data.protocols : existing.protocols;
+        const nav = hasData(data.navConfig) ? data.navConfig : existing.nav;
+        const home = hasData(data.homeConfig) ? data.homeConfig : existing.home;
+        const menus = hasData(data.menusConfig) ? data.menusConfig : existing.menus;
+        
+        // Cloud config is special: always merge field-by-field so we don't lose the API key
+        const cloud = { ...existing.cloud };
+        if (data.cloudConfig) {
+            if (data.cloudConfig.scriptUrl !== undefined) cloud.scriptUrl = data.cloudConfig.scriptUrl;
+            if (data.cloudConfig.sheetId !== undefined) cloud.sheetId = data.cloudConfig.sheetId;
+            if (data.cloudConfig.geminiApiKey !== undefined) cloud.geminiApiKey = data.cloudConfig.geminiApiKey;
+        }
+
+        let jsContent = '';
         jsContent += 'var channels_config = ' + JSON.stringify(channels, null, 2) + ';\n\n';
-
-        // 2. Protocols Data
-        const protocols = data.protocols || (typeof protocols_data !== 'undefined' ? protocols_data : []);
         jsContent += 'const protocols_data = ' + JSON.stringify(protocols, null, 2) + ';\n\n';
-
-        // 3. Navigation Config
-        const nav = data.navConfig || (typeof navigation_config !== 'undefined' ? navigation_config : {});
         jsContent += 'const navigation_config = ' + JSON.stringify(nav, null, 2) + ';\n\n';
-
-        // 4. Home Config
-        const home = data.homeConfig || (typeof home_config !== 'undefined' ? home_config : {});
         jsContent += 'const home_config = ' + JSON.stringify(home, null, 2) + ';\n\n';
-
-        // 5. Cloud Config (Added dynamically)
-        const cloud = data.cloudConfig || (typeof cloud_config !== 'undefined' ? cloud_config : { scriptUrl: '', sheetId: '' });
         jsContent += 'var cloud_config = ' + JSON.stringify(cloud, null, 2) + ';\n\n';
-
-        // 6. Menus Data
-        const menus = data.menusConfig || (typeof menus_data !== 'undefined' ? menus_data : []);
         jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
 
         if(!jsContent || jsContent.length < 50) {
            throw new Error("Contenido generado insuficiente o vacío");
         }
 
-        fs.writeFileSync(path.join(__dirname, 'data.js'), jsContent, 'utf-8');
-        console.log('✅ data.js actualizado correctamente');
+        fs.writeFileSync(dataFilePath, jsContent, 'utf-8');
+        console.log(`✅ data.js actualizado correctamente (${(jsContent.length / 1024).toFixed(0)} KB, ${protocols.length} protocolos, ${channels.length} canales)`);
         res.json({ success: true, message: 'Datos guardados correctamente' });
     } catch (e) {
         console.error('❌ Error al guardar:', e);

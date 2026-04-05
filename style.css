@@ -1604,9 +1604,9 @@ body.dark-mode .chatbot-window {
 }
 
 .chatbot-header {
-    background: var(--accent-blue);
+    background: linear-gradient(135deg, #0a6aa1 0%, #004a66 50%, #003049 100%);
     color: white;
-    padding: 20px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1877,3 +1877,57 @@ body.dark-mode .chat-excerpt {
     border-color: #444;
 }
 
+/* AI Response Styling */
+.ai-response {
+    position: relative;
+}
+
+.ai-response h3, .ai-response h4 {
+    margin-top: 10px !important;
+}
+
+.ai-response strong {
+    font-weight: 700;
+}
+
+body.dark-mode .ai-response strong {
+    color: #90caf9 !important;
+}
+
+body.dark-mode .ai-response h3,
+body.dark-mode .ai-response h4 {
+    color: #4fc3f7 !important;
+}
+
+/* Bot message with avatar */
+.bot-message {
+    position: relative;
+    padding-left: 16px !important;
+}
+
+.bot-message::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 8px;
+    width: 3px;
+    height: calc(100% - 16px);
+    background: linear-gradient(to bottom, #0a6aa1, transparent);
+    border-radius: 2px;
+    opacity: 0.4;
+}
+
+/* Wider window for AI responses */
+.chatbot-window {
+    width: 420px !important;
+    height: 580px !important;
+}
+
+@media (max-width: 500px) {
+    .chatbot-window {
+        width: calc(100% - 20px) !important;
+        right: 10px !important;
+        bottom: 80px !important;
+        height: calc(100vh - 140px) !important;
+    }
+}

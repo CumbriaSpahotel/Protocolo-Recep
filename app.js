@@ -1699,6 +1699,31 @@ function getLegalFooterHtml() {
 }
 
 /* --- CHATBOT LOGIC --- */
+
+// ============================================================
+// CONVERSATION MEMORY — Allows the AI to remember context
+// ============================================================
+const chatMemory = {
+    messages: [],  // {role: 'user'|'model', text: '...'}
+    maxHistory: 8, // Keep last N exchanges
+    
+    add(role, text) {
+        this.messages.push({ role, text: text.substring(0, 500) });
+        if (this.messages.length > this.maxHistory * 2) {
+            this.messages = this.messages.slice(-this.maxHistory * 2);
+        }
+    },
+    
+    getHistory() {
+        return this.messages.map(m => ({
+            role: m.role,
+            parts: [{ text: m.text }]
+        }));
+    },
+    
+    clear() { this.messages = []; }
+};
+
 function initChatbot() {
     const trigger = document.getElementById('chatbot-trigger');
     const container = document.getElementById('chatbot-container');
@@ -1710,7 +1735,7 @@ function initChatbot() {
 
     trigger.onclick = () => {
         container.style.display = container.style.display === 'flex' ? 'none' : 'flex';
-        input.focus();
+        if (container.style.display === 'flex') input.focus();
     };
 
     closeBtn.onclick = () => {
@@ -1748,7 +1773,6 @@ function showTypingIndicator() {
     const messagesContainer = document.getElementById('chatbot-messages');
     if (!messagesContainer) return;
     
-    // Don't add if already there
     if (messagesContainer.querySelector('.typing')) return;
 
     const typingDiv = document.createElement('div');
@@ -1768,8 +1792,9 @@ function processChatInput() {
 
     showTypingIndicator();
     
-    // Natural delay logic
-    const delay = Math.max(1000, Math.min(2500, text.length * 20));
+    // Shorter delay for AI mode — it already has network latency
+    const hasKey = typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey && cloud_config.geminiApiKey.length > 10;
+    const delay = hasKey ? 300 : Math.max(800, Math.min(2000, text.length * 15));
     setTimeout(() => {
         generateBotResponse(text);
     }, delay);
@@ -1779,6 +1804,11 @@ function getExcerpt(html, maxLength = 120) {
     if (!html) return '';
     const temp = document.createElement('div');
     temp.innerHTML = html;
+    
+    // Remove style and script tags to avoid garbage in snippets
+    const styles = temp.querySelectorAll('style, script');
+    styles.forEach(s => s.remove());
+    
     const text = temp.textContent || temp.innerText || '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
@@ -1788,6 +1818,10 @@ function getKeyPoints(html, maxPoints = 3) {
     if (!html) return null;
     const temp = document.createElement('div');
     temp.innerHTML = html;
+    
+    // Clean CSS/Scripts
+    const styles = temp.querySelectorAll('style, script');
+    styles.forEach(s => s.remove());
     
     // Try <li> items first
     const items = Array.from(temp.querySelectorAll('li'))
@@ -1811,6 +1845,11 @@ function getContextSnippets(html, searchTerms, maxSnippets = 3) {
     if (!html || !searchTerms || searchTerms.length === 0) return null;
     const temp = document.createElement('div');
     temp.innerHTML = html;
+    
+    // Clean CSS/Scripts
+    const styles = temp.querySelectorAll('style, script');
+    styles.forEach(s => s.remove());
+    
     const fullText = temp.textContent || temp.innerText || '';
     
     // Split into sentences (by . ; : or newline)
@@ -1849,121 +1888,377 @@ function getContextSnippets(html, searchTerms, maxSnippets = 3) {
     return results.length > 0 ? results : null;
 }
 
-function generateBotResponse(userInput) {
+async function generateBotResponse(userInput) {
     const input = userInput.toLowerCase();
     
-    // SYNONYM ENHANCEMENT
+    // ============================================================
+    // EXPANDED SYNONYM MAP — Covers hotel-specific terminology
+    // ============================================================
     const synonymMap = {
-        'wifi': ['internet', 'red', 'clave', 'conexion'],
-        'pms': ['tesipro', 'sistema', 'programa'],
-        'hab': ['habitacion', 'alojamiento', 'cuarto'],
+        'wifi': ['internet', 'red', 'clave', 'conexion', 'contraseña'],
+        'pms': ['tesipro', 'sistema', 'programa', 'software'],
+        'hab': ['habitacion', 'alojamiento', 'cuarto', 'room'],
         'copia': ['duplicado', 'clonar'],
         'qr': ['codigo', 'digital'],
-        'factura': ['ticket', 'pago', 'cobro', 'invoice'],
-        'menor': ['menores', 'niño', 'niña', 'hijo', '14'],
-        'dni': ['documento', 'identidad', 'pasaporte']
+        'factura': ['ticket', 'pago', 'cobro', 'invoice', 'facturacion', 'facturar'],
+        'menor': ['menores', 'niño', 'niña', 'hijo', '14', 'grupo'],
+        'dni': ['documento', 'identidad', 'pasaporte', 'ses', 'hospedajes'],
+        'booking': ['vcc', 'booking.com'],
+        'expedia': ['collect', 'hotel collect'],
+        'ota': ['online travel agency', 'canal', 'canales'],
+        'synxis': ['sercotel', 'motor', 'directas', 'roiback'],
+        'agencia': ['credito', 'bono', 'comision', 'keytel', 'hotelbeds', 'avoris', 'nautalia'],
+        'checkin': ['check-in', 'registro', 'llegada', 'entrada'],
+        'checkout': ['check-out', 'salida', 'caja'],
+        'caja': ['efectivo', 'deposito', 'cuadre', 'fondo', 'dinero'],
+        'turno': ['noche', 'mañana', 'tarde', 'auditor'],
+        'soulguest': ['soul', 'guest', 'enlace', 'link', 'precheckin', 'online'],
+        'reserva': ['reservas', 'entran', 'entra', 'llegan', 'descarga'],
+        'cancelacion': ['cancelar', 'anular', 'noshow', 'no-show'],
+        'tarifa': ['precio', 'rate', 'nrf', 'bar', 'descuento']
     };
 
     // FILTER FILLER WORDS
-    const fillers = ['de', 'el', 'la', 'los', 'las', 'un', 'una', 'con', 'para', 'por', 'que'];
+    const fillers = ['de', 'el', 'la', 'los', 'las', 'un', 'una', 'con', 'para', 'por', 'que', 'como', 'en', 'es', 'se', 'del', 'al', 'hay', 'son', 'qué', 'cómo', 'cuál'];
     const words = input.split(/\s+/).filter(w => w.length > 1 && !fillers.includes(w));
 
     let searchTerms = [input, ...words];
     for (const [key, values] of Object.entries(synonymMap)) {
-        if (input.includes(key)) {
-            searchTerms = [...searchTerms, ...values];
+        if (words.some(w => w.includes(key) || key.includes(w))) {
+            searchTerms = [...searchTerms, key, ...values];
         }
     }
+    // Deduplicate
+    searchTerms = [...new Set(searchTerms)];
     
-    // GREETINGS
-    const greetings = ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'ey', 'saludos', 'ayuda'];
-    if (greetings.some(g => input.includes(g))) {
-        appendChatMessage('bot', '¡Hola! Soy tu asistente inteligente. Puedo buscar procedimientos, protocolos y resolver dudas sobre la operativa del hotel.');
+    // ============================================================
+    // GREETINGS — Friendly welcome
+    // ============================================================
+    const greetings = ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'ey', 'saludos', 'ayuda', 'buenas', 'hey'];
+    const isGreeting = greetings.some(g => words.includes(g) || input === g);
+    
+    if (isGreeting && words.length <= 3) {
+        const hour = new Date().getHours();
+        const saludo = hour < 14 ? '¡Buenos días' : hour < 21 ? '¡Buenas tardes' : '¡Buenas noches';
+        appendChatMessage('bot', `${saludo}! 👋 Soy tu formador virtual de recepción. Pregúntame lo que necesites: procedimientos de check-in, cómo funcionan los canales (Booking, Expedia...), facturación, gestión de caja, grupos, y mucho más. Estoy aquí para enseñarte paso a paso.`, true);
         renderQuickReplies();
         return;
     }
 
-    // SEARCH IN PROTOCOLS
-    const matches = (typeof protocols_data !== 'undefined' ? protocols_data : protocols).map(p => {
+    // Thanks — Fixed false positive for 'booking' containing 'ok'
+    const thanks = ['gracias', 'perfecto', 'genial', 'vale', 'ok', 'entendido', 'claro', 'guay', 'gracia', 'thanks'];
+    const isThanks = thanks.some(t => words.includes(t) || input === t);
+    
+    if (isThanks && words.length <= 3) {
+        appendChatMessage('bot', '¡De nada! 😊 Si tienes más dudas, aquí estoy. Recuerda que puedes preguntarme sobre cualquier procedimiento del manual.', true);
+        return;
+    }
+
+    // Help / Capabilities
+    const helpTerms = ['puedes hacer', 'como funcionas', 'quien eres', 'ayuda', 'ayudame', 'que haces', 'funciones'];
+    if (helpTerms.some(h => input.includes(h))) {
+        const helpMsg = `
+            <div class="ai-response">
+                <p>Soy tu <b>Formador IA</b> y puedo ayudarte con cualquier duda sobre los procedimientos del hotel. Estás son algunas cosas que puedes preguntarme:</p>
+                <ul>
+                    <li><b>Check-in / Check-out:</b> Cómo hacer registros, registros de menores, cierres de caja...</li>
+                    <li><b>Canales de Venta:</b> Diferencias entre Booking, Expedia, Synxis, etc.</li>
+                    <li><b>Facturación:</b> Cómo facturar a agencias, emitir tickets o gestionar duplicados.</li>
+                    <li><b>Procedimientos Diarios:</b> Turnos, auditoría nocturna, arqueo de caja.</li>
+                </ul>
+                <p>💡 <i>Escribe tu duda y buscaré la respuesta paso a paso en el manual.</i></p>
+            </div>
+        `;
+        appendChatMessage('bot', helpMsg, true);
+        renderQuickReplies();
+        return;
+    }
+
+    // ============================================================
+    // SEARCH IN PROTOCOLS + CHANNELS
+    // ============================================================
+    const allProtocols = typeof protocols_data !== 'undefined' ? protocols_data : (typeof protocols !== 'undefined' ? protocols : []);
+    const matches = allProtocols.map(p => {
         let score = 0;
         const title = (p.title || '').toLowerCase();
         const section = (p.section || '').toLowerCase();
         const content = (p.content || '').toLowerCase();
+        const infoHtml = (p.info_html || '').toLowerCase();
 
         searchTerms.forEach(term => {
+            if (term.length < 2) return;
             if (title.includes(term)) score += 50;
             if (section.includes(term)) score += 100;
             if (content.includes(term)) score += 10;
+            if (infoHtml.includes(term)) score += 5;
         });
 
-        return { protocol: p, score: score };
+        return { protocol: p, score, source: 'protocol' };
     }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
 
-    if (matches.length > 0) {
-        // Store protocols in a global index to avoid inline string escaping issues
-        if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
-        
-        let combinedLinksHtml = '<div style="margin-bottom: 8px;">He analizado los protocolos y esto es lo más relevante:</div>';
-        
-        matches.slice(0, 3).forEach((m, i) => {
-            const p = m.protocol;
-            const cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
-            const idxKey = 'p_' + Date.now() + '_' + i;
-            window._chatProtocolIndex[idxKey] = p;
-            
-            // Resolve category name
-            const CAT_MAP = typeof getCatMap === 'function' ? getCatMap() : {};
-            const sectionStr = String(p.section || '');
-            const catId = sectionStr.split('.')[0];
-            const catName = CAT_MAP[catId] ? CAT_MAP[catId].name : null;
-            
-            // Build context snippets (KWIC)
-            const snippets = getContextSnippets(p.info_html || p.content, searchTerms);
-            let summaryHtml = '';
-            if (snippets && snippets.length > 0) {
-                summaryHtml = `<ul class="chat-kwic-list">${
-                    snippets.map(s => `<li>${s}</li>`).join('')
-                }</ul>`;
-            } else {
-                const keyPoints = typeof getKeyPoints === 'function' ? getKeyPoints(p.info_html || p.content) : null;
-                if (keyPoints && keyPoints.length > 0) {
-                    summaryHtml = `<ul class="chat-kwic-list">${
-                        keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')
-                    }</ul>`;
-                } else {
-                    const fallback = typeof getExcerpt === 'function' ? getExcerpt(p.info_html || p.content, 130) : '';
-                    summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
-                }
-            }
-            
-            combinedLinksHtml += `
-                <div style="margin: 15px 0; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px;">
-                    ${catName ? `<div class="chat-category-tag"><i class="fas fa-folder"></i>${catName}</div>` : ''}
-                    <a href="#" class="chat-link" onclick="event.preventDefault(); window.handleChatLinkByKey('${idxKey}')">
-                        <i class="fas fa-file-alt"></i> ${p.section ? p.section + ' - ' : ''}${cleanTitle}
-                    </a>
-                    ${summaryHtml}
-                </div>
-            `;
+    const allChannels = typeof channels_config !== 'undefined' ? channels_config : [];
+    const channelMatches = allChannels.map(ch => {
+        let score = 0;
+        const name = (ch.name || '').toLowerCase();
+        const summary = (ch.summary || '').toLowerCase();
+        const content = (ch.content || '').toLowerCase();
+        const notes = (ch.notes || '').toLowerCase();
+        const htmlContent = (ch.htmlContent || '').toLowerCase();
+
+        searchTerms.forEach(term => {
+            if (term.length < 2) return;
+            if (name.includes(term)) score += 200;
+            if (summary.includes(term)) score += 50;
+            if (content.includes(term)) score += 30;
+            if (notes.includes(term)) score += 20;
+            if (htmlContent.includes(term)) score += 10;
         });
+
+        return {
+            protocol: { title: ch.name, section: 'Canal: ' + ch.name, content: ch.content, info_html: ch.htmlContent },
+            score, source: 'channel', channelData: ch
+        };
+    }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
+
+    const allMatches = [...channelMatches, ...matches].sort((a,b) => b.score - a.score);
+
+    console.log('[Chatbot] Pregunta:', userInput);
+    console.log('[Chatbot] Matches:', allMatches.length, `(${channelMatches.length} canales, ${matches.length} protocolos)`);
+    
+    const hasGeminiKey = typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey && cloud_config.geminiApiKey.length > 10;
+
+    // ============================================================
+    // GEMINI AI MODE — Professor-style intelligent answers
+    // ============================================================
+    if (hasGeminiKey) {
+        try {
+            // Build context from top documents
+            let contextText = '';
+            if (allMatches.length > 0) {
+                allMatches.slice(0, 8).forEach((m, i) => {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = m.protocol.info_html || m.protocol.content || '';
+                    let text = temp.innerText || temp.textContent || '';
+                    text = text.replace(/\s+/g, ' ').trim().substring(0, 3000);
+                    const label = m.source === 'channel' ? '📡 CANAL DE VENTA' : '📋 PROTOCOLO';
+                    contextText += `\n\n${label}: "${m.protocol.section || ''} - ${m.protocol.title || ''}"\n${text}`;
+                });
+            }
+
+            // ============================================================
+            // THE PROFESSOR SYSTEM PROMPT
+            // ============================================================
+            const systemPrompt = `Eres un FORMADOR EXPERTO de recepción hotelera para los hoteles Sercotel Guadiana y Cumbria Spa. Tu rol es el de un profesor paciente y cercano que enseña a recepcionistas novatos.
+
+REGLAS DE COMPORTAMIENTO:
+1. EXPLICA como un profesor: no solo digas "qué hacer", explica "POR QUÉ" se hace así.
+2. Usa un tono CERCANO pero PROFESIONAL. Tutea al recepcionista.
+3. Estructura tus respuestas con claridad: usa títulos en negrita, listas numeradas para pasos, y viñetas para detalles.
+4. Si la pregunta es sobre un procedimiento, da los PASOS CONCRETOS numerados (1, 2, 3...).
+5. Añade CONSEJOS PRÁCTICOS al final cuando sea relevante (trucos, cosas que se olvidan, errores comunes).
+6. Si la documentación no contiene la respuesta, dilo honestamente y sugiere a quién preguntar (recepción jefe, central Sercotel, etc).
+7. NUNCA inventes procedimientos. Solo usa la documentación proporcionada.
+8. Responde SIEMPRE en español.
+9. Mantén las respuestas CONCISAS pero COMPLETAS (máximo 400 palabras).
+10. Si tiene sentido, al final sugiere 1-2 preguntas relacionadas que el recepcionista podría querer hacer a continuación.
+
+FORMATO DE RESPUESTA:
+- Usa **negrita** para conceptos importantes
+- Usa listas numeradas (1. 2. 3.) para pasos de procedimientos
+- Usa viñetas (- ) para detalles o características
+- Usa ⚠️ para advertencias críticas
+- Usa 💡 para consejos prácticos
+- Usa ✅ para confirmaciones
+
+${contextText ? 'DOCUMENTACIÓN INTERNA DISPONIBLE:' + contextText : 'No he encontrado documentación interna relevante para esta consulta.'}`;
+
+            // Add to memory
+            chatMemory.add('user', userInput);
+
+            // Build conversation with history
+            const contents = [
+                { role: 'user', parts: [{ text: systemPrompt }] },
+                { role: 'model', parts: [{ text: 'Entendido. Soy el formador de recepción. Estoy listo para enseñar paso a paso usando la documentación oficial del hotel. ¿En qué puedo ayudarte?' }] },
+                ...chatMemory.getHistory().slice(0, -1), // Previous history (exclude last user msg, we add it fresh)
+                { role: 'user', parts: [{ text: userInput }] }
+            ];
+
+            console.log('[Chatbot] ➡️ Enviando a Gemini con', allMatches.length, 'docs de contexto y', chatMemory.messages.length, 'msgs de memoria');
+            
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cloud_config.geminiApiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: contents,
+                    generationConfig: {
+                        temperature: 0.35,
+                        maxOutputTokens: 1500,
+                        topP: 0.9
+                    },
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                })
+            });
+
+            const rawData = await response.json();
+            
+            if (rawData.error) throw new Error(rawData.error.message || 'Error en la API');
+            if (!rawData.candidates || !rawData.candidates[0]) throw new Error('Respuesta vacía');
+            
+            let answerText = rawData.candidates[0].content.parts[0].text;
+            
+            // Save to memory
+            chatMemory.add('model', answerText);
+
+            // ============================================================
+            // ENHANCED MARKDOWN → HTML CONVERSION
+            // ============================================================
+            let html = answerText;
+            
+            // Headers
+            html = html.replace(/^### (.*?)$/gm, '<h4 style="font-size:0.88rem; font-weight:800; color:#0a6aa1; margin:12px 0 4px; text-transform:uppercase; letter-spacing:0.02em;">$1</h4>');
+            html = html.replace(/^## (.*?)$/gm, '<h3 style="font-size:0.95rem; font-weight:800; color:#004a66; margin:14px 0 6px;">$1</h3>');
+            
+            // Bold and italic
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#1a365d;">$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Numbered lists
+            html = html.replace(/^(\d+)\.\s+(.*?)$/gm, '<div style="display:flex; gap:8px; margin:4px 0; align-items:flex-start;"><span style="background:#0a6aa1; color:white; min-width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; flex-shrink:0;">$1</span><span style="flex:1;">$2</span></div>');
+            
+            // Bullet points
+            html = html.replace(/^[-•]\s+(.*?)$/gm, '<div style="display:flex; gap:8px; margin:3px 0 3px 8px; align-items:flex-start;"><span style="color:#0a6aa1; font-weight:800;">›</span><span style="flex:1;">$1</span></div>');
+            
+            // Warning/tip/check icons (already in text from the prompt)
+            html = html.replace(/⚠️\s*(.*?)(?:\n|$)/g, '<div style="background:#fff8e1; border-left:3px solid #f59e0b; padding:6px 10px; border-radius:6px; margin:6px 0; font-size:0.82rem;">⚠️ $1</div>');
+            html = html.replace(/💡\s*(.*?)(?:\n|$)/g, '<div style="background:#e8f5e9; border-left:3px solid #4caf50; padding:6px 10px; border-radius:6px; margin:6px 0; font-size:0.82rem;">💡 $1</div>');
+            
+            // Line breaks
+            html = html.replace(/\n\n/g, '<br>');
+            html = html.replace(/\n/g, '<br>');
+            // Clean up excessive <br>
+            html = html.replace(/(<br>){3,}/g, '<br><br>');
+
+            // ============================================================
+            // BUILD SOURCE LINKS
+            // ============================================================
+            if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
+            let sourcesHtml = '';
+            
+            if (allMatches.length > 0) {
+                sourcesHtml = '<div style="margin-top:12px; padding-top:8px; border-top:1px dashed #ddd; font-size:0.72rem; color:#888;">';
+                sourcesHtml += '<span style="font-weight:700;">📚 Basado en:</span> ';
+                
+                allMatches.slice(0, 3).forEach((m, i) => {
+                    const p = m.protocol;
+                    const cleanTitle = (p.title || '').replace(/\{.*?\}/, '').replace(/[^\w\s\-áéíóúñÁÉÍÓÚÑ.,()]/g, '').trim();
+                    const idxKey = 'ai_' + Date.now() + '_' + i;
+                    window._chatProtocolIndex[idxKey] = m;
+                    
+                    const icon = m.source === 'channel' ? '📡' : '📋';
+                    sourcesHtml += `<a href="#" style="color:#0a6aa1; text-decoration:none; font-weight:600; margin-right:8px;" onclick="event.preventDefault(); window.handleChatLinkByKey('${idxKey}')">${icon} ${cleanTitle}</a>`;
+                });
+                sourcesHtml += '</div>';
+            }
+
+            // ============================================================
+            // RENDER
+            // ============================================================
+            const fullHtml = `<div class="ai-response" style="line-height:1.55; font-size:0.87rem;">${html}</div>${sourcesHtml}`;
+            appendChatMessage('bot', fullHtml, true);
+            
+        } catch (err) {
+            console.error('[Chatbot] Error Gemini:', err);
+            if (allMatches.length > 0) {
+                appendChatMessage('bot', '⚠️ Error con la IA (' + err.message + '). Te muestro los protocolos relevantes:', true);
+                showClassicResults(allMatches, searchTerms);
+            } else {
+                appendChatMessage('bot', '⚠️ Error: ' + err.message + '. Inténtalo de nuevo en unos segundos.', true);
+            }
+        }
+
+    } else if (allMatches.length > 0) {
+        // --- MODO CLÁSICO (sin API Key) ---
+        showClassicResults(allMatches, searchTerms);
         
-        appendChatMessage('bot', combinedLinksHtml, true);
-        
-        if (matches.length > 3) {
-            appendChatMessage('bot', `También he encontrado otros ${matches.length - 3} resultados. ¿Necesitas algo más específico?`);
+        // Final warning if Key is missing
+        if (!hasGeminiKey) {
+            console.warn('[Chatbot] Gemini API Key missing or too short.');
+            const warningHtml = `<div style="margin-top:10px; font-size:0.7rem; color:#d97706; background:#fffdf2; padding:8px; border:1px solid #fef3c7; border-radius:6px; font-style:italic;">
+                ⚠️ <b>Aviso:</b> El "Cerebro IA" está desactivado. Ve al Admin -> Configuración Cloud y añade tu Gemini API Key para que el bot pueda explicarte las cosas paso a paso como un profesor.
+            </div>`;
+            appendChatMessage('bot', warningHtml, true);
         }
     } else {
-        appendChatMessage('bot', 'No he encontrado una coincidencia exacta en los manuales actuales. ¿Te refieres a algo de esto?');
+        appendChatMessage('bot', 'No he encontrado una coincidencia en los manuales. ¿Podrías reformular la pregunta? Por ejemplo:', true);
         renderQuickReplies();
     }
 }
 
+// ============================================================
+// CLASSIC RESULTS (Fallback without AI)
+// ============================================================
+function showClassicResults(allMatches, searchTerms) {
+    if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
+    let combinedLinksHtml = '<div style="margin-bottom: 8px; font-weight:600;">He encontrado estos protocolos relevantes:</div>';
+    
+    allMatches.slice(0, 3).forEach((m, i) => {
+        const p = m.protocol;
+        const cleanTitle = (p.title || '').replace(/\{.*?\}/, '').trim();
+        const idxKey = 'p_' + Date.now() + '_' + i;
+        window._chatProtocolIndex[idxKey] = m;
+        
+        const CAT_MAP = typeof getCatMap === 'function' ? getCatMap() : {};
+        const sectionStr = String(p.section || '');
+        const catId = sectionStr.split('.')[0];
+        const catName = CAT_MAP[catId] ? CAT_MAP[catId].name : (m.source === 'channel' ? '📡 Canales de Venta' : null);
+        
+        const snippets = getContextSnippets(p.info_html || p.content, searchTerms);
+        let summaryHtml = '';
+        if (snippets && snippets.length > 0) {
+            summaryHtml = `<ul class="chat-kwic-list">${snippets.map(s => `<li>${s}</li>`).join('')}</ul>`;
+        } else {
+            const keyPoints = typeof getKeyPoints === 'function' ? getKeyPoints(p.info_html || p.content) : null;
+            if (keyPoints && keyPoints.length > 0) {
+                summaryHtml = `<ul class="chat-kwic-list">${keyPoints.map(pt => `<li>${pt.length > 120 ? pt.substring(0, 120) + '…' : pt}</li>`).join('')}</ul>`;
+            } else {
+                const fallback = typeof getExcerpt === 'function' ? getExcerpt(p.info_html || p.content, 130) : '';
+                summaryHtml = `<div class="chat-excerpt">${fallback}</div>`;
+            }
+        }
+        
+        combinedLinksHtml += `
+            <div style="margin: 12px 0; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+                ${catName ? `<div class="chat-category-tag"><i class="fas fa-folder"></i>${catName}</div>` : ''}
+                <a href="#" class="chat-link" onclick="event.preventDefault(); window.handleChatLinkByKey('${idxKey}')">
+                    <i class="fas fa-file-alt"></i> ${p.section ? p.section + ' - ' : ''}${cleanTitle}
+                </a>
+                ${summaryHtml}
+            </div>
+        `;
+    });
+    
+    appendChatMessage('bot', combinedLinksHtml, true);
+    if (allMatches.length > 3) {
+        appendChatMessage('bot', `📎 También encontré otros ${allMatches.length - 3} resultados relacionados.`);
+    }
+}
+
+// ============================================================
+// QUICK REPLIES — Contextual suggestions
+// ============================================================
 function renderQuickReplies() {
     const options = [
-        { label: 'Check-in', query: 'check-in' },
-        { label: 'Check-out', query: 'check-out' },
-        { label: 'Facturación', query: 'factura' },
-        { label: 'Claves WiFi', query: 'wifi' }
+        { label: '🏨 Check-in', query: '¿Cómo hago un check-in?' },
+        { label: '🚪 Check-out', query: '¿Cómo se hace el check-out y cierre de caja?' },
+        { label: '📡 Canales', query: '¿Qué canales de venta tenemos y cómo funcionan?' },
+        { label: '💳 Facturación', query: '¿Cómo se factura según el tipo de reserva?' },
+        { label: '🔑 WiFi', query: '¿Cuáles son las claves WiFi del hotel?' },
+        { label: '👶 Menores', query: '¿Cómo registro un grupo de menores?' }
     ];
     
     const html = `
@@ -1998,14 +2293,33 @@ window.handleChatLinkClick = (sectionId, title) => {
     }
 };
 
-// New index-based handler — avoids all escaping issues with title/section strings
 window.handleChatLinkByKey = (idxKey) => {
-    const p = window._chatProtocolIndex && window._chatProtocolIndex[idxKey];
-    if (!p) return;
+    const m = window._chatProtocolIndex && window._chatProtocolIndex[idxKey];
+    if (!m) return;
+    
+    // Determine if it's a channel or a protocol
+    const p = m.protocol;
+    
     if (typeof viewHistory !== 'undefined') {
         viewHistory.push({ type: 'protocol', payload: p });
     }
-    loadProtocol(p);
+
+    if (m.source === 'channel' && m.channelData) {
+        // If it's a channel, load the 2.1 view and scroll to the ID
+        const baseProtocol = protocols.find(pr => pr.section === '2.1' || pr.section === '2.1.0');
+        if (baseProtocol) {
+            loadProtocol(baseProtocol);
+            setTimeout(() => {
+                const el = document.getElementById(m.channelData.id);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        } else {
+            loadProtocol(p);
+        }
+    } else {
+        loadProtocol(p);
+    }
+
     const chatbotContainer = document.getElementById('chatbot-container');
     if (chatbotContainer && window.innerWidth < 768) {
         chatbotContainer.style.display = 'none';

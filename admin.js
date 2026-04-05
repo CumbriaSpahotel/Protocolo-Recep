@@ -2728,28 +2728,43 @@ window.toggleCloudConfig = () => {
     if (!isVisible) {
         document.getElementById('config-cloud-url').value = CLOUD_GATEWAY_URL;
         document.getElementById('config-spreadsheet-id').value = CLOUD_SPREADSHEET_ID;
+        if (typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey) {
+            document.getElementById('config-gemini-key').value = cloud_config.geminiApiKey;
+        }
     }
 };
 
 window.saveCloudConfig = async () => {
     const newUrl = document.getElementById('config-cloud-url').value.trim();
     const newId = document.getElementById('config-spreadsheet-id').value.trim();
+    const newGeminiKey = document.getElementById('config-gemini-key').value.trim();
     
     if (newUrl) CLOUD_GATEWAY_URL = newUrl;
     if (newId) CLOUD_SPREADSHEET_ID = newId;
     
+    if (typeof cloud_config === 'undefined') {
+        window.cloud_config = {};
+    }
+    cloud_config.scriptUrl = CLOUD_GATEWAY_URL;
+    cloud_config.sheetId = CLOUD_SPREADSHEET_ID;
+    cloud_config.geminiApiKey = newGeminiKey;
+    
     showToast('💾 Guardando configuración en el servidor...');
     
     try {
+        const payload = {
+            cloudConfig: cloud_config,
+            protocols: typeof protocols_data !== 'undefined' ? protocols_data : (typeof adminProtocols !== 'undefined' && adminProtocols.length ? adminProtocols : []),
+            channelsConfig: typeof channels_config !== 'undefined' ? window.channels_config : [],
+            navConfig: typeof navigation_config !== 'undefined' ? navigation_config : {},
+            homeConfig: typeof home_config !== 'undefined' ? home_config : {},
+            menusConfig: typeof menus_data !== 'undefined' ? menus_data : []
+        };
+        
         const res = await fetch('/api/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                cloudConfig: {
-                    scriptUrl: CLOUD_GATEWAY_URL,
-                    sheetId: CLOUD_SPREADSHEET_ID
-                }
-            })
+            body: JSON.stringify(payload)
         });
         if (res.ok) {
             showToast('✅ Configuración guardada correctamente');
@@ -2884,23 +2899,21 @@ function initCanalesTab() {
         window.channels_config = [];
     }
 
+    const filterNameInput = document.getElementById('filter-channel-name');
+    const filterHotelInput = document.getElementById('filter-channel-hotel');
+    if (filterNameInput) filterNameInput.addEventListener('input', renderCanales);
+    if (filterHotelInput) filterHotelInput.addEventListener('change', renderCanales);
+
     renderCanales();
+    
+    // Drag and drop setup para canales
+    setupCanalesDragAndDrop();
     
     const btnAdd = document.getElementById('btn-add-channel');
     if (btnAdd) {
         btnAdd.onclick = (e) => {
             e.preventDefault();
-            window.channels_config.push({
-                id: 'nuevo-' + Date.now(),
-                name: 'NUEVO CANAL',
-                icon: '🌍',
-                hotel: 'Ambos hoteles',
-                summary: 'Descripción corta',
-                content: 'Normativa general...',
-                notes: '',
-                htmlContent: ''
-            });
-            renderCanales();
+            openChannelModal(-1); // -1 significa nuevo
         };
     }
     
@@ -2912,78 +2925,197 @@ function renderCanales() {
     const container = document.getElementById('canales-container');
     if (!container) return;
     
-    container.innerHTML = window.channels_config.map((c, idx) => `
-        <div class="channel-editor-card">
-            <div class="channel-card-header">
-                <h3><i class="fas fa-satellite-dish"></i> Canal #${idx + 1}: ${c.name || 'Sin nombre'}</h3>
-                <button class="btn-link" style="color:#e74c3c; font-size: 0.85rem;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i> Eliminar</button>
-            </div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; background: #f8faff; padding: 15px; border-radius: 8px;">
-                <div class="channel-form-group">
-                    <label><i class="fas fa-hotel"></i> Destinatario / Hotel</label>
-                    <select class="channel-input" onchange="updateChannelData(${idx}, 'hotel', this.value)" style="font-weight: 600; background: white;">
-                        <option value="Ambos hoteles" ${c.hotel === 'Ambos hoteles' ? 'selected' : ''}>Ambos hoteles</option>
-                        <option value="Sercotel Guadiana" ${c.hotel === 'Sercotel Guadiana' ? 'selected' : ''}>Sercotel Guadiana</option>
-                        <option value="Cumbria Spa & Hotel" ${c.hotel === 'Cumbria Spa & Hotel' ? 'selected' : ''}>Cumbria Spa & Hotel</option>
-                    </select>
-                </div>
-                <div class="channel-form-group">
-                    <label>Nombre del Canal</label>
-                    <input type="text" class="channel-input" value="${c.name || ''}" onchange="updateChannelData(${idx}, 'name', this.value)" style="font-weight:bold;" placeholder="Ej: Booking.com">
-                </div>
-            </div>
+    const filterNameInput = document.getElementById('filter-channel-name');
+    const filterHotelInput = document.getElementById('filter-channel-hotel');
+    
+    const term = filterNameInput ? filterNameInput.value.toLowerCase() : '';
+    const hotel = filterHotelInput ? filterHotelInput.value : '';
 
-            <div style="display:grid; grid-template-columns: 100px 1fr; gap:15px; margin-bottom:15px;">
-                <div class="channel-form-group">
-                    <label>Icono / Emoji</label>
-                    <input type="text" class="channel-input" value="${c.icon || ''}" onchange="updateChannelData(${idx}, 'icon', this.value)" style="text-align:center; font-size:1.2rem;" placeholder="🌍">
-                </div>
-                <div class="channel-form-group">
-                    <label>Resumen / Subtítulo</label>
-                    <input type="text" class="channel-input" value="${c.summary || ''}" onchange="updateChannelData(${idx}, 'summary', this.value)" placeholder="Peculiaridades breves...">
-                </div>
-            </div>
+    container.innerHTML = window.channels_config.map((c, idx) => {
+        if (term && !(c.name || '').toLowerCase().includes(term)) return '';
+        if (hotel && c.hotel !== hotel && c.hotel !== 'Ambos hoteles' && hotel !== 'Ambos hoteles') {
+            // Un hotel específico no debería ver un canal de un hotel específico diferente
+            // Pero "Ambos hoteles" en el filtro debería mostrar solo los de ambos? O todos?
+            // Si el filtro es un hotel específico (ej: Guadiana), vemos los de Guadiana y los de Ambos.
+            if (!(hotel === 'Sercotel Guadiana' && (c.hotel === 'Sercotel Guadiana' || c.hotel === 'Ambos hoteles')) && 
+                !(hotel === 'Cumbria Spa & Hotel' && (c.hotel === 'Cumbria Spa & Hotel' || c.hotel === 'Ambos hoteles')) &&
+                !(hotel === 'Ambos hoteles' && c.hotel === 'Ambos hoteles')) {
+               return ''; 
+            }
+        }
 
-            <div class="channel-form-group" style="margin-bottom:15px;">
-                <label>Contenido Principal (Procedimiento)</label>
-                <textarea class="channel-input" rows="3" onchange="updateChannelData(${idx}, 'content', this.value)" placeholder="Escribe aquí el procedimiento estándar para este canal...">${c.content || ''}</textarea>
+        return `
+        <div class="channel-row" draggable="true" data-index="${idx}" style="display:flex; align-items:center; gap: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: grab; margin-bottom: 15px;">
+            <div style="color: #ccc; cursor: grab;"><i class="fas fa-grip-lines"></i></div>
+            <div style="font-size: 1.5rem; width: 40px; text-align: center;">${c.icon || '🌍'}</div>
+            <div style="flex: 1;">
+                <h4 style="margin: 0 0 5px 0; color:var(--accent);">${c.name || 'Sin nombre'}</h4>
+                <div style="font-size: 0.8rem; color: #666;"><i class="fas fa-hotel"></i> ${c.hotel || 'Ambos'} | ${c.summary || ''}</div>
             </div>
-            
-            <div class="channel-form-group" style="margin-bottom:15px;">
-                <label>Notas Adicionales / Peculiaridades</label>
-                <textarea class="channel-input" rows="2" onchange="updateChannelData(${idx}, 'notes', this.value)" style="background:#f9f9f9; font-size: 0.85rem;" placeholder="Notas internas o avisos...">${c.notes || ''}</textarea>
-            </div>
-
-            <div class="channel-html-area">
-                <div class="channel-html-label">
-                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado</label>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" onclick="selectChannelMedia(${idx}, 'image')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #27ae60 !important; border-radius: 20px;"><i class="fas fa-image"></i> + Imagen</button>
-                        <button type="button" onclick="selectChannelMedia(${idx}, 'video')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #f39c12 !important; border-radius: 20px;"><i class="fas fa-video"></i> + Video</button>
-                    </div>
-                </div>
-                <textarea id="channel-html-${idx}" class="channel-input" rows="4" onchange="updateChannelData(${idx}, 'htmlContent', this.value)" style="font-family: monospace; font-size:0.85rem;" placeholder="Tablas, enlaces o diseños especiales...">${c.htmlContent || ''}</textarea>
+            <div style="display:flex; gap: 10px;">
+                <button type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="openChannelModal(${idx})"><i class="fas fa-edit"></i> Editar</button>
+                <button type="button" class="btn-secondary" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; padding: 6px 12px; font-size: 0.85rem;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i></button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-window.selectChannelMedia = (idx, type) => {
+let currentEditingChannelIndex = -1;
+
+function openChannelModal(index) {
+    currentEditingChannelIndex = index;
+    const modal = document.getElementById('modal-channel-editor');
+    const title = document.getElementById('modal-channel-title');
+    
+    if (index === -1) {
+        title.innerHTML = '<i class="fas fa-plus-circle" style="color:#0a6aa1;"></i> Añadir Nuevo Canal';
+        document.getElementById('modal-channel-name').value = '';
+        document.getElementById('modal-channel-icon').value = '🌍';
+        document.getElementById('modal-channel-hotel').value = 'Ambos hoteles';
+        document.getElementById('modal-channel-summary').value = '';
+        document.getElementById('modal-channel-content').value = '';
+        document.getElementById('modal-channel-notes').value = '';
+        document.getElementById('modal-channel-html').value = '';
+    } else {
+        const c = window.channels_config[index];
+        title.innerHTML = '<i class="fas fa-edit" style="color:#0a6aa1;"></i> Editar Canal: ' + (c.name || '');
+        document.getElementById('modal-channel-name').value = c.name || '';
+        document.getElementById('modal-channel-icon').value = c.icon || '🌍';
+        document.getElementById('modal-channel-hotel').value = c.hotel || 'Ambos hoteles';
+        document.getElementById('modal-channel-summary').value = c.summary || '';
+        document.getElementById('modal-channel-content').value = c.content || '';
+        document.getElementById('modal-channel-notes').value = c.notes || '';
+        document.getElementById('modal-channel-html').value = c.htmlContent || '';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeChannelModal() {
+    document.getElementById('modal-channel-editor').style.display = 'none';
+}
+
+function saveChannelFromModal() {
+    const name = document.getElementById('modal-channel-name').value.trim();
+    if (!name) {
+        alert('El nombre del canal es obligatorio');
+        return;
+    }
+    
+    const c = {
+        name: name,
+        icon: document.getElementById('modal-channel-icon').value,
+        hotel: document.getElementById('modal-channel-hotel').value,
+        summary: document.getElementById('modal-channel-summary').value,
+        content: document.getElementById('modal-channel-content').value,
+        notes: document.getElementById('modal-channel-notes').value,
+        htmlContent: document.getElementById('modal-channel-html').value
+    };
+    
+    if (currentEditingChannelIndex === -1) {
+        c.id = 'canal-' + Date.now();
+        window.channels_config.push(c);
+    } else {
+        c.id = window.channels_config[currentEditingChannelIndex].id || ('canal-' + Date.now());
+        window.channels_config[currentEditingChannelIndex] = c;
+    }
+    
+    closeChannelModal();
+    renderCanales();
+    showToast('Canal guardado temporalmente (debes guardar configuración)');
+}
+
+function removeChannel(idx) {
+    if(confirm('¿Eliminar este canal?')) {
+        window.channels_config.splice(idx, 1);
+        renderCanales();
+    }
+}
+
+// Drag & Drop for Canales
+function setupCanalesDragAndDrop() {
+    const container = document.getElementById('canales-container');
+    if (!container) return;
+    
+    let draggingEl = null;
+
+    container.addEventListener('dragstart', e => {
+        if (!e.target.classList.contains('channel-row')) return;
+        draggingEl = e.target;
+        e.target.style.opacity = '0.5';
+        e.target.classList.add('dragging-channel');
+    });
+
+    container.addEventListener('dragend', e => {
+        if (!e.target.classList.contains('channel-row')) return;
+        e.target.style.opacity = '1';
+        e.target.classList.remove('dragging-channel');
+        draggingEl = null;
+        updateCanalesOrder();
+    });
+
+    container.addEventListener('dragover', e => {
+        e.preventDefault();
+        if(!draggingEl) return;
+        const afterElement = getDragAfterElementCanales(container, e.clientY);
+        if (afterElement == null) {
+            container.appendChild(draggingEl);
+        } else {
+            container.insertBefore(draggingEl, afterElement);
+        }
+    });
+}
+
+function getDragAfterElementCanales(container, y) {
+    const draggableElements = [...container.querySelectorAll('.channel-row:not(.dragging-channel)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updateCanalesOrder() {
+    const rows = document.querySelectorAll('#canales-container .channel-row');
+    const newConfig = [];
+    rows.forEach(row => {
+        const oldIndex = parseInt(row.getAttribute('data-index'));
+        if (!isNaN(oldIndex) && window.channels_config[oldIndex]) {
+            newConfig.push(window.channels_config[oldIndex]);
+        }
+    });
+    
+    // Sólo reordenamos si no hay filtro activo para evitar borrar cosas
+    const filterTerm = document.getElementById('filter-channel-name')?.value;
+    const filterHotel = document.getElementById('filter-channel-hotel')?.value;
+    if(!filterTerm && !filterHotel) {
+        window.channels_config = newConfig;
+        renderCanales(); // Para actualizar los data-index
+    } else {
+        alert("Atención: Has reordenado mientras hay un filtro activo. Quita el filtro para poder reordenar con seguridad todos los canales.");
+        renderCanales(); // Revert visual drag if filtered
+    }
+}
+
+window.selectChannelMedia = (type) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = type === 'image' ? 'image/*' : 'video/*';
     input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            uploadChannelMedia(file, idx, type);
+            uploadChannelMedia(file, type);
         }
     };
     input.click();
 };
 
-async function uploadChannelMedia(file, idx, type) {
-    const btn = event.target; // Note: This might be tricky if called from input.onchange
+async function uploadChannelMedia(file, type) {
     showToast(`Subiendo ${type}...`);
     
     const formData = new FormData();
@@ -3004,11 +3136,10 @@ async function uploadChannelMedia(file, idx, type) {
                 mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><video controls style="max-width:100%; border-radius:8px;"><source src="${result.url}" type="${file.type}">Tu navegador no soporta video.</video></div>`;
             }
             
-            const textarea = document.getElementById(`channel-html-${idx}`);
+            const textarea = document.getElementById(`modal-channel-html`);
             if (textarea) {
                 textarea.value += mediaHtml;
-                window.updateChannelData(idx, 'htmlContent', textarea.value);
-                showToast('✅ Media insertado correctamente');
+                showToast('✅ Media insertado correctamente en el modal');
             }
         } else {
             alert('Error al subir: ' + result.message);

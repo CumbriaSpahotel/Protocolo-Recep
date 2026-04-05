@@ -275,6 +275,22 @@
             <div class="editor-body">
                 <p style="margin-bottom: 20px; color: #666;">Configura las peculiaridades de cada canal de venta (Booking, Expedia, etc.) para que se muestren en el protocolo central.</p>
                 
+                <div style="display:flex; gap: 15px; margin-bottom: 20px; background: #fdfdfd; padding: 15px; border-radius: 8px; border: 1px solid #eee; align-items: flex-end;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; font-weight:bold; color:#555; display:block; margin-bottom:5px;"><i class="fas fa-search"></i> Filtrar por Canal</label>
+                        <input type="text" id="filter-channel-name" placeholder="Buscar por nombre..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; font-weight:bold; color:#555; display:block; margin-bottom:5px;"><i class="fas fa-hotel"></i> Filtrar por Hotel</label>
+                        <select id="filter-channel-hotel" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="">Todos los hoteles</option>
+                            <option value="Ambos hoteles">Ambos hoteles</option>
+                            <option value="Sercotel Guadiana">Sercotel Guadiana</option>
+                            <option value="Cumbria Spa & Hotel">Cumbria Spa & Hotel</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div id="canales-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px;">
                     <!-- Channel editors injected dynamically -->
                 </div>
@@ -305,6 +321,11 @@
                         <div style="margin-bottom:15px;">
                             <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:4px;">ID de Hoja Google (Modo B/CSV)</label>
                             <input type="text" id="config-spreadsheet-id" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.8rem;" placeholder="ID de la url de tu hoja de cálculo">
+                        </div>
+                        <div style="margin-bottom:15px; border-top: 1px solid #eee; padding-top: 10px;">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:4px;"><i class="fas fa-robot" style="color:#0a6aa1;"></i> Asistente IA (Gemini API Key)</label>
+                            <input type="password" id="config-gemini-key" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.8rem;" placeholder="AIzaSy...">
+                            <p style="font-size: 0.7rem; color: #888; margin: 4px 0 0 0;">Si añades tu API Key de Google Gemini, el buscador de la intranet se volverá un chatbot inteligente.</p>
                         </div>
                         <div style="display:flex; justify-content:flex-end; gap:8px;">
                             <button class="btn-secondary" onclick="toggleCloudConfig()" style="font-size:0.75rem; padding:5px 10px;">Cancelar</button>
@@ -463,6 +484,65 @@
                 </div>
             </div>
         </div>
+
+    <!-- ===== MODAL: AÑADIR/EDITAR CANAL ===== -->
+    <div id="modal-channel-editor" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:10000; justify-content:center; align-items:center; padding:20px;">
+        <div style="background:white; border-radius:14px; padding:32px; width:100%; max-width:700px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+            <h3 id="modal-channel-title" style="margin-top:0; color:#032d4b; display:flex; align-items:center; gap:10px;"><i class="fas fa-plus-circle" style="color:#0a6aa1;"></i> Añadir Nuevo Canal</h3>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; background: #f8faff; padding: 15px; border-radius: 8px;">
+                <div class="channel-form-group">
+                    <label><i class="fas fa-hotel"></i> Destinatario / Hotel</label>
+                    <select id="modal-channel-hotel" class="channel-input" style="font-weight: 600; background: white; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="Ambos hoteles">Ambos hoteles</option>
+                        <option value="Sercotel Guadiana">Sercotel Guadiana</option>
+                        <option value="Cumbria Spa & Hotel">Cumbria Spa & Hotel</option>
+                    </select>
+                </div>
+                <div class="channel-form-group">
+                    <label>Nombre del Canal</label>
+                    <input type="text" id="modal-channel-name" class="channel-input" style="font-weight:bold; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Ej: Booking.com">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 100px 1fr; gap:15px; margin-bottom:15px;">
+                <div class="channel-form-group">
+                    <label>Icono / Emoji</label>
+                    <input type="text" id="modal-channel-icon" class="channel-input" style="text-align:center; font-size:1.2rem; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="🌍">
+                </div>
+                <div class="channel-form-group">
+                    <label>Resumen / Subtítulo</label>
+                    <input type="text" id="modal-channel-summary" class="channel-input" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Peculiaridades breves...">
+                </div>
+            </div>
+
+            <div class="channel-form-group" style="margin-bottom:15px;">
+                <label>Contenido Principal (Procedimiento)</label>
+                <textarea id="modal-channel-content" class="channel-input" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Escribe aquí el procedimiento estándar para este canal..."></textarea>
+            </div>
+            
+            <div class="channel-form-group" style="margin-bottom:15px;">
+                <label>Notas Adicionales / Peculiaridades</label>
+                <textarea id="modal-channel-notes" class="channel-input" rows="2" style="background:#f9f9f9; width: 100%; font-size: 0.85rem; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Notas internas o avisos..."></textarea>
+            </div>
+
+            <div class="channel-html-area">
+                <div class="channel-html-label" style="display:flex; justify-content:space-between; margin-bottom:5px; align-items: center;">
+                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado</label>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="window.selectChannelMedia('image')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #27ae60 !important; border-radius: 20px;"><i class="fas fa-image"></i> + Imagen</button>
+                        <button type="button" onclick="window.selectChannelMedia('video')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #f39c12 !important; border-radius: 20px;"><i class="fas fa-video"></i> + Video</button>
+                    </div>
+                </div>
+                <textarea id="modal-channel-html" class="channel-input" rows="4" style="font-family: monospace; font-size:0.85rem; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Tablas, enlaces o diseños especiales..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">
+                <button class="btn-secondary" onclick="closeChannelModal()">Cancelar</button>
+                <button class="btn-primary" id="btn-submit-channel-modal" onclick="saveChannelFromModal()"><i class="fas fa-save"></i> Guardar Canal</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Cargador dinámico anti-caché
