@@ -2025,10 +2025,10 @@ async function generateBotResponse(userInput) {
 
         searchTerms.forEach(term => {
             if (term.length < 2) return;
-            if (title.includes(term)) score += 50;
-            if (section.includes(term)) score += 100;
-            if (content.includes(term)) score += 10;
-            if (infoHtml.includes(term)) score += 5;
+            if (title.includes(term)) score += 500;
+            if (section.includes(term)) score += 1000;
+            if (content.includes(term)) score += 20;
+            if (infoHtml.includes(term)) score += 10;
         });
 
         // Filter by hotel context
@@ -2049,8 +2049,8 @@ async function generateBotResponse(userInput) {
 
         searchTerms.forEach(term => {
             if (term.length < 2) return;
-            if (name.includes(term)) score += 200;
-            if (summary.includes(term)) score += 50;
+            if (name.includes(term)) score += 1000;
+            if (summary.includes(term)) score += 200;
             if (content.includes(term)) score += 30;
             if (notes.includes(term)) score += 20;
             if (htmlContent.includes(term)) score += 10;
@@ -2069,7 +2069,7 @@ async function generateBotResponse(userInput) {
     const allMatches = [...channelMatches, ...matches].sort((a,b) => b.score - a.score);
 
     console.log('[Chatbot] Pregunta:', userInput);
-    console.log('[Chatbot] Matches:', allMatches.length, `(${channelMatches.length} canales, ${matches.length} protocolos)`);
+    console.log('[Chatbot] Top Matches:', allMatches.slice(0, 5).map(m => `${m.protocol.title} (${m.score})`));
     
     const hasGeminiKey = typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey && cloud_config.geminiApiKey.length > 10;
 
@@ -2081,7 +2081,12 @@ async function generateBotResponse(userInput) {
             // Build context from top documents
             let contextText = '';
             if (allMatches.length > 0) {
-                allMatches.slice(0, 8).forEach((m, i) => {
+                const topScore = allMatches[0].score;
+                // Only include documents that are relevant compared to the top result
+                // (e.g. at least 15% of the top score) to avoid polluting the AI context
+                const filteredMatches = allMatches.filter(m => m.score >= topScore * 0.15);
+                
+                filteredMatches.slice(0, 6).forEach((m, i) => {
                     const temp = document.createElement('div');
                     temp.innerHTML = m.protocol.info_html || m.protocol.content || '';
                     let text = temp.innerText || temp.textContent || '';
@@ -2170,7 +2175,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                 if (err.message === 'FALLBACK_TRIGGERED' || err.message.includes('Failed to fetch')) {
                     console.warn('[Chatbot] Proxy local falló o no disponible. Intentando llamada directa a Gemini...');
                     // FALLBACK: Direct call to Google if proxy fails (requires geminiApiKey in cloud_config)
-                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${cloud_config.geminiApiKey}`;
+                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cloud_config.geminiApiKey}`;
                     const directRes = await fetch(directUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
