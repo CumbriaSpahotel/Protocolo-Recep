@@ -377,6 +377,7 @@ app.get('/api/sync-cloud', async (req, res) => {
 
 // Chatbot AI Proxy Endpoint (Hides API Key and follows Google's safety rules)
 app.post('/api/chat', async (req, res) => {
+    console.log(`[${new Date().toLocaleTimeString()}] 🤖 Chatbot Request Received`);
     try {
         const { contents, generationConfig, safetySettings } = req.body;
         
@@ -385,7 +386,6 @@ app.post('/api/chat', async (req, res) => {
         let apiKey = '';
         if (fs.existsSync(dataFilePath)) {
             const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
-            // Regex más robusto para encontrar la clave esté donde esté en el cloud_config
             const keyMatch = fileContent.match(/"geminiApiKey":\s*"([^"]+)"/);
             if (keyMatch) apiKey = keyMatch[1];
         }
@@ -396,17 +396,11 @@ app.post('/api/chat', async (req, res) => {
         }
 
         // 2. Perform the request from the server side
-        // Usando el alias exacto que funcionó en tu CURL: gemini-flash-latest
-        const apiUri = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent`;
+        const apiUri = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
         
-        console.log(`🤖 LLamando a Gemini (${apiUri}) desde el servidor...`);
-
         const geminiRes = await fetch(apiUri, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey 
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents, generationConfig, safetySettings })
         });
 
@@ -422,6 +416,11 @@ app.post('/api/chat', async (req, res) => {
         console.error('❌ Error in AI Proxy:', e);
         res.status(500).json({ error: { message: 'Error interno en el servidor de IA: ' + e.message } });
     }
+});
+
+// Explicitly handle other methods for /api/chat to avoid generic 405s from proxy/static
+app.all('/api/chat', (req, res) => {
+    res.status(405).json({ error: { message: `Método ${req.method} no permitido en esta ruta.` } });
 });
 
 // Middleware para archivos estáticos al FINAL

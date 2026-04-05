@@ -2133,31 +2133,59 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
             console.log('[Chatbot] ➡️ Enviando a Gemini con', allMatches.length, 'docs de contexto y', chatMemory.messages.length, 'msgs de memoria');
             
             // Use the local server proxy to hide the API Key and avoid CORS/404 issues
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: contents,
-                    generationConfig: {
-                        temperature: 0.35,
-                        maxOutputTokens: 1500,
-                        topP: 0.9
-                    },
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                })
-            });
-
-            const rawData = await response.json();
+            let response;
+            let rawData;
             
-            if (response.status === 403 || response.status === 401) {
-                throw new Error('La clave de API es inválida o ha sido bloqueada por seguridad (Exposed Key). Por favor, genera una nueva en Google AI Studio.');
-            }
+            try {
+                response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: contents,
+                        generationConfig: {
+                            temperature: 0.35,
+                            maxOutputTokens: 1500,
+                            topP: 0.9
+                        },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                        ]
+                    })
+                });
 
+                const text = await response.text();
+                try {
+                    rawData = JSON.parse(text);
+                } catch (e) {
+                    console.error('[Chatbot] Servidor no devolvió JSON:', text.substring(0, 100));
+                    if (response.status === 405) {
+                        throw new Error('FALLBACK_TRIGGERED');
+                    }
+                    throw new Error('El servidor respondió con un error no válido (HTML). ¿Está el servidor NODE ejecutándose?');
+                }
+            } catch (err) {
+                if (err.message === 'FALLBACK_TRIGGERED' || err.message.includes('Failed to fetch')) {
+                    console.warn('[Chatbot] Proxy local falló o no disponible. Intentando llamada directa a Gemini...');
+                    // FALLBACK: Direct call to Google if proxy fails (requires geminiApiKey in cloud_config)
+                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${cloud_config.geminiApiKey}`;
+                    const directRes = await fetch(directUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: contents })
+                    });
+                    if (!directRes.ok) {
+                        const errData = await directRes.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `Error en llamada directa a Google (${directRes.status})`);
+                    }
+                    rawData = await directRes.json();
+                } else {
+                    throw err;
+                }
+            }
+            
             if (rawData.error) throw new Error(rawData.error.message || 'Error en la API');
             if (!rawData.candidates || !rawData.candidates[0]) throw new Error('Respuesta vacía de la IA');
             
