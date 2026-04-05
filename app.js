@@ -2177,26 +2177,59 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     rawData = JSON.parse(text);
                 } catch (e) {
                     console.error('[Chatbot] Servidor no devolvió JSON:', text.substring(0, 100));
-                    if (response.status === 405) {
+                    if (response.status === 405 || response.status === 404) {
                         throw new Error('FALLBACK_TRIGGERED');
                     }
-                    throw new Error('El servidor respondió con un error no válido (HTML). ¿Está el servidor NODE ejecutándose?');
+                    throw new Error('El servidor respondió con un error no válido.');
+                }
+                // Also trigger fallback if server returned 405/404
+                if (response.status === 405 || response.status === 404) {
+                    throw new Error('FALLBACK_TRIGGERED');
                 }
             } catch (err) {
                 if (err.message === 'FALLBACK_TRIGGERED' || err.message.includes('Failed to fetch')) {
-                    console.warn('[Chatbot] Proxy local falló o no disponible. Intentando llamada directa a Gemini...');
-                    // FALLBACK: Direct call to Google if proxy fails (requires geminiApiKey in cloud_config)
-                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cloud_config.geminiApiKey}`;
-                    const directRes = await fetch(directUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: contents })
-                    });
-                    if (!directRes.ok) {
-                        const errData = await directRes.json().catch(() => ({}));
-                        throw new Error(errData.error?.message || `Error en llamada directa a Google (${directRes.status})`);
+                    // ============================================================
+                    // FALLBACK: Google Apps Script Proxy (works from ANY browser)
+                    // The API key is stored securely in Script Properties (never public)
+                    // ============================================================
+                    const scriptUrl = (typeof cloud_config !== 'undefined' && cloud_config.scriptUrl) ? cloud_config.scriptUrl : null;
+                    if (scriptUrl) {
+                        console.log('[Chatbot] Usando Google Apps Script como proxy de IA...');
+                        const scriptRes = await fetch(scriptUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'gemini_chat',
+                                contents: contents,
+                                generationConfig: { temperature: 0.35, maxOutputTokens: 1500, topP: 0.9 }
+                            })
+                        });
+                        const scriptText = await scriptRes.text();
+                        try {
+                            rawData = JSON.parse(scriptText);
+                        } catch(e) {
+                            // Apps Script sometimes redirects to login — try direct as last resort
+                            rawData = null;
+                        }
                     }
-                    rawData = await directRes.json();
+                    
+                    // Last resort: direct call if key is available in localStorage/cloud_config
+                    if (!rawData && typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey) {
+                        console.warn('[Chatbot] Apps Script no disponible. Intentando llamada directa...');
+                        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cloud_config.geminiApiKey}`;
+                        const directRes = await fetch(directUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: contents })
+                        });
+                        if (!directRes.ok) {
+                            const errData = await directRes.json().catch(() => ({}));
+                            throw new Error(errData.error?.message || `Error en llamada directa a Google (${directRes.status})`);
+                        }
+                        rawData = await directRes.json();
+                    }
+                    
+                    if (!rawData) throw new Error('No hay conexión con el servicio de IA. Contacta al administrador.');
                 } else {
                     throw err;
                 }
