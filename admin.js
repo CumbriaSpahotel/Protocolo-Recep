@@ -1752,8 +1752,8 @@ function addMenuRow(id, name, icon, subsections = {}, description = '') {
         const pA = parseInt(a[0].split('.')[1] || '0');
         const pB = parseInt(b[0].split('.')[1] || '0');
         return pA - pB;
-    }).forEach(([subId, subName]) => {
-        addSubRow(subContainer, subId, subName);
+    }).forEach(([subId, subData]) => {
+        addSubRow(subContainer, subId, '', subData);
     });
 
     // Render existing external links if any
@@ -1796,16 +1796,50 @@ function addMenuRow(id, name, icon, subsections = {}, description = '') {
     container.appendChild(row);
 }
 
-function addSubRow(container, id, name) {
+function addSubRow(container, id, name, subsectionData = null) {
     const row = document.createElement('div');
     row.className = 'sub-row';
-    row.style = 'display: grid; grid-template-columns: 80px 1fr 40px; gap: 10px; align-items: center; background: #fdfdfd; padding: 5px 10px; border: 1px solid #f0f0f0; border-radius: 4px;';
+    row.style = 'display: flex; flex-direction: column; gap: 8px; background: #fdfdfd; padding: 10px; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 5px;';
     
+    // Extract name and links from subsectionData if it's an object
+    const finalName = (subsectionData && typeof subsectionData === 'object') ? subsectionData.name : (subsectionData || name);
+    const links = (subsectionData && typeof subsectionData === 'object' && subsectionData.links) ? subsectionData.links : [];
+
     row.innerHTML = `
-        <input type="text" class="sub-id" value="${id}" data-original-id="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
-        <input type="text" class="sub-name" value="${name}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
-        <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1rem;" onclick="this.parentElement.remove()" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#bbb'"><i class="fas fa-times-circle"></i></button>
+        <div style="display: grid; grid-template-columns: 80px 1fr 38px 38px; gap: 10px; align-items: center;">
+            <input type="text" class="sub-id" value="${id}" data-original-id="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
+            <input type="text" class="sub-name" value="${finalName}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
+            <button type="button" class="btn-toggle-sub-links" style="background:${links.length > 0 ? '#e3f2fd' : 'none'}; border:1px solid ${links.length > 0 ? '#90caf9' : 'transparent'}; color:#1976d2; border-radius:4px; height:34px; cursor:pointer;" title="Gestionar Enlaces de esta Subsección">
+                <i class="fas fa-link"></i> ${links.length > 0 ? `<span style="font-size:0.7rem; font-weight:bold; margin-left:3px;">${links.length}</span>` : ''}
+            </button>
+            <button type="button" style="background:none; border:none; color:#bbb; cursor:pointer; font-size:1rem;" onclick="if(confirm('¿Eliminar esta subsección?')) { this.closest('.sub-row').remove(); }" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#bbb'"><i class="fas fa-times-circle"></i></button>
+        </div>
+        <div class="sub-links-area" style="display:${links.length > 0 ? 'block' : 'none'}; border-top:1px dashed #eee; padding-top:10px; margin-left:20px;">
+            <h5 style="margin:0 0 8px 0; color:#666; font-size:0.75rem; text-transform:uppercase;">Enlaces de la Subsección:</h5>
+            <div class="sub-links-container" style="display:flex; flex-direction:column; gap:5px;"></div>
+            <button type="button" class="btn-add-sub-link" style="background:none; border:none; color:#27ae60; cursor:pointer; font-size:0.75rem; margin-top:5px; display:flex; align-items:center; gap:5px;"><i class="fas fa-plus"></i> Añadir Enlace</button>
+        </div>
     `;
+
+    const subLinksContainer = row.querySelector('.sub-links-container');
+    const btnToggleLinks = row.querySelector('.btn-toggle-sub-links');
+    const btnAddSubLink = row.querySelector('.btn-add-sub-link');
+    const linksArea = row.querySelector('.sub-links-area');
+
+    // Render existing links for this subsection
+    links.forEach(l => {
+        addExternalLinkRow(subLinksContainer, l.icon, l.text, l.url);
+    });
+
+    btnToggleLinks.onclick = () => {
+        const isVisible = linksArea.style.display === 'block';
+        linksArea.style.display = isVisible ? 'none' : 'block';
+    };
+
+    btnAddSubLink.onclick = () => {
+        addExternalLinkRow(subLinksContainer, 'fa-link', '', '');
+    };
+
     container.appendChild(row);
 }
 
@@ -1989,7 +2023,23 @@ function collectMenus() {
                 }
 
                 if (sId && sName) {
-                    subsectionsObj[sId] = sName;
+                    // Check for subsection links
+                    const subLinksArr = [];
+                    const subLinkRows = sub.querySelectorAll('.sub-links-container .external-link-row');
+                    subLinkRows.forEach(slrow => {
+                        const slIcon = slrow.querySelector('.link-icon').value.trim();
+                        const slText = slrow.querySelector('.link-text').value.trim();
+                        const slUrl = slrow.querySelector('.link-url').value.trim();
+                        if (slText && slUrl) {
+                            subLinksArr.push({ icon: slIcon, text: slText, url: slUrl });
+                        }
+                    });
+
+                    if (subLinksArr.length > 0) {
+                        subsectionsObj[sId] = { name: sName, links: subLinksArr };
+                    } else {
+                        subsectionsObj[sId] = sName;
+                    }
                 }
             });
 

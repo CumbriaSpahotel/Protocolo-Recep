@@ -349,13 +349,17 @@ function renderNavigation() {
             
             // 2a. First, seed the subMap with manually defined subsections from navigation_config
             if (cat.subsections && typeof cat.subsections === 'object') {
-                Object.entries(cat.subsections).forEach(([subId, subLabel]) => {
+                Object.entries(cat.subsections).forEach(([subId, subData]) => {
                     // Only include numeric-style subsection IDs (e.g. "8.1", "14.1") not named ones
                     if (!subMap.has(subId) && /^\d+\.\d/.test(subId)) {
                         const matchedP = protocols.find(pr => String(pr.section) === subId);
+                        const subName = typeof subData === 'string' ? subData : subData.name;
+                        const subLinks = typeof subData === 'object' ? subData.links : [];
+                        
                         subMap.set(subId, {
                             id: subId,
-                            name: subLabel,
+                            name: subName,
+                            links: subLinks,
                             emoji: null,
                             protocol: matchedP || null,
                             children: []
@@ -786,7 +790,7 @@ function renderList(items, container, options = {}) {
         item.innerHTML = `
             <div class="post-card-content">
                 <div class="post-header-meta">
-                    <div class="post-section-tag">${p.section ? `<i class="fas fa-hashtag"></i> ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
+                    <div class="post-section-tag">${p.section ? `<i class="fas ${p.isChannel ? 'fa-satellite-dish' : 'fa-hashtag'}"></i> ${p.section}` : '<i class="fas fa-file"></i> s/s'}</div>
                     ${statusBadge ? `<div class="post-status-pill ${statusBadge.class}">${statusBadge.emoji} ${statusBadge.text}</div>` : ''}
                     <div class="post-date"><i class="far fa-clock"></i> ${formatDate(bestDate)}</div>
                 </div>
@@ -796,14 +800,28 @@ function renderList(items, container, options = {}) {
                 
                 <div class="post-footer">
                     <div class="post-scope"><i class="fas fa-map-marker-alt"></i> ${scope}</div>
-                    <div class="post-action">Leer documento <i class="fas fa-chevron-right"></i></div>
+                    <div class="post-action">${p.isChannel ? 'Ver canal' : 'Leer documento'} <i class="fas fa-chevron-right"></i></div>
                 </div>
             </div>
         `;
         
         item.addEventListener('click', () => {
-            viewHistory.push({ type: 'protocol', payload: p });
-            loadProtocol(p, highlightText);
+            if (p.isChannel) {
+                // Find the "Canales de Venta" protocol (usually 2.1 or similar)
+                const channelProtocol = protocols.find(pr => pr.section === '2.1.0' || pr.section === '2.1');
+                if (channelProtocol) {
+                    viewHistory.push({ type: 'protocol', payload: channelProtocol });
+                    loadProtocol(channelProtocol);
+                    // Selection of the specific channel is handled by loadProtocol's logic if we pass the channel id
+                    setTimeout(() => {
+                        const tab = document.querySelector(`.channel-tab[data-id="${p.id}"]`);
+                        if (tab) tab.click();
+                    }, 100);
+                }
+            } else {
+                viewHistory.push({ type: 'protocol', payload: p });
+                loadProtocol(p, highlightText);
+            }
         });
         container.appendChild(item);
     });
