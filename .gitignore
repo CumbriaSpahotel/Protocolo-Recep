@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+# Excluir data.js para no exponer la API Key en GitHub
+data.js

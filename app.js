@@ -2175,7 +2175,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                 if (err.message === 'FALLBACK_TRIGGERED' || err.message.includes('Failed to fetch')) {
                     console.warn('[Chatbot] Proxy local falló o no disponible. Intentando llamada directa a Gemini...');
                     // FALLBACK: Direct call to Google if proxy fails (requires geminiApiKey in cloud_config)
-                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${cloud_config.geminiApiKey}`;
+                    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cloud_config.geminiApiKey}`;
                     const directRes = await fetch(directUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
