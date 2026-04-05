@@ -17,23 +17,7 @@ function setHotel(hotel) {
     else if (currentView.type === 'protocol') loadProtocol(currentView.payload);
     else if (currentView.type === 'category') renderCategory(currentView.name, currentView.id);
     
-    updateHotelSelectorUI();
-}
-
-function updateHotelSelectorUI() {
-    document.querySelectorAll('.hotel-sel-btn').forEach(btn => {
-        if (btn.dataset.hotel === currentHotel) {
-            btn.classList.add('active');
-            btn.style.backgroundColor = 'var(--accent-blue)';
-            btn.style.color = 'white';
-        } else {
-            btn.classList.remove('active');
-            btn.style.backgroundColor = 'rgba(255,255,255,0.1)';
-            btn.style.color = 'white';
-        }
-    });
-
-    // Also update the chatbot context if needed
+    // Update the chatbot context if it exists
     const botContext = document.querySelector('.chatbot-header span:last-child');
     if (botContext) {
         botContext.innerHTML = `<span style="width:6px; height:6px; background:#4ade80; border-radius:50%; display:inline-block;"></span> IA · ${currentHotel}`;
@@ -123,45 +107,6 @@ function init() {
         }
     }
 
-    // Inject Hotel Selector into Header
-    const headerContent = document.querySelector('.header-content');
-    if (headerContent) {
-        const selectorDiv = document.createElement('div');
-        selectorDiv.className = 'hotel-selector-global';
-        selectorDiv.style.display = 'flex';
-        selectorDiv.style.gap = '5px';
-        selectorDiv.style.padding = '4px';
-        selectorDiv.style.background = 'rgba(0,0,0,0.2)';
-        selectorDiv.style.borderRadius = '12px';
-        selectorDiv.style.marginLeft = 'auto';
-        selectorDiv.style.marginRight = '15px';
-        
-        const hotels = [
-            { id: 'Sercotel Guadiana', short: 'Guadiana' },
-            { id: 'Cumbria Spa & Hotel', short: 'Cumbria' },
-            { id: 'Ambos hoteles', short: 'Ambos' }
-        ];
-
-        hotels.forEach(h => {
-            const btn = document.createElement('button');
-            btn.className = 'hotel-sel-btn';
-            btn.dataset.hotel = h.id;
-            btn.textContent = h.short;
-            btn.style.border = 'none';
-            btn.style.borderRadius = '8px';
-            btn.style.padding = '6px 12px';
-            btn.style.fontSize = '0.75rem';
-            btn.style.fontWeight = '700';
-            btn.style.cursor = 'pointer';
-            btn.style.transition = 'all 0.3s';
-            btn.onclick = () => setHotel(h.id);
-            selectorDiv.appendChild(btn);
-        });
-        
-        // Insert before theme toggle
-        headerContent.insertBefore(selectorDiv, document.getElementById('admin-access'));
-        updateHotelSelectorUI();
-    }
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
         protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
@@ -498,10 +443,26 @@ function renderNavigation() {
                     
                     a.innerHTML = `<span style="display:flex; align-items:center; flex:1;">${iconHtml}${item.name}</span>`;
                     
-                    if (item.children.length > 0) {
+                    if (item.children.length > 0 || (item.links && item.links.length > 0)) {
                         a.innerHTML += ` <i class="fas fa-caret-right" style="font-size: 0.7rem; margin-left: auto; opacity: 0.6; padding-left: 10px;"></i>`;
                         const nested = document.createElement('div');
                         nested.className = 'dropdown-content nested';
+                        
+                        // Add sub-section links first (if any)
+                        if (item.links && item.links.length > 0) {
+                            item.links.forEach(l => {
+                                const la = document.createElement('a');
+                                la.href = l.url; la.target = "_blank";
+                                const isImg = l.icon && (l.icon.startsWith('http') || l.icon.startsWith('assets/'));
+                                const iconHtml = isImg 
+                                    ? `<img src="${l.icon}" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;">`
+                                    : `<i class="fas ${l.icon || 'fa-link'}"></i> `;
+                                la.innerHTML = `${iconHtml}${l.text}`;
+                                nested.appendChild(la);
+                            });
+                        }
+
+                        // Add children subsections
                         item.children.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}))
                                      .forEach(child => renderNavItem(child, nested));
                         
@@ -928,43 +889,91 @@ function loadProtocol(p, highlightText = '') {
 
         content = `
             <div class="channel-explorer-container">
-                <div class="hotel-selector-tabs" style="margin-bottom: 20px; display: flex; gap: 10px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #666; width: 100%; margin-bottom: 5px;">Filtrado por Hotel: <span style="color: var(--accent-blue)">${currentHotel}</span></span>
+                <div class="channel-info-banner" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 5px solid #2196f3; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 15px;">
+                    <i class="fas fa-info-circle" style="color: #1976d2; font-size: 1.4rem; margin-top: 2px;"></i>
+                    <div style="font-size: 0.95rem; color: #1565c0; line-height: 1.5;">
+                        <p style="margin: 0; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 4px;">Información para el Usuario:</p>
+                        Este explorador te permite consultar la operativa específica de cada canal. 
+                        <strong>1. Filtra por Hotel</strong> para reducir la lista a los canales activos en tu centro. 
+                        <strong>2. Pulsa en un Canal</strong> de la cuadrícula para ver sus detalles, procedimientos y notas específicas sin tener que desplazarte.
+                    </div>
                 </div>
 
-                <nav class="channel-nav-sticky" style="display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: -10px; z-index: 100; background: #004a66; padding: 12px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: visible;">
-                    ${relevantChannels.map(c => `<a href="#${c.id}" class="channel-tab" style="flex: 0 0 auto; white-space: nowrap; padding: 6px 12px; font-size: 0.8rem; background: rgba(255,255,255,0.1); border-radius: 6px; color: white; text-decoration: none; font-weight: 600;">${c.name}</a>`).join('')}
+                <div class="channel-filter-bar" style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #f4f6f8; padding: 10px; border-radius: 12px; border: 1px solid #e0e4e8;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #5c7081; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 5px;">📍 Hotel:</span>
+                    ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
+                        <button onclick="setHotel('${h}')" style="padding: 6px 14px; border-radius: 8px; border: 1px solid ${currentHotel === h ? 'var(--accent-blue)' : '#ccc'}; background: ${currentHotel === h ? 'var(--accent-blue)' : 'white'}; color: ${currentHotel === h ? 'white' : '#555'}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+                            ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <nav class="channel-nav-sticky" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; position: sticky; top: -10px; z-index: 100; background: #004a66; padding: 15px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow: visible;">
+                    ${relevantChannels.map((c, idx) => `
+                        <button onclick="selectChannelTab('${c.id}', this)" class="channel-tab ${idx === 0 ? 'active' : ''}" style="padding: 10px; font-size: 0.75rem; background: ${idx === 0 ? 'var(--accent-gold)' : 'rgba(255,255,255,0.1)'}; color: ${idx === 0 ? '#000' : 'white'}; border-radius: 8px; border: 1px solid ${c.isGift ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255,255,255,0.1)'}; font-weight: 700; text-align: center; cursor: pointer; transition: all 0.2s; min-height: 45px; position: relative;">
+                            ${c.isGift ? '<span style="position: absolute; top: -5px; right: -5px; background: #a855f7; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🎁</span>' : ''}
+                            ${c.name}
+                        </button>
+                    `).join('')}
                 </nav>
 
-                <div id="channels-render-list">
-                    ${relevantChannels.map(c => `
-                        <div id="${c.id}" class="channel-section" style="scroll-margin-top: 100px; margin-bottom: 50px;">
+                <div id="channels-render-list" style="min-height: 400px; background: rgba(255,255,255,0.02); border-radius: 20px; padding: 5px;">
+                    ${relevantChannels.length > 0 ? relevantChannels.map((c, idx) => `
+                        <div id="panel-${c.id}" class="channel-pane" style="display: ${idx === 0 ? 'block' : 'none'}; animation: fadeIn 0.3s ease-out;">
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px;">
-                                <h2 style="border:none; margin:0; color: #004a66;">${c.icon} ${c.name}</h2>
+                                <h2 style="border:none; margin:0; color: #004a66; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                                    ${c.icon} ${c.name}
+                                    ${c.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
+                                </h2>
                                 <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#004a66' : c.hotel === 'Sercotel Guadiana' ? '#a58c5f' : '#27ae60'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
                                     ${c.hotel || 'Ambos hoteles'}
                                 </span>
                             </div>
-                            <div class="channel-card" style="background: white; border-radius: 12px; padding: 25px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
-                                <p style="font-weight:600; color:var(--primary); margin-bottom:10px;">${c.summary || ''}</p>
-                                <div class="channel-procedimiento" style="color: #444; line-height: 1.6;">
+                            <div class="channel-card" style="background: white; border-radius: 16px; padding: 30px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                <h3 style="margin-top:0; color: var(--accent-blue); font-size: 1.2rem;">${c.summary || 'Resumen del Canal'}</h3>
+                                <div class="channel-procedimiento" style="color: #444; line-height: 1.7; font-size: 1.05rem;">
                                     ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
                                 </div>
-                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:20px;">${c.htmlContent}</div>` : ''}
+                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:25px; background: #fafafa; padding: 20px; border-radius: 12px; border: 1px solid #efefef;">${c.htmlContent}</div>` : ''}
                                 ${c.notes ? `
-                                    <div class="channel-notes" style="margin-top:20px; padding:15px; background:#f9f9f9; border-left:4px solid var(--accent); border-radius:4px;">
-                                        <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#555;"><i class="fas fa-info-circle"></i> PECULIARIDADES Y NOTAS:</h4>
-                                        <p style="margin:0; font-size:0.9rem; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
+                                    <div class="channel-notes" style="margin-top:25px; padding:20px; background:#fff9e6; border-left:5px solid var(--accent-gold); border-radius:8px;">
+                                        <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:#856404; text-transform: uppercase; letter-spacing: 1px;"><i class="fas fa-exclamation-circle"></i> Notas del Canal</h4>
+                                        <p style="margin:0; font-size:0.95rem; color: #735e1d; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
                                     </div>
                                 ` : ''}
                             </div>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div style="padding: 40px; text-align: center; color: #999;"><i class="fas fa-search fa-3x" style="margin-bottom: 10px; opacity: 0.3;"></i><p>No hay canales configurados para este hotel.</p></div>'}
                 </div>
             </div>
+
+            <script>
+                function selectChannelTab(id, btn) {
+                    // Hide all panes
+                    document.querySelectorAll('.channel-pane').forEach(p => p.style.display = 'none');
+                    // Show selected
+                    const target = document.getElementById('panel-' + id);
+                    if(target) target.style.display = 'block';
+                    
+                    // Update buttons
+                    document.querySelectorAll('.channel-tab').forEach(b => {
+                        b.style.background = 'rgba(255,255,255,0.1)';
+                        b.style.color = 'white';
+                        b.classList.remove('active');
+                    });
+                    btn.style.background = 'var(--accent-gold)';
+                    btn.style.color = '#000';
+                    btn.classList.add('active');
+
+                    // Scroll to top of explorer if needed
+                    document.querySelector('.channel-nav-sticky').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            </script>
+
             <style>
-                .channel-tab:hover { background: rgba(255,255,255,0.3) !important; transform: translateY(-2px); }
-                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+                .channel-tab:hover:not(.active) { background: rgba(255,255,255,0.2) !important; }
+                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
             </style>
         `;
     }
@@ -1229,17 +1238,42 @@ function handleSearch(query, pushHistory = true) {
         viewHistory.push({ type: 'search', query: query });
     }
 
-    renderHome(); // Go to home structure first
-    const list = document.getElementById('posts-list');
-    document.querySelector('.section-title').innerHTML = `<i class="fas fa-search"></i> Resultados de búsqueda: "${query}"`;
+    // Instead of renderHome(), we clear and build a dedicated results view
+    toggleHomeComponents(false);
+    mainColumn.innerHTML = `
+        <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver al Inicio</div>
+        <h2 class="section-title"><i class="fas fa-search"></i> Resultados de búsqueda: "${query}"</h2>
+        <div id="posts-list" class="recent-posts-grid"></div>
+        ${getLegalFooterHtml()}
+    `;
     
-    const results = protocols.filter(p => 
+    const list = document.getElementById('posts-list');
+    
+    // Search in protocols
+    const protocolResults = protocols.filter(p => 
         p.title.toLowerCase().includes(query.toLowerCase()) || 
         stripHtml(p.content).toLowerCase().includes(query.toLowerCase()) ||
         (p.section && p.section.toLowerCase().includes(query.toLowerCase()))
     );
+
+    // Search in channels
+    let channelResults = [];
+    if (typeof channels_config !== 'undefined') {
+        channelResults = channels_config.filter(c => 
+            c.name.toLowerCase().includes(query.toLowerCase()) ||
+            (c.summary && c.summary.toLowerCase().includes(query.toLowerCase())) ||
+            (c.content && c.content.toLowerCase().includes(query.toLowerCase()))
+        ).map(c => ({
+            ...c,
+            title: `[Canal] ${c.name}`,
+            section: 'Canales de Venta',
+            isChannel: true
+        }));
+    }
+
+    const allResults = [...protocolResults, ...channelResults];
     
-    renderList(results, list, query);
+    renderList(allResults, list, query);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1381,10 +1415,7 @@ function formatDate(dateStr) {
     if (!dateStr) return '--';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    const day = d.getDate().toString().padStart(2, '0');
-    const month = (d.getMonth() + 1);
-    const year = d.getFullYear().toString().slice(-2);
-    return `${day}/${month}/${year}`;
+    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 // Helper for Hash-based routing
 function handleHashRouting() {

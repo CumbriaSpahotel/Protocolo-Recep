@@ -2971,6 +2971,7 @@ function openChannelModal(index) {
     if (index === -1) {
         title.innerHTML = '<i class="fas fa-plus-circle" style="color:#0a6aa1;"></i> Añadir Nuevo Canal';
         document.getElementById('modal-channel-name').value = '';
+        document.getElementById('modal-channel-is-gift').checked = false;
         document.getElementById('modal-channel-icon').value = '🌍';
         document.getElementById('modal-channel-hotel').value = 'Ambos hoteles';
         document.getElementById('modal-channel-summary').value = '';
@@ -2981,6 +2982,7 @@ function openChannelModal(index) {
         const c = window.channels_config[index];
         title.innerHTML = '<i class="fas fa-edit" style="color:#0a6aa1;"></i> Editar Canal: ' + (c.name || '');
         document.getElementById('modal-channel-name').value = c.name || '';
+        document.getElementById('modal-channel-is-gift').checked = !!c.isGift;
         document.getElementById('modal-channel-icon').value = c.icon || '🌍';
         document.getElementById('modal-channel-hotel').value = c.hotel || 'Ambos hoteles';
         document.getElementById('modal-channel-summary').value = c.summary || '';
@@ -3005,6 +3007,7 @@ function saveChannelFromModal() {
     
     const c = {
         name: name,
+        isGift: document.getElementById('modal-channel-is-gift').checked,
         icon: document.getElementById('modal-channel-icon').value,
         hotel: document.getElementById('modal-channel-hotel').value,
         summary: document.getElementById('modal-channel-summary').value,
