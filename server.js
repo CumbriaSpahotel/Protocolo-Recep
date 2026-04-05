@@ -396,7 +396,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         // 2. Perform the request from the server side
-        const apiUri = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const apiUri = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
         
         const geminiRes = await fetch(apiUri, {
             method: 'POST',
