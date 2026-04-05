@@ -1264,7 +1264,7 @@ const home_config = {
 var cloud_config = {
   "scriptUrl": "https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec",
   "sheetId": "1bJF6nCVDKnsS6fTUdGNQ3bGncvP_6WKCudtP1lH2XIw",
-  "geminiApiKey": ""
+  "geminiApiKey": "AIzaSyD32BrTKSVpt1AKK0YFvHYN9qUHLTTeSds"
 };
 
 const menus_data = [];
