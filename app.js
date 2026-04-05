@@ -12,6 +12,8 @@ function setHotel(hotel) {
     localStorage.setItem('selectedHotel', hotel);
     // Refresh UI
     renderNavigation();
+    updateHotelButtons();
+    
     const currentView = viewHistory[viewHistory.length - 1];
     if (currentView.type === 'home') renderHome();
     else if (currentView.type === 'protocol') loadProtocol(currentView.payload);
@@ -22,6 +24,29 @@ function setHotel(hotel) {
     if (botContext) {
         botContext.innerHTML = `<span style="width:6px; height:6px; background:#4ade80; border-radius:50%; display:inline-block;"></span> IA · ${currentHotel}`;
     }
+}
+
+function updateHotelButtons() {
+    const btns = {
+        'Sercotel Guadiana': document.getElementById('btn-h-guadiana'),
+        'Cumbria Spa & Hotel': document.getElementById('btn-h-cumbria'),
+        'Ambos hoteles': document.getElementById('btn-h-ambos')
+    };
+    
+    Object.keys(btns).forEach(key => {
+        const btn = btns[key];
+        if (!btn) return;
+        
+        if (key === currentHotel) {
+            btn.style.background = 'var(--accent-gold)';
+            btn.style.color = '#000';
+            btn.style.boxShadow = '0 0 10px rgba(165,140,95,0.3)';
+        } else {
+            btn.style.background = 'rgba(255,255,255,0.1)';
+            btn.style.color = '#fff';
+            btn.style.boxShadow = 'none';
+        }
+    });
 }
 
 // History stack for better navigation
@@ -106,7 +131,7 @@ function init() {
             }
         }
     }
-
+    updateHotelButtons();
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
         protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
@@ -130,8 +155,12 @@ function init() {
         // Delay routing slightly to ensure DOM is ready
         setTimeout(handleHashRouting, 100);
 
-        // Sort by date descending
-        protocols.sort((a, b) => new Date(b.published) - new Date(a.published));
+        // Sort by modification date descending (most recently updated first)
+        protocols.sort((a, b) => {
+            const dateA = new Date(a.updated || a.published || 0);
+            const dateB = new Date(b.updated || b.published || 0);
+            return dateB - dateA;
+        });
         initApp();
     } else {
         const postsListEl = document.getElementById('posts-list');
@@ -1038,7 +1067,7 @@ function loadProtocol(p, highlightText = '') {
             <header style="text-align: center; margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem;">
                 <h1 style="color: #032d4b; font-size: 2.2rem; margin-bottom: 1rem;">${displayTitle}</h1>
                 <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #666; font-size: 0.85rem;">
-                    <span><i class="fas fa-calendar-alt"></i> ${formatDate(p.published)}</span>
+                    <span><i class="fas fa-calendar-alt"></i> Última actualización: ${formatDate(p.updated || p.published)}</span>
                     <span style="color: #ddd;">|</span>
                     <span>${statusEmoji} ${statusText}</span>
                     <span style="color: #ddd;">|</span>

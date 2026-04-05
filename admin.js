@@ -585,16 +585,12 @@ function renderSummaryItem(item, icon, color, parent) {
         if (!confirm('¿Seguro que quieres quitar este elemento del contenido?')) return;
         
         if (!isHtmlMode) {
-             // In Quill, we just search for the link and remove it by finding the node
-             const links = quill.root.querySelectorAll('a');
-             links.forEach(l => {
-                 if (l.getAttribute('href') === item.href) {
-                     l.replaceWith(l.innerText); // keep text, remove link? Or just remove entirely?
-                     // Let's remove link but keep text maybe? The user might prefer deleting entirely.
-                     // l.remove(); 
-                     l.replaceWith(''); // remove completely as it's an 'attachment' record
-                 }
-             });
+              const links = quill.root.querySelectorAll('a');
+              links.forEach(l => {
+                  if (l.getAttribute('href') === item.href) {
+                      l.remove();
+                  }
+              });
         } else {
             const htmlArea = document.getElementById('html-editor');
             const currentHtml = htmlArea.value;
@@ -1240,7 +1236,7 @@ function renderAdminTable(data) {
         const tr = document.createElement('tr');
         
         const secVal = p.section || 'N/A';
-        const dateVal = formatAdminDate(p.published);
+        const dateVal = formatAdminDate(p.updated || p.published);
         const sourceVal = p.source || 'Ambos';
 
         // Resolve category name from navigation_config
@@ -2348,7 +2344,7 @@ function saveToServer(protocolsData, navData, homeData) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showToast('Guardado correctamente en data.js');
+            showToast('✅ Cambios y fecha de revisión guardados');
         } else {
             alert('Error guardando en el servidor: ' + data.message);
         }
