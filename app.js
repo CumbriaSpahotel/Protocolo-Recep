@@ -137,6 +137,17 @@ function init() {
         protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
         window.protocols = protocols; // Make protocols globally accessible
         
+        // If geminiApiKey is empty (e.g. on GitHub Pages), try to load it from localStorage
+        try {
+            if (typeof cloud_config !== 'undefined' && !cloud_config.geminiApiKey) {
+                const storedKey = localStorage.getItem('geminiApiKey_override');
+                if (storedKey) {
+                    cloud_config.geminiApiKey = storedKey;
+                    console.log('[Config] Clave Gemini cargada desde almacenamiento local del navegador.');
+                }
+            }
+        } catch(e) { /* localStorage bloqueado */ }
+        
         // Calculate and show last update date
         if (protocols.length > 0) {
             const latestDate = protocols.reduce((max, p) => {

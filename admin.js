@@ -2805,7 +2805,21 @@ window.saveCloudConfig = async () => {
     cloud_config.sheetId = CLOUD_SPREADSHEET_ID;
     cloud_config.geminiApiKey = newGeminiKey;
     
-    showToast('💾 Guardando configuración en el servidor...');
+    showToast('💾 Guardando configuración...');
+    
+    // On GitHub Pages, /api/save is not available — save key to localStorage as fallback
+    if (!IS_LOCAL_SERVER) {
+        try {
+            localStorage.setItem('geminiApiKey_override', newGeminiKey);
+            // Also update the in-memory cloud_config so the chatbot can use it immediately
+            if (typeof cloud_config !== 'undefined') cloud_config.geminiApiKey = newGeminiKey;
+            showToast('✅ Clave API guardada en este navegador (sesión local). Para que persista en el servidor, usa el administrador local.');
+            toggleCloudConfig();
+        } catch (e) {
+            showToast('❌ Error: El navegador bloqueó el almacenamiento local. Desactiva el modo privado o la Protección de Rastreo.');
+        }
+        return;
+    }
     
     try {
         const payload = {
