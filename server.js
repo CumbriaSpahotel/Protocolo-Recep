@@ -73,14 +73,15 @@ app.post('/api/save', (req, res) => {
             }
         }
         
-        // Merge: use request data if provided AND non-empty, otherwise keep existing
-        const hasData = (val) => val !== undefined && val !== null && (Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0);
+        // Merge: use request data if provided (even if empty), otherwise keep existing
+        // We only fallback if the property is UNDEFINED (missing from payload), NOT if it's empty [] or {}
+        const isSet = (val) => val !== undefined && val !== null;
         
-        const channels = hasData(data.channelsConfig) ? data.channelsConfig : existing.channels;
-        const protocols = hasData(data.protocols) ? data.protocols : existing.protocols;
-        const nav = hasData(data.navConfig) ? data.navConfig : existing.nav;
-        const home = hasData(data.homeConfig) ? data.homeConfig : existing.home;
-        const menus = hasData(data.menusConfig) ? data.menusConfig : existing.menus;
+        const channels = isSet(data.channelsConfig) ? data.channelsConfig : existing.channels;
+        const protocols = isSet(data.protocols) ? data.protocols : existing.protocols;
+        const nav = isSet(data.navConfig) ? data.navConfig : existing.nav;
+        const home = isSet(data.homeConfig) ? data.homeConfig : existing.home;
+        const menus = isSet(data.menusConfig) ? data.menusConfig : existing.menus;
         
         // Cloud config is special: always merge field-by-field so we don't lose the API key
         const cloud = { ...existing.cloud };

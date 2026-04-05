@@ -2044,7 +2044,8 @@ function collectMenus() {
             });
 
             const linksArr = [];
-            const linkRows = row.querySelectorAll('.external-link-row');
+            const mainLinksContainer = row.querySelector('.links-container');
+            const linkRows = mainLinksContainer ? mainLinksContainer.querySelectorAll('.external-link-row') : [];
             linkRows.forEach(lrow => {
                 const lIcon = lrow.querySelector('.link-icon').value.trim();
                 const lText = lrow.querySelector('.link-text').value.trim();
