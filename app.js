@@ -2191,13 +2191,14 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     // ============================================================
                     // FALLBACK: Google Apps Script Proxy (works from ANY browser)
                     // The API key is stored securely in Script Properties (never public)
+                    // NOTE: Using text/plain to avoid CORS preflight (OPTIONS) which Apps Script blocks
                     // ============================================================
                     const scriptUrl = (typeof cloud_config !== 'undefined' && cloud_config.scriptUrl) ? cloud_config.scriptUrl : null;
                     if (scriptUrl) {
                         console.log('[Chatbot] Usando Google Apps Script como proxy de IA...');
                         const scriptRes = await fetch(scriptUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 'Content-Type': 'text/plain' }, // text/plain avoids CORS preflight
                             body: JSON.stringify({
                                 action: 'gemini_chat',
                                 contents: contents,
