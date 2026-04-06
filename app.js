@@ -1077,6 +1077,24 @@ function loadProtocol(p, highlightText = '') {
 
         <article class="protocol-full animate-fade-in" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
             <header style="text-align: center; margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem;">
+                ${p.isCritical ? `
+                    <div class="critical-alert-banner">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>⚠️ ESTE PROTOCOLO CONTIENE ADVERTENCIAS DE ERRORES CRÍTICOS</span>
+                    </div>
+                ` : ''}
+                ${p.isAnnouncement ? `
+                    <div class="critical-alert-banner" style="background: linear-gradient(135deg, #0a6aa1, #032d4b); box-shadow: 0 10px 25px rgba(10, 106, 161, 0.25);">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>📢 COMUNICADO OFICIAL IMPORTANTE</span>
+                    </div>
+                ` : ''}
+                ${p.commonErrors && p.commonErrors.length > 0 ? `
+                    <div class="critical-alert-banner" style="background: linear-gradient(135deg, #f39c12, #e67e22); box-shadow: 0 10px 25px rgba(230, 126, 34, 0.25);">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>💡 ERRORES FRECUENTES DETECTADOS (Ver checklist al final)</span>
+                    </div>
+                ` : ''}
                 <h1 style="color: #032d4b; font-size: 2.2rem; margin-bottom: 1rem;">${displayTitle}</h1>
                 <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #666; font-size: 0.85rem;">
                     <span><i class="fas fa-calendar-alt"></i> Última actualización: ${formatDate(p.updated || p.published)}</span>
@@ -1089,29 +1107,29 @@ function loadProtocol(p, highlightText = '') {
             </header>
 
             <div class="protocol-full-body" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+                ${content}
                 ${p.commonErrors && p.commonErrors.length > 0 ? `
-                    <div class="common-errors-box" style="margin-bottom: 2.5rem; background: #fff5f5; border: 1px solid #ffcfca; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.1); overflow: hidden;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; color: #dc3545; border-bottom: 1px solid #ffebea; padding-bottom: 10px;">
-                            <i class="fas fa-bug" style="font-size: 1.3rem;"></i>
-                            <h3 style="margin: 0; font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">CHECKLIST: Errores Comunes y Soluciones</h3>
-                        </div>
-                        <div class="errors-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <section class="common-errors-box" style="margin-top: 2rem;">
+                        <header class="common-errors-header">
+                            <i class="fas fa-bug"></i>
+                            <h3>CHECKLIST: Errores Frecuentes y Soluciones</h3>
+                        </header>
+                        <div class="errors-list">
                             ${p.commonErrors.map(err => `
-                                <div class="error-solution-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #eee;">
-                                    <div style="border-right: 1px dashed #eee; padding-right: 10px;">
-                                        <div style="font-size: 0.65rem; font-weight: 800; color: #dc3545; text-transform: uppercase; margin-bottom: 5px;"><i class="fas fa-times-circle"></i> EL ERROR</div>
-                                        <div style="font-size: 0.9rem; color: #444; line-height: 1.4;">${err.error}</div>
+                                <div class="error-solution-item">
+                                    <div class="error-col">
+                                        <div class="error-label"><i class="fas fa-times-circle"></i> EL ERROR</div>
+                                        <div class="error-val">${err.error}</div>
                                     </div>
-                                    <div>
-                                        <div style="font-size: 0.65rem; font-weight: 800; color: #28a745; text-transform: uppercase; margin-bottom: 5px;"><i class="fas fa-check-circle"></i> LA SOLUCIÓN</div>
-                                        <div style="font-size: 0.9rem; color: #155724; font-weight: 600; line-height: 1.4;">${err.solution}</div>
+                                    <div class="solution-col">
+                                        <div class="solution-label"><i class="fas fa-check-circle"></i> LA SOLUCIÓN</div>
+                                        <div class="solution-val">${err.solution}</div>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
-                    </div>
+                    </section>
                 ` : ''}
-                ${content}
             </div>
 
             <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.8rem; color: #999; text-align: justify; font-style: italic;">
@@ -2248,7 +2266,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     // Last resort: direct call if key is available in localStorage/cloud_config
                     if (!rawData && typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey) {
                         console.warn('[Chatbot] Apps Script no disponible. Intentando llamada directa...');
-                        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cloud_config.geminiApiKey}`;
+                        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cloud_config.geminiApiKey}`;
                         const directRes = await fetch(directUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },

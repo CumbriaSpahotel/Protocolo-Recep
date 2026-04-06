@@ -254,13 +254,21 @@
                     <textarea id="home-welcome-text" rows="4" placeholder="Texto descriptivo de bienvenida" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
                 </div>
 
-                <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Errores Críticos</h3>
-                <div id="alerts-critical-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>
-                <button id="btn-add-critical" class="btn-link" style="padding: 10px; background: #ffebee; color: #c62828; border-radius: 4px; text-decoration: none; cursor: pointer; border:none; margin-bottom: 30px;">+ Añadir Error Crítico</button>
+                <div id="manual-alerts-obsolete" style="display:none;">
+                    <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Errores Críticos</h3>
+                    <div id="alerts-critical-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>
+                    <button id="btn-add-critical" class="btn-link" style="padding: 10px; background: #ffebee; color: #c62828; border-radius: 4px; text-decoration: none; cursor: pointer; border:none; margin-bottom: 30px;">+ Añadir Error Crítico</button>
+                    
+                    <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Avisos Importantes</h3>
+                    <div id="alerts-announcements-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>
+                    <button id="btn-add-announcement" class="btn-link" style="padding: 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; text-decoration: none; cursor: pointer; border:none; margin-bottom: 30px;">+ Añadir Aviso</button>
+                </div>
                 
-                <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Avisos Importantes</h3>
-                <div id="alerts-announcements-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>
-                <button id="btn-add-announcement" class="btn-link" style="padding: 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; text-decoration: none; cursor: pointer; border:none; margin-bottom: 30px;">+ Añadir Aviso</button>
+                <div style="background: #eef7ff; border: 1.5px solid #0a6aa140; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top:0; left:0; width: 4px; height: 100%; background: #0a6aa1;"></div>
+                    <h3 style="margin: 0 0 10px 0; color: #0a6aa1; display:flex; align-items:center; gap: 8px;"><i class="fas fa-info-circle"></i> Gestión de la Barra Lateral</h3>
+                    <p style="margin: 0; font-size: 0.88rem; color: #555; line-height: 1.5;">Los <b>errores críticos</b> y <b>avisos importantes</b> ya no se gestionan desde aquí. <br>Para que un protocolo aparezca en la barra lateral, simplemente edita el protocolo y marca los botones <b>"Error Crítico"</b> o <b>"Comunicado"</b>.</p>
+                </div>
 
                 <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Noticias Destacadas</h3>
                 <div id="featured-news-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>

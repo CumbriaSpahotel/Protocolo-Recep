@@ -1011,18 +1011,6 @@ function initAdmin() {
             if (typeof addMenuRow === 'function') addMenuRow(currentRows + 1, '', 'fa-folder', {}, '');
         });
     }
-    const btnAddCritical = document.getElementById('btn-add-critical');
-    if (btnAddCritical) {
-        btnAddCritical.addEventListener('click', () => {
-            if (typeof addAlertRow === 'function') addAlertRow(document.getElementById('alerts-critical-container'), '', 'Hoy', '');
-        });
-    }
-    const btnAddAnnounce = document.getElementById('btn-add-announcement');
-    if (btnAddAnnounce) {
-        btnAddAnnounce.addEventListener('click', () => {
-            if (typeof addAlertRow === 'function') addAlertRow(document.getElementById('alerts-announcements-container'), '', 'Hoy', '');
-        });
-    }
     const btnAddNews = document.getElementById('btn-add-news');
     if (btnAddNews) {
         btnAddNews.addEventListener('click', () => {
@@ -1965,24 +1953,9 @@ function renderInicioUI(homeObj) {
         document.getElementById('home-welcome-text').value = homeObj.welcome.text || '';
     }
 
-    // 2. Errores y Avisos
-    const criticalContainer = document.getElementById('alerts-critical-container');
-    const announcementsContainer = document.getElementById('alerts-announcements-container');
-    
-    if (criticalContainer) criticalContainer.innerHTML = '';
-    if (announcementsContainer) announcementsContainer.innerHTML = '';
-    
-    if (criticalContainer && homeObj?.alerts?.critical_errors?.items) {
-        homeObj.alerts.critical_errors.items.forEach(item => {
-            addAlertRow(criticalContainer, item.title, item.date, item.id || '');
-        });
-    }
-    
-    if (announcementsContainer && homeObj?.alerts?.announcements?.items) {
-        homeObj.alerts.announcements.items.forEach(item => {
-            addAlertRow(announcementsContainer, item.title, item.date, item.id || '');
-        });
-    }
+    // 2. Errores y Avisos (Managed only via protocols now)
+    // Removed population logic as it is handled automatically and hidden from UI
+
 
     // 3. Noticias Destacadas
     const newsContainer = document.getElementById('featured-news-container');
@@ -2018,18 +1991,7 @@ function renderInicioUI(homeObj) {
     }
 }
 
-function addAlertRow(container, title, date, id = '') {
-    const row = document.createElement('div');
-    row.className = 'alert-row';
-    row.style = 'display:flex; gap:10px; align-items:center; background:#fff; padding:10px; border-radius:4px; border:1px solid #ddd; margin-bottom: 5px;';
-    row.innerHTML = `
-        <input type="text" class="alert-title" value="${title}" placeholder="Mensaje de alerta" style="flex:1; padding:5px; border:1px solid #ccc; border-radius:4px;">
-        <input type="text" class="alert-date" value="${date}" placeholder="Fecha/Dato" style="width:100px; padding:5px; border:1px solid #ccc; border-radius:4px;">
-        <input type="text" class="alert-link-id" value="${id}" placeholder="ID Protocolo (opcional)" style="width:80px; padding:5px; border:1px solid #ccc; border-radius:4px;">
-        <button type="button" class="btn-delete-row" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer;" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
-    `;
-    container.appendChild(row);
-}
+
 
 function addNewsRow(container, text, link) {
     const row = document.createElement('div');
@@ -2212,28 +2174,15 @@ function collectInicio() {
         text: document.getElementById('home-welcome-text').value.trim()
     };
 
-    // 2. Errores y Avisos
-    if (!currHome.alerts) currHome.alerts = { critical_errors: { title: 'Errores Críticos', icon: '<i class="fas fa-exclamation-triangle"></i>', items: [] }, announcements: { title: 'Avisos Importantes', icon: '<i class="fas fa-bullhorn"></i>', items: [] } };
-    
-    const criticalRows = document.querySelectorAll('#alerts-critical-container .alert-row');
-    const criticalItems = [];
-    criticalRows.forEach(row => {
-        const title = row.querySelector('.alert-title').value.trim();
-        const date = row.querySelector('.alert-date').value.trim();
-        const id = row.querySelector('.alert-link-id').value.trim();
-        if (title) criticalItems.push({ title, date, id });
-    });
-    currHome.alerts.critical_errors.items = criticalItems;
-    
-    const annRows = document.querySelectorAll('#alerts-announcements-container .alert-row');
-    const annItems = [];
-    annRows.forEach(row => {
-        const title = row.querySelector('.alert-title').value.trim();
-        const date = row.querySelector('.alert-date').value.trim();
-        const id = row.querySelector('.alert-link-id').value.trim();
-        if (title) annItems.push({ title, date, id });
-    });
-    currHome.alerts.announcements.items = annItems;
+    // 2. Errores y Avisos (PRESERVE existing from config, managed via Protocols editor)
+    if (!currHome.alerts) {
+        currHome.alerts = { 
+            critical_errors: { title: 'Errores Críticos', icon: '<i class="fas fa-exclamation-triangle"></i>', items: [] }, 
+            announcements: { title: 'Avisos Importantes', icon: '<i class="fas fa-bullhorn"></i>', items: [] } 
+        };
+    }
+    // We do not collect from DOM anymore to avoid overwriting automatic alerts
+
     
     // 3. Noticias Destacadas
     const newsRows = document.querySelectorAll('#featured-news-container .news-row');
@@ -2266,12 +2215,27 @@ function collectInicio() {
 
 function deleteProtocol(index) {
     if (confirm('¿Estás seguro de que deseas eliminar este protocolo?')) {
+        const p = adminProtocols[index];
+        const protocolId = p.section;
+        
+        // Remove from alerts in home_config if present
+        if (typeof home_config !== 'undefined' && home_config.alerts) {
+            if (home_config.alerts.critical_errors?.items) {
+                home_config.alerts.critical_errors.items = home_config.alerts.critical_errors.items.filter(i => i.id !== protocolId);
+            }
+            if (home_config.alerts.announcements?.items) {
+                home_config.alerts.announcements.items = home_config.alerts.announcements.items.filter(i => i.id !== protocolId);
+            }
+            // Update hidden JSON for persistence
+            document.getElementById('edit-home-json').value = JSON.stringify(home_config, null, 2);
+        }
+
         adminProtocols.splice(index, 1);
         renderAdminTable(adminProtocols);
         updateCounters();
         showToast('Protocolo eliminado permanentemente.');
         // Save deletion to server
-        saveToServer(adminProtocols);
+        saveToServer(adminProtocols, undefined, typeof home_config !== 'undefined' ? home_config : undefined);
     }
 }
 
@@ -2308,6 +2272,7 @@ function saveProtocol() {
         publishedDate = adminProtocols[editingIndex].published || now;
     }
 
+    const isCritical = document.getElementById('edit-is-critical').checked;
     const isAnnouncement = document.getElementById('edit-is-announcement').checked;
 
     const hasCommonErrors = document.getElementById('edit-has-common-errors').checked;
