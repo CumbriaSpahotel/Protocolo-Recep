@@ -2226,7 +2226,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     // Last resort: direct call if key is available in localStorage/cloud_config
                     if (!rawData && typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey) {
                         console.warn('[Chatbot] Apps Script no disponible. Intentando llamada directa...');
-                        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cloud_config.geminiApiKey}`;
+                        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cloud_config.geminiApiKey}`;
                         const directRes = await fetch(directUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
