@@ -2155,24 +2155,30 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
             let rawData;
             
             try {
-                response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.35,
-                            maxOutputTokens: 1500,
-                            topP: 0.9
-                        },
-                        safetySettings: [
-                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                        ]
-                    })
-                });
+                // Si estamos en localhost/servidor, intentamos el proxy local de Node.js primero
+                if (!window.location.hostname.includes('github.io') && window.location.protocol !== 'file:') {
+                    response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: contents,
+                            generationConfig: {
+                                temperature: 0.35,
+                                maxOutputTokens: 1500,
+                                topP: 0.9
+                            },
+                            safetySettings: [
+                                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                            ]
+                        })
+                    });
+                } else {
+                    // Forzamos el fallback directamente porque en GitHub Pages no hay servidor Node.js
+                    throw new Error('FALLBACK_TRIGGERED');
+                }
 
                 const text = await response.text();
                 try {
