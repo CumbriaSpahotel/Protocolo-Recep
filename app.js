@@ -2195,7 +2195,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     // ============================================================
                     const scriptUrl = (typeof cloud_config !== 'undefined' && cloud_config.scriptUrl) ? cloud_config.scriptUrl : null;
                     if (scriptUrl) {
-                        console.log('[Chatbot] Usando Google Apps Script como proxy de IA...');
+                        console.log('[Chatbot] Usando Google Apps Script como proxy de IA. URL:', scriptUrl);
                         const scriptRes = await fetch(scriptUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain' }, // text/plain avoids CORS preflight
