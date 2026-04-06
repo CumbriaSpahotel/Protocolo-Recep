@@ -1089,6 +1089,28 @@ function loadProtocol(p, highlightText = '') {
             </header>
 
             <div class="protocol-full-body" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+                ${p.commonErrors && p.commonErrors.length > 0 ? `
+                    <div class="common-errors-box" style="margin-bottom: 2.5rem; background: #fff5f5; border: 1px solid #ffcfca; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.1); overflow: hidden;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; color: #dc3545; border-bottom: 1px solid #ffebea; padding-bottom: 10px;">
+                            <i class="fas fa-bug" style="font-size: 1.3rem;"></i>
+                            <h3 style="margin: 0; font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">CHECKLIST: Errores Comunes y Soluciones</h3>
+                        </div>
+                        <div class="errors-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            ${p.commonErrors.map(err => `
+                                <div class="error-solution-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #eee;">
+                                    <div style="border-right: 1px dashed #eee; padding-right: 10px;">
+                                        <div style="font-size: 0.65rem; font-weight: 800; color: #dc3545; text-transform: uppercase; margin-bottom: 5px;"><i class="fas fa-times-circle"></i> EL ERROR</div>
+                                        <div style="font-size: 0.9rem; color: #444; line-height: 1.4;">${err.error}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.65rem; font-weight: 800; color: #28a745; text-transform: uppercase; margin-bottom: 5px;"><i class="fas fa-check-circle"></i> LA SOLUCIÓN</div>
+                                        <div style="font-size: 0.9rem; color: #155724; font-weight: 600; line-height: 1.4;">${err.solution}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
                 ${content}
             </div>
 

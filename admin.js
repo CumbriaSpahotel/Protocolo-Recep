@@ -1103,6 +1103,21 @@ function initAdmin() {
         });
     }
 
+    // Errores Comunes
+    const cbHasErrors = document.getElementById('edit-has-common-errors');
+    const errorsContainer = document.getElementById('common-errors-list-container');
+    if (cbHasErrors && errorsContainer) {
+        cbHasErrors.addEventListener('change', () => {
+            errorsContainer.style.display = cbHasErrors.checked ? 'block' : 'none';
+        });
+    }
+    const btnAddError = document.getElementById('btn-add-common-error');
+    if (btnAddError) {
+        btnAddError.addEventListener('click', () => {
+            renderCommonErrorItem();
+        });
+    }
+
     const iconSearch = document.getElementById('icon-search');
     if (iconSearch) {
         iconSearch.addEventListener('input', (e) => {
@@ -1474,6 +1489,30 @@ function generateNextId(force = false) {
     }
 }
 
+function renderCommonErrorItem(errorData = { error: '', solution: '' }) {
+    const container = document.getElementById('common-errors-items');
+    if (!container) return;
+    
+    const item = document.createElement('div');
+    item.className = 'common-error-item';
+    item.style = "display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; background: #fdf2f2; padding: 12px; border: 1px solid #ffcfca; border-radius: 8px; align-items: start; margin-bottom: 8px;";
+    
+    item.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.65rem; font-weight: 800; color: #dc3545; text-transform: uppercase;">A) EL ERROR FRECUENTE</label>
+            <textarea class="error-text" placeholder="Ej: No pedir tarjeta al reservar" style="width: 100%; border: 1px solid #ffcfca; border-radius: 6px; padding: 8px; height: 60px; font-size: 0.85rem; resize: vertical; background: white;">${errorData.error || ''}</textarea>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.65rem; font-weight: 800; color: #157347; text-transform: uppercase;">B) LA SOLUCIÓN CORRECTA</label>
+            <textarea class="solution-text" placeholder="Ej: Siempre tokenizar tarjeta o pedir link REDSYS" style="width: 100%; border: 1px solid #c3e6cb; border-radius: 6px; padding: 8px; height: 60px; font-size: 0.85rem; resize: vertical; color: #157347; font-weight: 600; background: #f9fffb;">${errorData.solution || ''}</textarea>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding-top: 15px;">
+            <button type="button" onclick="this.closest('.common-error-item').remove()" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.1rem; padding: 5px;" title="Eliminar entrada"><i class="fas fa-trash-alt"></i></button>
+        </div>
+    `;
+    container.appendChild(item);
+}
+
 function openEditor(index = -1) {
     editingIndex = index;
     const form = document.getElementById('protocol-form');
@@ -1504,6 +1543,11 @@ function openEditor(index = -1) {
         
         document.getElementById('edit-is-critical').checked = false;
         document.getElementById('edit-is-announcement').checked = false;
+
+        // Reset Errores Comunes
+        document.getElementById('edit-has-common-errors').checked = false;
+        document.getElementById('common-errors-list-container').style.display = 'none';
+        document.getElementById('common-errors-items').innerHTML = '';
         
         // Ensure visual mode UI
         htmlEditor.style.display = 'none';
@@ -1561,6 +1605,21 @@ function openEditor(index = -1) {
         
         document.getElementById('edit-is-critical').checked = isCritical;
         document.getElementById('edit-is-announcement').checked = isAnnouncement;
+
+        // Errores Comunes Load
+        const commonErrors = p.commonErrors || [];
+        const cbHasErrors = document.getElementById('edit-has-common-errors');
+        const errorsItemsContainer = document.getElementById('common-errors-items');
+        errorsItemsContainer.innerHTML = '';
+        
+        if (commonErrors.length > 0) {
+            cbHasErrors.checked = true;
+            document.getElementById('common-errors-list-container').style.display = 'block';
+            commonErrors.forEach(err => renderCommonErrorItem(err));
+        } else {
+            cbHasErrors.checked = false;
+            document.getElementById('common-errors-list-container').style.display = 'none';
+        }
         
         // Preserve raw HTML to avoid stripping
         const rawContent = p.content || '';
@@ -2249,8 +2308,17 @@ function saveProtocol() {
         publishedDate = adminProtocols[editingIndex].published || now;
     }
 
-    const isCritical = document.getElementById('edit-is-critical').checked;
     const isAnnouncement = document.getElementById('edit-is-announcement').checked;
+
+    const hasCommonErrors = document.getElementById('edit-has-common-errors').checked;
+    const currentCommonErrors = [];
+    if (hasCommonErrors) {
+        document.querySelectorAll('.common-error-item').forEach(item => {
+            const err = item.querySelector('.error-text').value.trim();
+            const sol = item.querySelector('.solution-text').value.trim();
+            if (err || sol) currentCommonErrors.push({ error: err, solution: sol });
+        });
+    }
 
     const p = {
         title: title,
@@ -2262,6 +2330,7 @@ function saveProtocol() {
         content: content,
         isCritical: isCritical,
         isAnnouncement: isAnnouncement,
+        commonErrors: currentCommonErrors.length > 0 ? currentCommonErrors : undefined,
         categories: [section ? `${section.split('.')[0]}ª Sección` : 'General']
     };
 
