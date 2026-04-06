@@ -2082,14 +2082,16 @@ async function generateBotResponse(userInput) {
     console.log('[Chatbot] Pregunta:', userInput);
     console.log('[Chatbot] Top Matches:', allMatches.slice(0, 5).map(m => `${m.protocol.title} (${m.score})`));
     
-    const hasGeminiKey = typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey && cloud_config.geminiApiKey.length > 10;
+    const hasLocalKey = localStorage.getItem('geminiApiKey_override');
+    const hasCloudKey = typeof cloud_config !== 'undefined' && cloud_config.geminiApiKey && cloud_config.geminiApiKey.length > 10;
+    const hasScriptUrl = typeof cloud_config !== 'undefined' && cloud_config.scriptUrl && cloud_config.scriptUrl.includes('script.google.com');
+    const isAiEnabled = hasLocalKey || hasCloudKey || hasScriptUrl;
 
     // ============================================================
     // GEMINI AI MODE — Professor-style intelligent answers
     // ============================================================
-    if (hasGeminiKey) {
+    if (isAiEnabled) {
         try {
-            // Build context from top documents
             let contextText = '';
             if (allMatches.length > 0) {
                 const topScore = allMatches[0].score;
@@ -2316,11 +2318,11 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
         // --- MODO CLÁSICO (sin API Key) ---
         showClassicResults(allMatches, searchTerms);
         
-        // Final warning if Key is missing
-        if (!hasGeminiKey) {
-            console.warn('[Chatbot] Gemini API Key missing or too short.');
+        // Final warning if Key/Proxy is missing
+        if (!isAiEnabled) {
+            console.warn('[Chatbot] AI is disabled (No API Key or Proxy URL found).');
             const warningHtml = `<div style="margin-top:10px; font-size:0.7rem; color:#d97706; background:#fffdf2; padding:8px; border:1px solid #fef3c7; border-radius:6px; font-style:italic;">
-                ⚠️ <b>Aviso:</b> El "Cerebro IA" está desactivado. Ve al Admin -> Configuración Cloud y añade tu Gemini API Key para que el bot pueda explicarte las cosas paso a paso como un profesor.
+                ⚠️ <b>Aviso:</b> El "Cerebro IA" está desactivado. Ve al Admin -> Configuración Cloud y añade tu cuenta para que el bot pueda explicarte las cosas paso a paso.
             </div>`;
             appendChatMessage('bot', warningHtml, true);
         }
