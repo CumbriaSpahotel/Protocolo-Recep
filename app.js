@@ -2206,6 +2206,7 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                             })
                         });
                         const scriptText = await scriptRes.text();
+                        console.log('[Chatbot] Apps Script Respondió:', scriptText);
                         try {
                             rawData = JSON.parse(scriptText);
                         } catch(e) {
