@@ -169,6 +169,20 @@ var channels_config = [
 
 const protocols_data = [
   {
+    "title": "NEGLIGENCIA EN LA ASIGNACIÓN DE HABITACIONES DE GRUPOS - PROTOCOLO OBLIGATORIO",
+    "section": "",
+    "source": "Ambos hoteles",
+    "status": "Activo",
+    "published": "2026-05-01T15:49:48.868Z",
+    "updated": "2026-05-01T15:49:48.868Z",
+    "content": "<p><strong>ASUNTO: NEGLIGENCIA EN LA ASIGNACIÓN DE HABITACIONES DE GRUPOS - PROTOCOLO OBLIGATORIO</strong></p><p><strong>A todo el equipo de Recepción:</strong></p><p>Lo ocurrido recientemente con la llegada del último grupo es absolutamente inaceptable y no se puede volver a repetir. Tener a un grupo entero esperando en la recepción durante el <em>check-in</em> mientras descubrimos, sobre la marcha, que hemos asignado camas de matrimonio a dos personas del mismo sexo sin que lo hayan pedido, o que faltan supletorias por una nula revisión, es un fallo de coordinación gravísimo.</p><p>Cuando trabajamos con grupos, el margen de error es cero, ya que tenemos los nombres y los tipos de habitación con tiempo suficiente. No hay habitaciones extra para improvisar. Tener que bloquear <em>suites</em> familiares o montar camas a última hora con el cliente delante da una imagen pésima y bloquea por completo la operativa de todo el equipo.</p><p>A partir de este momento, se aplicará a rajatabla el siguiente protocolo para la gestión de grupos:</p><p><strong>1. Cuadre Inmediato de la Rooming List (7 Días)</strong></p><ul><li>La <em>rooming list</em> definitiva se recibe 7 días antes de la llegada. En ese mismo momento, es <strong>obligatorio</strong> volcar la información al sistema y cruzarla con el <em>rack</em>. Tened en cuenta que cualquier cambio posterior en la lista está siempre sujeto a disponibilidad, por lo que esta primera comprobación exacta es vital.</li><li>El cálculo inicial de tipologías no sirve de nada si no se verifica nombre por nombre y habitación por habitación cuando llega la lista final, ya que durante la semana previa se pueden producir situaciones de cambios de habitación, modificaciones de tipología, etc.</li></ul><p><strong>2. Previsión de Camas Supletorias</strong></p><ul><li>Todas las necesidades de camas supletorias, habitaciones cuádruples, etc., deben detectarse en ese cruce de datos a <strong>2 días vista</strong> como máximo.</li><li>El departamento de Pisos debe recibir el listado con antelación para que, el día de la llegada, <strong>todas las camas estén montadas antes de que el grupo ponga un pie en el hotel</strong>.</li></ul><p><strong>3. Responsabilidad Compartida en Turnos Previos</strong></p><ul><li>La responsabilidad de que el grupo entre sin incidencias no es solo de quien hace la asignación inicial. <strong>Todos los turnos</strong>, y en especial el turno de noche y el de mañana del mismo día de la llegada, tienen la obligación ineludible de repasar el <em>rack</em>.</li><li>Dar por sentado que el trabajo de asignación ya lo ha revisado otro compañero es una actitud negligente. Hay que auditar el <em>rack</em> antes de la hora de entrada.</li></ul><p>Cualquier descuadre o falta de disponibilidad debe detectarse y solucionarse internamente días antes, <strong>nunca</strong> en el momento en que el grupo está frente al mostrador. Se exigirá responsabilidad directa a los turnos implicados ante cualquier desviación de este protocolo.</p>",
+    "isCritical": true,
+    "isAnnouncement": false,
+    "categories": [
+      "General"
+    ]
+  },
+  {
     "title": "📢 Prórroga Campaña Escapada Joven CLM",
     "section": "new-1774752176983",
     "source": "General",
@@ -1182,6 +1196,11 @@ const home_config = {
       "title": "Errores Críticos",
       "icon": "fa-exclamation-triangle",
       "items": [
+        {
+          "title": "NEGLIGENCIA EN LA ASIGNACIÓN DE HABITACIONES DE GRUPOS - PROTOCOLO OBLIGATORIO",
+          "date": "01 may",
+          "id": "new-1777650588868"
+        },
         {
           "title": "📢 Registro de incidencias durante la estancia de los clientes",
           "date": "29 mar",
