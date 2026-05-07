@@ -44,10 +44,11 @@ h1, h2, h3, h4 {
 }
 
 /* Header & Navigation */
-.app-main-header {
+.main-header {
     background-color: var(--primary);
     color: var(--white);
-    padding: 0;
+    padding: 0.5rem 0;
+    text-align: center;
     transition: var(--transition);
 }
 
@@ -59,7 +60,7 @@ h1, h2, h3, h4 {
     opacity: 0.7 !important;
 }
 
-.app-main-header h1 {
+.main-header h1 {
     margin: 0;
     font-size: 1.05rem;
     letter-spacing: 1px;
@@ -70,7 +71,7 @@ h1, h2, h3, h4 {
     background-color: #333;
     padding: 0.3rem 0;
     position: sticky;
-    top: 64px;
+    top: 0;
     z-index: 1000;
     z-index: 1000;
     transition: background-color 0.3s, transform 0.3s ease-in-out;
