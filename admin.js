@@ -6,6 +6,33 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+/**
+ * Generates a premium responsive video container based on the URL provided.
+ * Supports YouTube, Vimeo, Google Drive and direct MP4 links.
+ */
+function generateVideoHtml(videoUrl, videoTitle) {
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const vimeoRegex = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/i;
+    const driveRegex = /(?:drive\.google\.com\/file\/d\/|open\?id=)([^"&?\/\s]+)/i;
+
+    const ytMatch = videoUrl.match(youtubeRegex);
+    const vimeoMatch = videoUrl.match(vimeoRegex);
+    const driveMatch = videoUrl.match(driveRegex);
+
+    if (ytMatch && ytMatch[1]) {
+        const videoId = ytMatch[1];
+        return `\n<div class="video-wrapper">\n    <div class="video-container">\n        <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>\n    </div>\n    ${videoTitle ? `<p class="video-caption"><i class="fas fa-video"></i> ${videoTitle}</p>` : ''}\n</div>\n`;
+    } else if (vimeoMatch && vimeoMatch[1]) {
+        const videoId = vimeoMatch[1];
+        return `\n<div class="video-wrapper">\n    <div class="video-container">\n        <iframe src="https://player.vimeo.com/video/${videoId}" allowfullscreen></iframe>\n    </div>\n    ${videoTitle ? `<p class="video-caption"><i class="fas fa-video"></i> ${videoTitle}</p>` : ''}\n</div>\n`;
+    } else if (driveMatch && driveMatch[1]) {
+        const videoId = driveMatch[1];
+        return `\n<div class="video-wrapper">\n    <div class="video-container">\n        <iframe src="https://drive.google.com/file/d/${videoId}/preview" allowfullscreen></iframe>\n    </div>\n    ${videoTitle ? `<p class="video-caption"><i class="fas fa-video"></i> ${videoTitle}</p>` : ''}\n</div>\n`;
+    } else {
+        return `\n<div class="video-wrapper">\n    <video controls style="width: 100%; height: auto; border-radius: 12px; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">\n        <source src="${videoUrl}" type="video/mp4">\n        Tu navegador no soporta videos.\n    </video>\n    ${videoTitle ? `<p class="video-caption"><i class="fas fa-video"></i> ${videoTitle}</p>` : ''}\n</div>\n`;
+    }
+}
+
 // --- HTML Quick Link Editor logic ---
 window.scanHtmlLinks = function() {
     const editor = document.getElementById('html-editor');
@@ -52,6 +79,25 @@ window.scanHtmlLinks = function() {
             });
         }
     }
+
+    // 3. Buscamos Videos (iframes de YouTube/Vimeo y tags video)
+    const videoRegex = /<(iframe|video)\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>([\s\S]*?)<\/\1>/gi;
+    while ((match = videoRegex.exec(htmlText)) !== null) {
+        const fullTag = match[0];
+        const tagDoc = parser.parseFromString(fullTag, 'text/html');
+        const el = tagDoc.querySelector('iframe, video');
+        if (el) {
+            const src = el.tagName === 'IFRAME' ? el.getAttribute('src') : (el.querySelector('source')?.getAttribute('src') || el.getAttribute('src'));
+            if (src) {
+                elements.push({
+                    type: 'video',
+                    src: src,
+                    alt: el.tagName === 'IFRAME' ? 'Embed' : 'Tag Video',
+                    original: fullTag
+                });
+            }
+        }
+    }
     
     if (elements.length === 0) {
         list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado elementos editables en el código.</div>';
@@ -72,9 +118,11 @@ window.scanHtmlLinks = function() {
         item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
         
         const isImg = m.type === 'img';
-        const badge = isImg ? 
-            `<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-image"></i> FOTO</span>` :
-            `<span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-link"></i> LINK</span>`;
+        const isVideo = m.type === 'video';
+        let badge = '';
+        if (isImg) badge = `<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-image"></i> FOTO</span>`;
+        else if (isVideo) badge = `<span style="background: #f3e8ff; color: #7e22ce; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video"></i> VIDEO</span>`;
+        else badge = `<span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-link"></i> LINK</span>`;
             
         const input1Id = `html-item-url-${idx}`;
         const input2Id = `html-item-text-${idx}`;
@@ -82,12 +130,12 @@ window.scanHtmlLinks = function() {
         item.innerHTML = `
             <div>${badge}</div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : 'ENLACE'}</label>
-                <input type="text" id="${input1Id}" value="${(isImg ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : (isVideo ? 'URL VIDEO' : 'ENLACE')}</label>
+                <input type="text" id="${input1Id}" value="${(m.src || m.href || '').replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : 'TEXTO VISIBLE'}</label>
-                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : m.text).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : (isVideo ? 'TIPO' : 'TEXTO VISIBLE')}</label>
+                <input type="text" id="${input2Id}" value="${(m.alt || m.text || '').replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem;" ${isVideo ? 'readonly' : ''}>
             </div>
             <div style="display: flex; align-items: flex-end; height: 100%;">
                 <button type="button" class="btn-apply-item" 
@@ -109,6 +157,7 @@ window.scanHtmlLinks = function() {
         
         item.dataset.originalHtml = m.original;
         item.dataset.isImg = isImg;
+        item.dataset.isVideo = isVideo;
     });
 
     // Eventos Aplicar
@@ -118,13 +167,14 @@ window.scanHtmlLinks = function() {
             const parent = this.closest('div[data-original-html]');
             const originalHtml = parent.dataset.originalHtml;
             const isImg = parent.dataset.isImg === 'true';
+            const isVideo = parent.dataset.isVideo === 'true';
             
             const val1 = document.getElementById(`html-item-url-${idx}`).value;
             const val2 = document.getElementById(`html-item-text-${idx}`).value;
             
             const parser = new DOMParser();
             const tagDoc = parser.parseFromString(originalHtml, 'text/html');
-            const el = tagDoc.querySelector(isImg ? 'img' : 'a');
+            const el = tagDoc.querySelector(isImg ? 'img' : (isVideo ? 'iframe, video' : 'a'));
             
             if (!el) return;
             
@@ -133,6 +183,14 @@ window.scanHtmlLinks = function() {
                 oldVisibleText = el.getAttribute('alt') || "";
                 el.setAttribute('src', val1);
                 el.setAttribute('alt', val2);
+            } else if (isVideo) {
+                if (el.tagName === 'IFRAME') {
+                    el.setAttribute('src', val1);
+                } else {
+                    const source = el.querySelector('source');
+                    if (source) source.setAttribute('src', val1);
+                    else el.setAttribute('src', val1);
+                }
             } else {
                 oldVisibleText = el.innerText.trim();
                 el.setAttribute('href', val1);
@@ -785,6 +843,93 @@ function initAdmin() {
                 
                 // Alert if using visual editor
                 alert("✅ Foto insertada en modo visual. Si notas que tras guardar se desconfigura, te recomendamos insertarla siempre estado en modo 'Editar en HTML puro' para proteger sus estilos avanzados.");
+            }
+        });
+    }
+
+    // Insert Video Event
+    const btnInsertVideo = document.getElementById('btn-insert-video');
+    if (btnInsertVideo) {
+        btnInsertVideo.addEventListener('click', () => {
+            let videoUrl = prompt('📹 Introduce el enlace del video (YouTube, Vimeo o MP4):');
+            if (!videoUrl) return;
+
+            const videoTitle = prompt('📝 Título o pie del video (opcional):', '');
+            
+            const finalHtml = generateVideoHtml(videoUrl, videoTitle);
+
+            if (isHtmlMode) {
+                const htmlEditor = document.getElementById('html-editor');
+                const startPos = htmlEditor.selectionStart;
+                const endPos = htmlEditor.selectionEnd;
+                htmlEditor.value = htmlEditor.value.substring(0, startPos) + finalHtml + htmlEditor.value.substring(endPos, htmlEditor.value.length);
+                htmlEditor.focus();
+                htmlEditor.selectionStart = startPos + finalHtml.length;
+                htmlEditor.selectionEnd = startPos + finalHtml.length;
+            } else {
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(range.index, finalHtml);
+                quill.setSelection(range.index + 1);
+                alert("✅ Video insertado. Para mejor compatibilidad, se recomienda usar el modo 'Editar en HTML puro'.");
+            }
+        });
+    }
+
+    // Insert Callout Event
+    const btnInsertCallout = document.getElementById('btn-insert-callout');
+    if (btnInsertCallout) {
+        btnInsertCallout.addEventListener('click', () => {
+            const type = prompt('🎨 Selecciona el tipo de bloque:\n1. ℹ️ Nota Informativa (Azul)\n2. ⚠️ Aviso Importante (Naranja)\n3. 💡 Consejo / Tip (Verde)', '1');
+            if (!type) return;
+
+            const content = prompt('✍️ Escribe el texto que quieres resaltar:');
+            if (!content) return;
+
+            let style = '';
+            let icon = '';
+            let title = '';
+
+            switch(type) {
+                case '1':
+                    style = 'background: #eef7ff; border-left: 5px solid #0a6aa1; color: #032d4b;';
+                    icon = 'fas fa-info-circle';
+                    title = 'NOTA';
+                    break;
+                case '2':
+                    style = 'background: #fff9db; border-left: 5px solid #f08c00; color: #5c3e03;';
+                    icon = 'fas fa-exclamation-triangle';
+                    title = 'IMPORTANTE';
+                    break;
+                case '3':
+                    style = 'background: #ebfbee; border-left: 5px solid #2f9e44; color: #093814;';
+                    icon = 'fas fa-lightbulb';
+                    title = 'CONSEJO';
+                    break;
+                default:
+                    return;
+            }
+
+            const calloutHtml = `
+<div style="margin: 20px 0; padding: 20px; border-radius: 8px; ${style} box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+        <i class="${icon}"></i> ${title}
+    </div>
+    <div style="font-size: 1rem; line-height: 1.6;">${content}</div>
+</div>
+`;
+
+            if (isHtmlMode) {
+                const htmlEditor = document.getElementById('html-editor');
+                const startPos = htmlEditor.selectionStart;
+                const endPos = htmlEditor.selectionEnd;
+                htmlEditor.value = htmlEditor.value.substring(0, startPos) + calloutHtml + htmlEditor.value.substring(endPos, htmlEditor.value.length);
+                htmlEditor.focus();
+                htmlEditor.selectionStart = startPos + calloutHtml.length;
+                htmlEditor.selectionEnd = startPos + calloutHtml.length;
+            } else {
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(range.index, calloutHtml);
+                quill.setSelection(range.index + 1);
             }
         });
     }
@@ -3209,7 +3354,24 @@ function updateCanalesOrder() {
     }
 }
 
-window.selectChannelMedia = (type) => {
+window.selectChannelMedia = async (type) => {
+    if (type === 'video') {
+        const option = confirm("¿Deseas insertar un enlace de video (YouTube, Vimeo, Drive) o subir un archivo local?\n\nAceptar = Enlace / Cancelar = Subir archivo");
+        if (option) {
+            const videoUrl = prompt('Introduce la URL del video:');
+            if (!videoUrl) return;
+            const videoTitle = prompt('Título del video (opcional):');
+            
+            const finalHtml = generateVideoHtml(videoUrl, videoTitle);
+            const textarea = document.getElementById(`modal-channel-html`);
+            if (textarea) {
+                textarea.value += finalHtml;
+                showToast('✅ Video insertado correctamente');
+            }
+            return;
+        }
+    }
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = type === 'image' ? 'image/*' : 'video/*';
