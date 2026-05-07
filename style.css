@@ -2154,3 +2154,34 @@ body.dark-mode .error-col {
     border-color: rgba(255, 255, 255, 0.05);
 }
 
+
+/* --- Contenedor de Video Responsivo --- */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    background: #000;
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+}

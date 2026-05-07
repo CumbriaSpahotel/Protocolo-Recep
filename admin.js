@@ -789,6 +789,73 @@ function initAdmin() {
         });
     }
 
+    // Insert Video Event
+    const btnInsertVideo = document.getElementById('btn-insert-video');
+    if (btnInsertVideo) {
+        btnInsertVideo.addEventListener('click', () => {
+            const videoUrl = prompt('🎬 Introduce la URL del video (Google Drive, YouTube o MP4):');
+            if (!videoUrl) return;
+            
+            let finalHtml = '';
+            
+            // 1. Detección de Google Drive
+            const driveMatch = videoUrl.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
+            if (driveMatch && driveMatch[1]) {
+                const driveId = driveMatch[1];
+                const embedUrl = `https://drive.google.com/file/d/${driveId}/preview`;
+                finalHtml = `
+<div class="video-container" style="margin: 20px 0; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; background: #000;">
+    <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="autoplay" allowfullscreen></iframe>
+</div>`;
+            }
+            // 2. Detección de YouTube
+            else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch && ytMatch[1]) {
+                    const ytId = ytMatch[1];
+                    const embedUrl = `https://www.youtube.com/embed/${ytId}`;
+                    finalHtml = `
+<div class="video-container" style="margin: 20px 0; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; background: #000;">
+    <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allowfullscreen></iframe>
+</div>`;
+                }
+            }
+            // 3. Direct MP4 (o similar)
+            else if (videoUrl.endsWith('.mp4') || videoUrl.endsWith('.webm') || videoUrl.includes('/documentos/')) {
+                finalHtml = `
+<div class="video-container" style="margin: 20px 0; text-align: center;">
+    <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <source src="${videoUrl}" type="video/mp4">
+        Tu navegador no soporta video.
+    </video>
+</div>`;
+            }
+            else {
+                alert('⚠️ No hemos podido reconocer el formato. Se insertará como un enlace normal o intenta usar una URL directa.');
+                finalHtml = `<div style="margin:10px 0;"><a href="${videoUrl}" target="_blank">📺 Ver Video Externo</a></div>`;
+            }
+            
+            if (isHtmlMode) {
+                const htmlEditor = document.getElementById('html-editor');
+                const startPos = htmlEditor.selectionStart;
+                const endPos = htmlEditor.selectionEnd;
+                htmlEditor.value = htmlEditor.value.substring(0, startPos) + finalHtml + htmlEditor.value.substring(endPos, htmlEditor.value.length);
+                htmlEditor.focus();
+                htmlEditor.selectionStart = startPos + finalHtml.length;
+                htmlEditor.selectionEnd = startPos + finalHtml.length;
+            } else {
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(range.index, finalHtml);
+                quill.setSelection(range.index + 1);
+            }
+            
+            showToast('🎬 Video insertado correctamente');
+            if (!isHtmlMode) {
+                alert("✅ Video insertado. Si no lo ves correctamente en el editor, usa el botón 'Vista Previa' para confirmar cómo quedará en la web.");
+            }
+        });
+    }
+
     const btnCloseLinks = document.getElementById('btn-close-links-modal');
     if (btnCloseLinks) {
         btnCloseLinks.addEventListener('click', () => {
