@@ -52,6 +52,33 @@ window.scanHtmlLinks = function() {
             });
         }
     }
+
+    // 3. Buscamos Videos (<video> e <iframe>)
+    const videoTagsRegex = /<(video|iframe)\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>(?:[\s\S]*?<\/\1>)?/gi;
+    while ((match = videoTagsRegex.exec(htmlText)) !== null) {
+        const fullTag = match[0];
+        const tagDoc = parser.parseFromString(fullTag, 'text/html');
+        const el = tagDoc.querySelector('video, iframe');
+        if (el) {
+            const isIframe = el.tagName.toLowerCase() === 'iframe';
+            let src = el.getAttribute('src');
+            
+            // Si es un <video> sin src pero con <source>, lo buscamos
+            if (!src && !isIframe) {
+                const source = el.querySelector('source');
+                if (source) src = source.getAttribute('src');
+            }
+
+            if (src) {
+                elements.push({
+                    type: 'video',
+                    src: src,
+                    tagName: el.tagName.toLowerCase(),
+                    original: fullTag
+                });
+            }
+        }
+    }
     
     if (elements.length === 0) {
         list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado elementos editables en el código.</div>';
@@ -72,9 +99,13 @@ window.scanHtmlLinks = function() {
         item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
         
         const isImg = m.type === 'img';
-        const badge = isImg ? 
-            `<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-image"></i> FOTO</span>` :
-            `<span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-link"></i> LINK</span>`;
+        const isVideo = m.type === 'video';
+        
+        let badge = '';
+        if (isImg) badge = `<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-image"></i> FOTO</span>`;
+        else if (isVideo) badge = `<span style="background: #f3e8ff; color: #7e22ce; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-video"></i> VIDEO</span>`;
+        else badge = `<span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;"><i class="fas fa-link"></i> LINK</span>`;
+
             
         const input1Id = `html-item-url-${idx}`;
         const input2Id = `html-item-text-${idx}`;
@@ -82,12 +113,12 @@ window.scanHtmlLinks = function() {
         item.innerHTML = `
             <div>${badge}</div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : 'ENLACE'}</label>
-                <input type="text" id="${input1Id}" value="${(isImg ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'RUTA / URL' : (isVideo ? 'URL VIDEO' : 'ENLACE')}</label>
+                <input type="text" id="${input1Id}" value="${(isImg || isVideo ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : 'TEXTO VISIBLE'}</label>
-                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : m.text).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem;">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : (isVideo ? 'TIPO' : 'TEXTO VISIBLE')}</label>
+                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : (isVideo ? (m.tagName === 'iframe' ? 'Iframe (Drive/YT)' : 'Tag Video') : m.text)).replace(/"/g, '&quot;')}" ${isVideo ? 'readonly' : ''} style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; ${isVideo ? 'background: #f8f9fa; color: #666;' : ''}">
             </div>
             <div style="display: flex; align-items: flex-end; height: 100%;">
                 <button type="button" class="btn-apply-item" 
@@ -109,6 +140,7 @@ window.scanHtmlLinks = function() {
         
         item.dataset.originalHtml = m.original;
         item.dataset.isImg = isImg;
+        item.dataset.isVideo = isVideo;
     });
 
     // Eventos Aplicar
@@ -118,13 +150,18 @@ window.scanHtmlLinks = function() {
             const parent = this.closest('div[data-original-html]');
             const originalHtml = parent.dataset.originalHtml;
             const isImg = parent.dataset.isImg === 'true';
+            const isVideo = parent.dataset.isVideo === 'true';
             
             const val1 = document.getElementById(`html-item-url-${idx}`).value;
             const val2 = document.getElementById(`html-item-text-${idx}`).value;
             
             const parser = new DOMParser();
             const tagDoc = parser.parseFromString(originalHtml, 'text/html');
-            const el = tagDoc.querySelector(isImg ? 'img' : 'a');
+            
+            let el;
+            if (isImg) el = tagDoc.querySelector('img');
+            else if (isVideo) el = tagDoc.querySelector('video, iframe');
+            else el = tagDoc.querySelector('a');
             
             if (!el) return;
             
@@ -133,6 +170,26 @@ window.scanHtmlLinks = function() {
                 oldVisibleText = el.getAttribute('alt') || "";
                 el.setAttribute('src', val1);
                 el.setAttribute('alt', val2);
+            } else if (isVideo) {
+                // Conversión de Drive si es necesario
+                let finalUrl = val1;
+                const driveMatch = val1.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
+                if (driveMatch && driveMatch[1]) {
+                    finalUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+                }
+
+                // Si es video, actualizamos el src principal o el primer <source>
+                if (el.tagName.toLowerCase() === 'video') {
+                    if (el.getAttribute('src')) {
+                        el.setAttribute('src', finalUrl);
+                    } else {
+                        const source = el.querySelector('source');
+                        if (source) source.setAttribute('src', finalUrl);
+                    }
+                } else {
+                    // Iframe
+                    el.setAttribute('src', finalUrl);
+                }
             } else {
                 oldVisibleText = el.innerText.trim();
                 el.setAttribute('href', val1);
@@ -181,13 +238,13 @@ window.scanHtmlLinks = function() {
             const parser = new DOMParser();
             const doc = parser.parseFromString(editor.value, 'text/html');
             
-            // Intento de borrar el figure completo si existe
-            let figureFound = false;
-            doc.querySelectorAll('figure').forEach(fig => {
-                if (fig.outerHTML.includes(originalHtml)) {
-                    if(confirm('He detectado que esta imagen está dentro de un "figure" (contenedor). ¿Quieres borrar todo el bloque de la foto con su pie?')) {
-                        searchStr = fig.outerHTML;
-                        figureFound = true;
+            // Intento de borrar el figure o video-container completo si existe
+            let containerFound = false;
+            doc.querySelectorAll('figure, .video-container').forEach(cont => {
+                if (cont.outerHTML.includes(originalHtml)) {
+                    if(confirm('He detectado que este elemento está dentro de un contenedor (figure/video-container). ¿Quieres borrar todo el bloque?')) {
+                        searchStr = cont.outerHTML;
+                        containerFound = true;
                     }
                 }
             });
