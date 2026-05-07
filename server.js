@@ -317,14 +317,23 @@ app.post('/api/publish', (req, res) => {
                 return res.status(500).json({ success: false, message: 'Error en commit: ' + commitErr.message });
             }
             
-            // Intentar el push
-            exec(push, { cwd: __dirname }, (pushErr, pushStdout, pushStderr) => {
-                if (pushErr) {
-                    console.error(`❌ Error en Push: ${pushStderr || pushErr.message}`);
-                    return res.status(500).json({ success: false, message: 'Error en conexión con GitHub. Revisa tu internet: ' + (pushStderr || pushErr.message) });
+            // Intentar el pull primero para evitar conflictos de "fetch first"
+            const pull = 'git pull origin main --rebase';
+            exec(pull, { cwd: __dirname }, (pullErr, pullStdout, pullStderr) => {
+                if (pullErr) {
+                    console.error(`❌ Error en Pull: ${pullStderr || pullErr.message}`);
+                    return res.status(500).json({ success: false, message: 'Error sincronizando con GitHub (Pull): ' + (pullStderr || pullErr.message) });
                 }
-                console.log(`✅ GitHub actualizado correctamente.`);
-                res.json({ success: true, message: 'Publicado en GitHub correctamente' });
+
+                // Intentar el push
+                exec(push, { cwd: __dirname }, (pushErr, pushStdout, pushStderr) => {
+                    if (pushErr) {
+                        console.error(`❌ Error en Push: ${pushStderr || pushErr.message}`);
+                        return res.status(500).json({ success: false, message: 'Error en conexión con GitHub (Push). Revisa tu internet: ' + (pushStderr || pushErr.message) });
+                    }
+                    console.log(`✅ GitHub actualizado correctamente.`);
+                    res.json({ success: true, message: 'Publicado en GitHub correctamente' });
+                });
             });
         });
     });
