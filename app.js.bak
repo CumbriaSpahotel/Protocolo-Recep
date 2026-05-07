@@ -198,37 +198,14 @@ function initApp() {
     });
 
     // Logo click
-    document.querySelector('.app-main-header h1').style.cursor = 'pointer';
-    document.querySelector('.app-main-header h1').addEventListener('click', () => {
+    document.querySelector('.main-header h1').style.cursor = 'pointer';
+    document.querySelector('.main-header h1').addEventListener('click', () => {
         viewHistory = [{ type: 'home' }];
         renderHome();
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         document.querySelector('.nav-link[data-cat="inicio"]').classList.add('active');
         document.querySelector('.app-wrapper').classList.remove('reading-mode');
     });
-
-function sanitizeProtocolContent(html) {
-    if (!html) return '';
-    
-    // 1. Remove full HTML boilerplate if present
-    let clean = html.replace(/<!DOCTYPE html>|<html>|<\/html>|<head>|<\/head>|<body>|<\/body>|<meta [^>]*>/gi, '');
-    
-    // 2. Scope or rename internal styles to prevent leakage
-    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-    clean = clean.replace(styleRegex, (match, css) => {
-        // If the CSS contains .main-header, we rename it to avoid collision
-        if (css.includes('.main-header') || css.includes('.logo-title') || css.includes('body')) {
-            return `<style>${css.replace(/\.main-header/g, '.protocol-internal-header').replace(/\.logo-title/g, '.protocol-logo-title').replace(/body/g, '.protocol-full-body')}</style>`;
-        }
-        return match;
-    });
-
-    // 3. Rename any hardcoded .main-header class in the HTML too
-    clean = clean.replace(/class=["']main-header["']/g, 'class="protocol-internal-header"');
-    clean = clean.replace(/class=["']logo-title["']/g, 'class="protocol-logo-title"');
-
-    return clean;
-}
 
     // Inicio link click
     const inicioLink = document.querySelector('.nav-link[data-cat="inicio"]');
@@ -974,7 +951,7 @@ function loadProtocol(p, highlightText = '') {
     toggleHomeComponents(false);
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
-    let content = sanitizeProtocolContent(p.content);
+    let content = p.content;
     const isChannelProtocol = p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
     
     // 1. Prepare Content (Special Channel Case)

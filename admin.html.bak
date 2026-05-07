@@ -16,8 +16,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <header class="app-main-header sticky top-0 z-[1100] bg-[#1e293b] border-b border-white/10 shadow-2xl">
-        <div class="header-content h-16 max-w-[1600px] mx-auto flex justify-between items-center px-6 gap-6">
+    <header class="main-header sticky top-0 z-[1100] bg-[#1e293b] border-b border-white/10 shadow-2xl">
+        <div class="header-content max-w-[1600px] mx-auto flex justify-between items-center px-6 py-3 gap-6">
             <div class="flex items-center gap-5 flex-1">
                 <div class="bg-white p-1.5 rounded-xl shadow-lg">
                     <img src="Imagenes/Logo.png" alt="Logo" class="h-8 w-auto">
