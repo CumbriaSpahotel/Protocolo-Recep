@@ -76,11 +76,12 @@ window.scanHtmlLinks = function() {
                 if (source) src = source.getAttribute('src');
             }
 
-            if (src) {
+        if (src) {
                 elements.push({
                     type: 'video',
                     src: src,
                     tagName: el_vid.tagName.toLowerCase(),
+                    caption: el_vid.closest('.video-wrapper')?.querySelector('.video-caption')?.textContent.trim() || '',
                     original: fullTag_vid
                 });
             }
@@ -124,8 +125,8 @@ window.scanHtmlLinks = function() {
                 <input type="text" id="${input1Id}" value="${(isImg || isVideo ? m.src : m.href).replace(/"/g, '&quot;')}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; font-family: monospace;">
             </div>
             <div style="display:flex; flex-direction:column; gap:2px;">
-                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : (isVideo ? 'TIPO' : 'TEXTO VISIBLE')}</label>
-                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : (isVideo ? (m.tagName === 'iframe' ? 'Iframe (Drive/YT)' : 'Tag Video') : m.text)).replace(/"/g, '&quot;')}" ${isVideo ? 'readonly' : ''} style="width: 100%; padding: 6px 10px; border: 1px solid #d1d9e0; border-radius: 10px; font-size: 0.8rem; ${isVideo ? 'background: #f8f9fa; color: #666;' : ''}">
+                <label style="font-size:0.65rem; color:#999; font-weight:bold; margin-left:2px;">${isImg ? 'TEXTO PIE/ALT' : (isVideo ? 'TÍTULO / PIE DE VÍDEO' : 'TEXTO VISIBLE')}</label>
+                <input type="text" id="${input2Id}" value="${(isImg ? m.alt : (isVideo ? (m.caption || '') : m.text)).replace(/"/g, '&quot;')}" placeholder="${isVideo ? 'Escribe un título o descripción del vídeo...' : ''}" style="width: 100%; padding: 6px 10px; border: 1px solid ${isVideo ? '#a78bfa' : '#d1d9e0'}; border-radius: 10px; font-size: 0.8rem; background: ${isVideo ? '#faf5ff' : 'white'};">
             </div>
             <div style="display: flex; align-items: flex-end; height: 100%;">
                 <button type="button" class="btn-apply-item" 
@@ -173,14 +174,14 @@ window.scanHtmlLinks = function() {
         
         if (driveMatch && driveMatch[1]) {
             const embedUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
-            finalHtml = `\n<div class="video-container"><iframe src="${embedUrl}" allow="autoplay" allowfullscreen></iframe></div>\n`;
+            finalHtml = `\n<div class="video-wrapper"><div class="video-container"><iframe src="${embedUrl}" allow="autoplay" allowfullscreen></iframe></div></div>\n`;
         } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
             const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (ytMatch) {
-                finalHtml = `\n<div class="video-container"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>\n`;
+                finalHtml = `\n<div class="video-wrapper"><div class="video-container"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div></div>\n`;
             }
         } else if (url.endsWith('.mp4') || url.includes('/documentos/')) {
-            finalHtml = `\n<div class="video-container"><video controls><source src="${url}" type="video/mp4"></video></div>\n`;
+            finalHtml = `\n<div class="video-wrapper"><div class="video-container"><video controls><source src="${url}" type="video/mp4"></video></div></div>\n`;
         }
 
         if (finalHtml) {
@@ -227,8 +228,7 @@ window.scanHtmlLinks = function() {
                 if (driveMatch && driveMatch[1]) {
                     finalUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
                 }
-
-                // Si es video, actualizamos el src principal o el primer <source>
+                // Actualizar src del iframe o video
                 if (el.tagName.toLowerCase() === 'video') {
                     if (el.getAttribute('src')) {
                         el.setAttribute('src', finalUrl);
@@ -237,14 +237,30 @@ window.scanHtmlLinks = function() {
                         if (source) source.setAttribute('src', finalUrl);
                     }
                 } else {
-                    // Iframe
                     el.setAttribute('src', finalUrl);
                 }
+                // Construir bloque con wrapper + caption opcional
+                const captionText = val2.trim();
+                const newContainerHtml = `<div class="video-container">${el.outerHTML}</div>`;
+                const videoBlock = captionText
+                    ? `<div class="video-wrapper">${newContainerHtml}<p class="video-caption">${captionText}</p></div>`
+                    : `<div class="video-wrapper">${newContainerHtml}</div>`;
+
+                const editor2 = document.getElementById('html-editor');
+                if (editor2.value.includes(originalHtml)) {
+                    editor2.value = editor2.value.replace(originalHtml, videoBlock);
+                    showToast('✅ Vídeo actualizado');
+                    window.scanHtmlLinks();
+                } else {
+                    alert('No se pudo encontrar el fragmento original. Pulsa "Refrescar Lista".');
+                }
+                return;
             } else {
                 oldVisibleText = el.innerText.trim();
                 el.setAttribute('href', val1);
                 el.innerText = val2;
             }
+
             
             const newHtml = el.outerHTML;
             const editor = document.getElementById('html-editor');
@@ -2176,6 +2192,8 @@ function renderInicioUI(homeObj) {
     if (homeObj?.welcome) {
         document.getElementById('home-welcome-title').value = homeObj.welcome.title || '';
         document.getElementById('home-welcome-text').value = homeObj.welcome.text || '';
+        const heroVideoInput = document.getElementById('home-hero-video');
+        if (heroVideoInput) heroVideoInput.value = homeObj.welcome.hero_video || '';
     }
 
     // 2. Errores y Avisos (Managed only via protocols now)
@@ -2394,9 +2412,11 @@ function collectInicio() {
     const currHome = JSON.parse(document.getElementById('edit-home-json').value || '{}');
 
     // 1. Bienvenida
+    const heroVideoEl = document.getElementById('home-hero-video');
     currHome.welcome = {
         title: document.getElementById('home-welcome-title').value.trim(),
-        text: document.getElementById('home-welcome-text').value.trim()
+        text: document.getElementById('home-welcome-text').value.trim(),
+        hero_video: heroVideoEl ? heroVideoEl.value.trim() : ''
     };
 
     // 2. Errores y Avisos (PRESERVE existing from config, managed via Protocols editor)

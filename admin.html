@@ -256,6 +256,32 @@
                     <textarea id="home-welcome-text" rows="4" placeholder="Texto descriptivo de bienvenida" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
                 </div>
 
+                <!-- Nueva sección: Video Hero -->
+                <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;"><i class="fas fa-film" style="color:#0a6aa1;"></i> Vídeo Corporativo de Inicio</h3>
+                <div style="background: linear-gradient(135deg, #eef7ff 0%, #f0f4ff 100%); border: 1.5px solid #c7d9f5; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                    <p style="margin: 0 0 12px; font-size: 0.875rem; color: #555; line-height: 1.5;">
+                        <i class="fas fa-info-circle" style="color:#0a6aa1;"></i>
+                        Pega aquí el enlace de <strong>Google Drive</strong> o <strong>YouTube</strong>. El vídeo se mostrará de forma compacta en la página de inicio. Si dejas el campo vacío, la sección no se mostrará.
+                    </p>
+                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                        <div style="flex:1;">
+                            <label style="display:block; font-size: 0.75rem; font-weight: 700; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em;">URL del vídeo</label>
+                            <input type="url" id="home-hero-video" placeholder="https://drive.google.com/file/d/... o https://youtu.be/..." style="width: 100%; padding: 10px 12px; border: 1px solid #c7d9f5; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; background: white;">
+                        </div>
+                        <div style="margin-top: 22px;">
+                            <button type="button" onclick="(function(){ var url=document.getElementById('home-hero-video').value.trim(); if(!url){alert('Introduce una URL primero.');return;} var em=''; var dm=url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/); if(dm&&dm[1]){em='https://drive.google.com/file/d/'+dm[1]+'/preview';} else if(url.includes('youtube')||url.includes('youtu.be')){var ym=url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);if(ym)em='https://www.youtube.com/embed/'+ym[1];}else{em=url;} if(!em){alert('URL no reconocida.');return;} window.open(em,'_blank');})()" style="background:#0a6aa1; color:white; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; font-size:0.85rem; font-weight:600; white-space:nowrap;">
+                                <i class="fas fa-eye"></i> Previsualizar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="hero-video-preview-area" style="margin-top: 12px; display:none; border-radius: 8px; overflow:hidden; background:#000; aspect-ratio: 16/5;">
+                        <iframe id="hero-video-preview-iframe" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>
+                    </div>
+                    <p style="margin: 8px 0 0; font-size: 0.75rem; color: #888;">
+                        <i class="fas fa-lightbulb" style="color:#f39c12;"></i> Tip: Puedes usar la URL pública del vídeo directamente desde Drive o el enlace de YouTube.
+                    </p>
+                </div>
+
                 <div id="manual-alerts-obsolete" style="display:none;">
                     <h3 style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Barra Lateral: Errores Críticos</h3>
                     <div id="alerts-critical-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 15px;"></div>

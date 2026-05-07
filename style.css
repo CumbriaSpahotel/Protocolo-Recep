@@ -326,52 +326,230 @@ body.dark-mode .top-nav {
 
 /* Re-styling Welcome for Dashboard */
 .welcome-card {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #0d47a1 100%);
     border-radius: 24px;
-    padding: 3.5rem;
-    box-shadow: 0 20px 50px rgba(30, 60, 114, 0.2);
+    padding: 0;
+    box-shadow: 0 20px 50px rgba(30, 60, 114, 0.25);
     position: relative;
     overflow: hidden;
     color: white;
     margin-bottom: 2rem;
 }
 
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+}
+
 .welcome-card::after {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
+    bottom: -80px;
+    left: 30%;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(30px);
+}
+
+.welcome-card-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2.5rem 3rem;
+    position: relative;
+    z-index: 1;
+    gap: 2rem;
+}
+
+.welcome-text-block {
+    flex: 1;
+    min-width: 0;
 }
 
 .welcome-title {
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     color: white;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.75rem;
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
+    line-height: 1.2;
+}
+
+.welcome-title i {
+    font-size: 1.8rem;
+    opacity: 0.85;
 }
 
 .welcome-desc {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.2rem;
-    line-height: 1.6;
-    max-width: 850px;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 720px;
     font-weight: 400;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.welcome-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+}
+
+.welcome-chip i {
+    font-size: 0.7rem;
+}
+
+.welcome-chip.online-chip {
+    background: rgba(46, 213, 115, 0.2);
+    border-color: rgba(46, 213, 115, 0.4);
+    color: #a8edbb;
+}
+
+.welcome-chip.online-chip i {
+    color: #2ed573;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.welcome-deco-block {
+    flex-shrink: 0;
+}
+
+.welcome-deco-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+}
+
+.welcome-card:hover .welcome-deco-circle {
+    transform: rotate(10deg) scale(1.05);
+    background: rgba(255, 255, 255, 0.18);
 }
 
 .welcome-card p {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.88);
     font-size: 1.1rem;
 }
+
+/* ============================================
+   HERO VIDEO SECTION - Compacta y elegante
+   ============================================ */
+.hero-video-section {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: all 0.3s;
+}
+
+.hero-video-section:hover {
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1) !important;
+    transform: translateY(-2px);
+}
+
+.hero-video-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: white;
+}
+
+.hero-video-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.hero-video-badge i {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.hero-video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 36%; /* Aspecto 16:9 pero más compacto */
+    background: #000;
+}
+
+.hero-video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .welcome-card-inner {
+        padding: 2rem 1.5rem;
+        flex-direction: column;
+    }
+
+    .welcome-deco-block {
+        display: none;
+    }
+
+    .welcome-title {
+        font-size: 1.6rem;
+    }
+
+    .hero-video-wrapper {
+        padding-bottom: 56.25%; /* Ratio estándar 16:9 en móvil */
+    }
+}
+
+
 
 /* Posts List */
 .section-title {
@@ -2156,17 +2334,24 @@ body.dark-mode .error-col {
 
 
 /* --- Contenedor de Video Responsivo --- */
+.video-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 24px 0;
+}
+
 .video-container {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    padding-bottom: 56.25%; /* 16:9 */
     height: 0;
     overflow: hidden;
-    max-width: 100%;
+    width: 100%;
+    max-width: 680px;
     background: #000;
-    border-radius: 12px;
-    margin: 20px 0;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.08);
 }
 
 .video-container iframe,
@@ -2180,8 +2365,24 @@ body.dark-mode .error-col {
     border: 0;
 }
 
+/* Caption editable del video */
+.video-caption {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+    max-width: 680px;
+    line-height: 1.4;
+}
+
 video {
     max-width: 100%;
+    max-width: 680px;
     height: auto;
-    border-radius: 12px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
 }
+
+

@@ -584,12 +584,64 @@ function renderHome() {
     // Manual Operativo de Recepción - Centro de Procedimientos
     const welcomeTitle = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.title : 'Manual Operativo de Recepción';
     const welcomeText = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.text : 'Bienvenido al sistema centralizado de procedimientos y normativas de trabajo.';
+    const heroVideoUrl = (typeof home_config !== 'undefined' && home_config.welcome && home_config.welcome.hero_video) ? home_config.welcome.hero_video.trim() : '';
+
+    // Convertir URL de Drive a embed si es necesario
+    let heroVideoEmbed = '';
+    if (heroVideoUrl) {
+        const driveMatch = heroVideoUrl.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
+        if (driveMatch && driveMatch[1]) {
+            heroVideoEmbed = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+        } else if (heroVideoUrl.includes('youtube.com') || heroVideoUrl.includes('youtu.be')) {
+            const ytMatch = heroVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytMatch) heroVideoEmbed = `https://www.youtube.com/embed/${ytMatch[1]}`;
+        } else {
+            heroVideoEmbed = heroVideoUrl;
+        }
+    }
+
+    // Sección de video hero (solo si hay URL configurada)
+    const heroVideoSection = heroVideoEmbed ? `
+        <div class="hero-video-section premium-shadow">
+            <div class="hero-video-header">
+                <div class="hero-video-badge">
+                    <i class="fas fa-play-circle"></i>
+                    <span>VIDEO CORPORATIVO</span>
+                </div>
+            </div>
+            <div class="hero-video-wrapper">
+                <iframe 
+                    src="${heroVideoEmbed}" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen
+                    loading="lazy"
+                    title="Video corporativo">
+                </iframe>
+            </div>
+        </div>
+    ` : '';
 
     mainColumn.innerHTML = `
         <div class="welcome-card premium-shadow">
-            <h1 class="welcome-title"><i class="fas fa-hotel"></i> ${welcomeTitle}</h1>
-            <p class="welcome-desc">${welcomeText}</p>
+            <div class="welcome-card-inner">
+                <div class="welcome-text-block">
+                    <h1 class="welcome-title"><i class="fas fa-hotel"></i> ${welcomeTitle}</h1>
+                    <p class="welcome-desc">${welcomeText}</p>
+                    <div class="welcome-meta-row">
+                        <span class="welcome-chip"><i class="fas fa-shield-alt"></i> Sistema Interno</span>
+                        <span class="welcome-chip"><i class="fas fa-users"></i> Guadiana &amp; Cumbria</span>
+                        <span class="welcome-chip online-chip"><i class="fas fa-circle"></i> En línea</span>
+                    </div>
+                </div>
+                <div class="welcome-deco-block">
+                    <div class="welcome-deco-circle">
+                        <i class="fas fa-concierge-bell"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        ${heroVideoSection}
 
         <div class="dashboard-grid">
             <!-- Búsqueda Global -->
