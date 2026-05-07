@@ -16,17 +16,28 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-content" style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <img src="Imagenes/Logo.png" alt="Logo" style="height: 35px; background: white; padding: 3px; border-radius: 4px;">
-                <h1>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
+    <header class="main-header sticky top-0 z-[1100] bg-[#1e293b] border-b border-white/10 shadow-2xl">
+        <div class="header-content max-w-[1600px] mx-auto flex justify-between items-center px-6 py-3 gap-6">
+            <div class="flex items-center gap-5 flex-1">
+                <div class="bg-white p-1.5 rounded-xl shadow-lg">
+                    <img src="Imagenes/Logo.png" alt="Logo" class="h-8 w-auto">
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-white font-black text-sm tracking-[0.1em] uppercase leading-none mb-1">
+                        Operativa Recepción
+                    </h1>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                        Panel de Administración
+                    </div>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <button id="admin-access" class="admin-btn" aria-label="Acceso administrador" style="background: none; border: none; color: inherit; font-size: 1rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; opacity: 0.6; transition: opacity 0.3s;">
+
+            <div class="flex items-center gap-3">
+                <button id="admin-access" class="admin-btn p-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all duration-300" title="Configuración">
                     <i class="fas fa-cog"></i>
                 </button>
-                <button id="theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background: none; border: none; color: inherit; font-size: 1.1rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; opacity: 0.6;">
+                <button id="theme-toggle" class="theme-btn p-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl shadow-lg transition-all duration-300" title="Cambiar Tema">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
