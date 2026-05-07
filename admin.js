@@ -913,6 +913,61 @@ function initAdmin() {
         });
     }
 
+    // Insert Note/Alert Event
+    const btnInsertNote = document.getElementById('btn-insert-note');
+    if (btnInsertNote) {
+        btnInsertNote.addEventListener('click', () => {
+            const noteText = prompt('📝 Introduce el texto de la nota o aviso:');
+            if (!noteText) return;
+            
+            const type = prompt('🎨 Elige el tipo (1: Info Azul, 2: Aviso Amarillo, 3: Alerta Roja):', '1');
+            
+            let bg = '#e3f2fd';
+            let border = '#2196f3';
+            let icon = 'fa-info-circle';
+            let label = 'AVISO';
+            
+            if (type === '2') {
+                bg = '#fff3e0';
+                border = '#ff9800';
+                icon = 'fa-exclamation-triangle';
+                label = 'IMPORTANTE';
+            } else if (type === '3') {
+                bg = '#ffebee';
+                border = '#f44336';
+                icon = 'fa-times-circle';
+                label = 'ALERTA';
+            }
+            
+            const noteHtml = `
+<div class="custom-note" style="background: ${bg}; border-left: 6px solid ${border}; padding: 18px; border-radius: 8px; margin: 25px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 1px solid rgba(0,0,0,0.02); border-right: 1px solid rgba(0,0,0,0.02); border-bottom: 1px solid rgba(0,0,0,0.02);">
+    <div style="display: flex; align-items: flex-start; gap: 15px;">
+        <i class="fas ${icon}" style="color: ${border}; font-size: 1.4rem; margin-top: 2px;"></i>
+        <div style="flex: 1;">
+            <strong style="display: block; color: ${border}; margin-bottom: 5px; font-size: 0.85rem; letter-spacing: 1px; font-weight: 800;">${label}</strong>
+            <p style="margin: 0; color: #333; line-height: 1.6; font-size: 1rem; font-weight: 500;">${noteText}</p>
+        </div>
+    </div>
+</div>
+`;
+            
+            if (isHtmlMode) {
+                const htmlEditor = document.getElementById('html-editor');
+                const startPos = htmlEditor.selectionStart;
+                const endPos = htmlEditor.selectionEnd;
+                htmlEditor.value = htmlEditor.value.substring(0, startPos) + noteHtml + htmlEditor.value.substring(endPos, htmlEditor.value.length);
+                htmlEditor.focus();
+                htmlEditor.selectionStart = startPos + noteHtml.length;
+                htmlEditor.selectionEnd = startPos + noteHtml.length;
+            } else {
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(range.index, noteHtml);
+                quill.setSelection(range.index + 1);
+            }
+            showToast('📝 Nota insertada');
+        });
+    }
+
     const btnCloseLinks = document.getElementById('btn-close-links-modal');
     if (btnCloseLinks) {
         btnCloseLinks.addEventListener('click', () => {
@@ -948,8 +1003,8 @@ function initAdmin() {
             setTimeout(() => window.scanHtmlLinks(), 50);
 
             btn.innerHTML = '<i class="fas fa-eye"></i> Editor Visual';
-            btn.classList.add('btn-primary');
-            btn.classList.remove('btn-secondary');
+            btn.style.background = '#1dbc60'; // Verde premium
+            btn.style.color = 'white';
         } else {
             // Switch to Visual mode
             const currentHtml = htmlEditor.value;
@@ -969,8 +1024,8 @@ function initAdmin() {
             document.getElementById('quill-editor').style.display = 'block';
 
             btn.innerHTML = '<i class="fas fa-code"></i> Editar en HTML puro';
-            btn.classList.add('btn-secondary');
-            btn.classList.remove('btn-primary');
+            btn.style.background = '#6c757d'; // Gris/Secondary
+            btn.style.color = 'white';
         }
     });
 
