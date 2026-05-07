@@ -6,6 +6,13 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+// --- Detección de Servidor Local ---
+const IS_LOCAL_SERVER = window.location.protocol !== 'file:' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1' || 
+    window.location.port === '3001'
+);
+
 // --- HTML Quick Link Editor logic ---
 window.scanHtmlLinks = function() {
     const editor = document.getElementById('html-editor');
@@ -2697,6 +2704,7 @@ function renderIconBank(filterText) {
 // Comment Moderation logic moved or already integrated
 
 async function updatePendingBadge() {
+    if (!IS_LOCAL_SERVER) return;
     try {
         const response = await fetch('/api/comments/all');
         if (!response.ok) return;
@@ -2723,7 +2731,7 @@ async function updatePendingBadge() {
             }
         }
     } catch (e) {
-        console.error('Error updating badge:', e);
+        console.warn('Could not update pending badge (offline mode).');
     }
 }
 
@@ -3518,3 +3526,25 @@ if (typeof cloud_config !== 'undefined') {
     if (cloud_config.scriptUrl) CLOUD_GATEWAY_URL = cloud_config.scriptUrl;
     if (cloud_config.sheetId) CLOUD_SPREADSHEET_ID = cloud_config.sheetId;
 }
+
+// --- Inicialización de Advertencias ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Advertencia si se abre como archivo local para evitar errores de CORS
+    if (window.location.protocol === 'file:') {
+        console.warn('⚠️ Estás usando el protocolo file://. Las funciones de servidor (comentarios, subidas) fallarán.');
+        const warning = document.createElement('div');
+        warning.id = 'file-protocol-warning';
+        warning.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; background: linear-gradient(to right, #e74c3c, #c0392b); color: white; text-align: center; padding: 12px; z-index: 999999; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: sans-serif; font-size: 0.9rem;';
+        warning.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i> 
+            SISTEMA EN MODO LECTURA (ARCHIVO LOCAL). 
+            <span style="font-weight: normal; margin-left: 10px;">
+                Para gestionar comentarios y multimedia, usa: 
+                <a href="http://localhost:3000/admin.html" style="color: #f1c40f; font-weight: bold; text-decoration: underline;">http://localhost:3000/admin.html</a> 
+                (Ejecuta 'Abrir_Administrador.bat').
+            </span>
+        `;
+        document.body.prepend(warning);
+        document.body.style.marginTop = '45px';
+    }
+});

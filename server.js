@@ -2,13 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const open = require('open').default;
+const open = require('open');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
 const https = require('https');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 // Configurar almacenamiento de documentos
 const uploadDir = path.join(__dirname, 'documentos');
@@ -309,27 +309,34 @@ app.post('/api/publish', (req, res) => {
     
     console.log('🚀 Iniciando publicación en GitHub...');
     
-    exec(add, { cwd: __dirname }, (err) => {
-        // El commit puede fallar si no hay cambios, lo cual es normal
+    exec(add, { cwd: __dirname }, (addErr) => {
+        if (addErr) {
+            console.error(`❌ Error en Git Add: ${addErr.message}`);
+            return res.status(500).json({ success: false, message: 'Error preparando archivos: ' + addErr.message });
+        }
+
         exec(commit, { cwd: __dirname }, (commitErr, stdout) => {
-            if (commitErr && !stdout.includes('nothing to commit')) {
-                console.error(`❌ Error en Commit: ${commitErr.message}`);
-                return res.status(500).json({ success: false, message: 'Error en commit: ' + commitErr.message });
+            // El commit puede fallar si no hay cambios, lo cual es normal
+            if (commitErr && !stdout.includes('nothing to commit') && !stdout.includes('nada para hacer')) {
+                console.error(`❌ Error en Git Commit: ${commitErr.message}`);
+                return res.status(500).json({ success: false, message: 'Error guardando cambios localmente: ' + commitErr.message });
             }
             
             // Intentar el pull primero para evitar conflictos de "fetch first"
+            // Usamos --no-rebase o --rebase dependiendo de la preferencia, 
+            // pero --rebase es más limpio si no hay conflictos reales.
             const pull = 'git pull origin main --rebase';
             exec(pull, { cwd: __dirname }, (pullErr, pullStdout, pullStderr) => {
                 if (pullErr) {
-                    console.error(`❌ Error en Pull: ${pullStderr || pullErr.message}`);
-                    return res.status(500).json({ success: false, message: 'Error sincronizando con GitHub (Pull): ' + (pullStderr || pullErr.message) });
+                    console.error(`❌ Error en Git Pull: ${pullStderr || pullErr.message}`);
+                    return res.status(500).json({ success: false, message: 'Error sincronizando con GitHub (Pull). Prueba de nuevo en unos segundos: ' + (pullStderr || pullErr.message) });
                 }
 
                 // Intentar el push
                 exec(push, { cwd: __dirname }, (pushErr, pushStdout, pushStderr) => {
                     if (pushErr) {
-                        console.error(`❌ Error en Push: ${pushStderr || pushErr.message}`);
-                        return res.status(500).json({ success: false, message: 'Error en conexión con GitHub (Push). Revisa tu internet: ' + (pushStderr || pushErr.message) });
+                        console.error(`❌ Error en Git Push: ${pushStderr || pushErr.message}`);
+                        return res.status(500).json({ success: false, message: 'Error subiendo a GitHub (Push). Revisa tu internet: ' + (pushStderr || pushErr.message) });
                     }
                     console.log(`✅ GitHub actualizado correctamente.`);
                     res.json({ success: true, message: 'Publicado en GitHub correctamente' });
@@ -435,8 +442,25 @@ app.all('/api/chat', (req, res) => {
 // Middleware para archivos estáticos al FINAL
 app.use(express.static(__dirname));
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Servidor de desarrollo iniciado en http://localhost:${PORT}/admin.html`);
     console.log('Mantén esta ventana abierta mientras editas.');
-    open(`http://localhost:${PORT}/admin.html`);
+    console.log('----------------------------------------------------------');
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ ERROR: El puerto ${PORT} ya está siendo usado por otro programa.`);
+    } else {
+        console.error('❌ Error en el servidor:', err);
+    }
+});
+
+// Manejadores de errores globales para depuración
+process.on('uncaughtException', (err) => {
+    console.error('❌ EXCEPCIÓN NO CAPTURADA:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ RECHAZO DE PROMESA NO CAPTURADO:', reason);
 });

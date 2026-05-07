@@ -1132,6 +1132,15 @@ function loadProtocol(p, highlightText = '') {
                 ` : ''}
             </div>
 
+            <!-- Global Video Support for Drive/YouTube -->
+            <script>
+                (function() {
+                    // This internal script will run inside the protocol context if needed, 
+                    // but we also call it from loadProtocol globally.
+                    if (window.initVideoUnits) window.initVideoUnits(document.querySelector('.protocol-full-body'));
+                })();
+            </script>
+
             <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.8rem; color: #999; text-align: justify; font-style: italic;">
                 <p><i class="fas fa-info-circle"></i> Documento de uso interno. Queda prohibida la reproducción o difusión no autorizada de este protocolo.</p>
             </footer>
@@ -1197,7 +1206,118 @@ function loadProtocol(p, highlightText = '') {
     
     setTimeout(() => {
         if (typeof renderComments === 'function') renderComments(pId);
+        
+        // Initialize Global Video Units
+        initVideoUnits(mainColumn);
+        
+        // Scan for raw links that should be videos
+        scanAndConvertVideoLinks(mainColumn);
     }, 100);
+}
+
+/**
+ * Global Video Unit Initializer
+ * Detects <section class="video-unit"> and injects the proper player
+ */
+function initVideoUnits(root) {
+    root.querySelectorAll('.video-unit').forEach(vu => {
+        const id = (vu.dataset.driveId || '').trim();
+        const title = (vu.dataset.title || 'Vídeo').trim();
+        const titleEl = vu.querySelector('.vu-title');
+        const statusEl = vu.querySelector('.vu-status') || vu.querySelector('[data-status]');
+        const player = vu.querySelector('.vu-player');
+        const fallback = vu.querySelector('.vu-fallback');
+        const iframe = vu.querySelector('iframe');
+        const btn = vu.querySelector('.btn-open');
+        const overlay = vu.querySelector('.open-overlay');
+
+        if (titleEl) titleEl.textContent = title;
+
+        if (id) {
+            const embedUrl = id.includes('http') ? id : `https://drive.google.com/file/d/${id}/preview`;
+            const viewUrl = id.includes('http') ? id : `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+            
+            if (iframe) {
+                iframe.src = embedUrl;
+                iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+            }
+            if (btn) btn.href = viewUrl;
+            if (overlay) overlay.href = viewUrl;
+            
+            if (player) player.hidden = false;
+            if (fallback) fallback.hidden = true;
+            if (statusEl) {
+                statusEl.textContent = 'Disponible';
+                statusEl.className = 'vu-status ok';
+                statusEl.style.background = '#dcfce7';
+                statusEl.style.color = '#16a34a';
+                statusEl.style.padding = '4px 10px';
+                statusEl.style.borderRadius = '20px';
+                statusEl.style.fontSize = '0.75rem';
+                statusEl.style.fontWeight = '700';
+            }
+        } else {
+            if (player) player.hidden = true;
+            if (fallback) fallback.hidden = false;
+            if (statusEl) {
+                statusEl.textContent = 'Pendiente';
+                statusEl.className = 'vu-status pending';
+                statusEl.style.background = '#fee2e2';
+                statusEl.style.color = '#b91c1c';
+                statusEl.style.padding = '4px 10px';
+                statusEl.style.borderRadius = '20px';
+                statusEl.style.fontSize = '0.75rem';
+                statusEl.style.fontWeight = '700';
+            }
+        }
+    });
+}
+
+/**
+ * Scans for raw links to Drive/YouTube and converts them to embedded players automatically
+ */
+function scanAndConvertVideoLinks(root) {
+    const links = root.querySelectorAll('.protocol-full-body a');
+    links.forEach(link => {
+        const url = link.getAttribute('href') || '';
+        const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        const isMp4 = url.toLowerCase().endsWith('.mp4');
+
+        if (driveMatch || ytMatch || isMp4) {
+            // Check if it's already inside a video-container or video-unit
+            if (link.closest('.video-container') || link.closest('.video-unit')) return;
+
+            const container = document.createElement('div');
+            container.className = 'video-container';
+            container.style.margin = '20px 0';
+            container.style.position = 'relative';
+            container.style.paddingBottom = '56.25%';
+            container.style.height = '0';
+            container.style.overflow = 'hidden';
+            container.style.borderRadius = '12px';
+            container.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            container.style.background = '#000';
+
+            let embedHtml = '';
+            if (driveMatch) {
+                embedHtml = `<iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`;
+            } else if (ytMatch) {
+                embedHtml = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>`;
+            } else if (isMp4) {
+                embedHtml = `<video controls style="position:absolute; top:0; left:0; width:100%; height:100%;"><source src="${url}" type="video/mp4"></video>`;
+            }
+
+            if (embedHtml) {
+                container.innerHTML = embedHtml;
+                link.parentNode.insertBefore(container, link.nextSibling);
+                // Optionally hide the original link if it's just the URL text
+                if (link.innerText.includes('drive.google.com') || link.innerText.includes('youtube.com')) {
+                    link.style.display = 'none';
+                }
+            }
+        }
+    });
 }
 
 
