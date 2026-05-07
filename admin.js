@@ -47,15 +47,15 @@ window.scanHtmlLinks = function() {
     // 2. Buscamos Enlaces: <a ...>...</a>
     const linkRegex = /<a\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>([\s\S]*?)<\/a>/gi;
     while ((match = linkRegex.exec(htmlText)) !== null) {
-        const fullTag = match[0];
-        const tagDoc = parser.parseFromString(fullTag, 'text/html');
-        const el = tagDoc.querySelector('a');
-        if (el && el.getAttribute('href')) {
+        const fullTag_link = match[0];
+        const tagDoc_link = parser.parseFromString(fullTag_link, 'text/html');
+        const el_link = tagDoc_link.querySelector('a');
+        if (el_link && el_link.getAttribute('href')) {
             elements.push({
                 type: 'link',
-                href: el.getAttribute('href') || '',
-                text: el.innerText.trim(),
-                original: fullTag
+                href: el_link.getAttribute('href') || '',
+                text: el_link.innerText.trim(),
+                original: fullTag_link
             });
         }
     }
@@ -63,16 +63,16 @@ window.scanHtmlLinks = function() {
     // 3. Buscamos Videos (<video> e <iframe>)
     const videoTagsRegex = /<(video|iframe)\s+(?:[^"'>]|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')*>(?:[\s\S]*?<\/\1>)?/gi;
     while ((match = videoTagsRegex.exec(htmlText)) !== null) {
-        const fullTag = match[0];
-        const tagDoc = parser.parseFromString(fullTag, 'text/html');
-        const el = tagDoc.querySelector('video, iframe');
-        if (el) {
-            const isIframe = el.tagName.toLowerCase() === 'iframe';
-            let src = el.getAttribute('src');
+            const fullTag_vid = match[0];
+            const tagDoc_vid = parser.parseFromString(fullTag_vid, 'text/html');
+            const el_vid = tagDoc_vid.querySelector('video, iframe');
+        if (el_vid) {
+            const isIframe = el_vid.tagName.toLowerCase() === 'iframe';
+            let src = el_vid.getAttribute('src');
             
             // Si es un <video> sin src pero con <source>, lo buscamos
             if (!src && !isIframe) {
-                const source = el.querySelector('source');
+                const source = el_vid.querySelector('source');
                 if (source) src = source.getAttribute('src');
             }
 
@@ -80,8 +80,8 @@ window.scanHtmlLinks = function() {
                 elements.push({
                     type: 'video',
                     src: src,
-                    tagName: el.tagName.toLowerCase(),
-                    original: fullTag
+                    tagName: el_vid.tagName.toLowerCase(),
+                    original: fullTag_vid
                 });
             }
         }
@@ -343,12 +343,8 @@ let _commentPage = 1;
 const _commentsPerPage = 20;
 let _replyTargetId = null;
 
-// --- Environment detection ---
-const IS_LOCAL_SERVER = (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.protocol === 'file:'
-);
+// --- Environment detection (Already defined above) ---
+
 
 // Protección por contraseña
 (function() {
