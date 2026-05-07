@@ -141,7 +141,50 @@ window.scanHtmlLinks = function() {
         item.dataset.originalHtml = m.original;
         item.dataset.isImg = isImg;
         item.dataset.isVideo = isVideo;
+
+        // Si es un link pero apunta a un video (Drive/YT), añadimos botón de conversión rápida
+        if (!isImg && !isVideo) {
+            const isVideoUrl = m.href.includes('drive.google.com') || m.href.includes('youtube.com') || m.href.includes('youtu.be') || m.href.endsWith('.mp4');
+            if (isVideoUrl) {
+                const convertBtn = document.createElement('button');
+                convertBtn.type = 'button';
+                convertBtn.className = 'btn-convert-to-video';
+                convertBtn.innerHTML = '<i class="fas fa-magic"></i> Convertir a Video';
+                convertBtn.style.cssText = 'grid-column: 1 / -1; margin-top: 5px; background: #6c5ce7; color: white; border: none; padding: 8px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;';
+                convertBtn.onclick = () => window.convertLinkToVideo(m.original, m.href);
+                item.appendChild(convertBtn);
+            }
+        }
     });
+
+    // Función global para convertir un link <a> en un bloque <div class="video-container">
+    window.convertLinkToVideo = function(originalHtml, url) {
+        if (!confirm('¿Quieres convertir este enlace en un video embebido (reproductor)?')) return;
+
+        let finalHtml = '';
+        const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
+        
+        if (driveMatch && driveMatch[1]) {
+            const embedUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+            finalHtml = `\n<div class="video-container"><iframe src="${embedUrl}" allow="autoplay" allowfullscreen></iframe></div>\n`;
+        } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytMatch) {
+                finalHtml = `\n<div class="video-container"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>\n`;
+            }
+        } else if (url.endsWith('.mp4') || url.includes('/documentos/')) {
+            finalHtml = `\n<div class="video-container"><video controls><source src="${url}" type="video/mp4"></video></div>\n`;
+        }
+
+        if (finalHtml) {
+            const editor = document.getElementById('html-editor');
+            if (editor.value.includes(originalHtml)) {
+                editor.value = editor.value.replace(originalHtml, finalHtml);
+                showToast('🎬 Enlace convertido a Video');
+                window.scanHtmlLinks();
+            }
+        }
+    };
 
     // Eventos Aplicar
     document.querySelectorAll('.btn-apply-item').forEach(btn => {
