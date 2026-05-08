@@ -1004,7 +1004,47 @@ function loadProtocol(p, highlightText = '') {
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
     let content = p.content;
+    
+    // Si es un documento HTML completo, extraemos estilos y scripts para que el diseño funcione
+    if (content && (content.includes('<html') || content.includes('<!DOCTYPE'))) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        
+        // Inyectar estilos y scripts del head del protocolo al head de la página principal
+        doc.head.querySelectorAll('style, link, script').forEach(el => {
+            if (!document.head.querySelector(`[data-proto-id="${p.section}"]`)) {
+                const clone = el.cloneNode(true);
+                clone.setAttribute('data-proto-id', p.section);
+                document.head.appendChild(clone);
+            }
+        });
+
+        // El contenido real será solo lo que hay en el body
+        content = doc.body.innerHTML;
+    }
+    
+    // Sección de video independiente (completamente fuera del HTML del protocolo)
+    let videoSection = '';
+    if (p.video_url) {
+        videoSection = `
+            <div class="video-wrapper" style="margin-top: 4rem; padding-top: 2rem; border-top: 2px solid #f1f5f9;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <span style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; rounded-full; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Contenido Multimedia Relacionado
+                    </span>
+                </div>
+                <div class="video-container">
+                    <iframe src="${p.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                </div>
+                ${p.video_caption ? `<p class="video-caption">${p.video_caption}</p>` : ''}
+            </div>
+        `;
+    }
+
+
     const isChannelProtocol = p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
+
+
     
     // 1. Prepare Content (Special Channel Case)
     if (isChannelProtocol && typeof channels_config !== 'undefined') {
@@ -1160,6 +1200,8 @@ function loadProtocol(p, highlightText = '') {
 
             <div class="protocol-full-body" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
                 ${content}
+                ${videoSection}
+
                 ${p.commonErrors && p.commonErrors.length > 0 ? `
                     <section class="common-errors-box" style="margin-top: 2rem;">
                         <header class="common-errors-header">
