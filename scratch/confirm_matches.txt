@@ -1,0 +1,1153 @@
+﻿
+data.js:20:    "htmlContent": "</head>\n<body class=\"p-4 md:p-10\">\n\n    <div class=\"max-w-5xl mx-auto\">\n        
+<!-- Header Principal -->\n        <header class=\"bg-[#1e293b] p-10 rounded-t-3xl text-white card-shadow border-b-8 
+border-[#334155]\">\n            <div class=\"flex flex-col md:flex-row justify-between items-center gap-6\">\n        
+        <div>\n                    <h1 class=\"text-4xl font-extrabold tracking-tight italic text-white uppercase 
+tracking-tighter\">Synxis (Sercotel)</h1>\n                    <p class=\"text-slate-400 font-medium mt-2 text-lg 
+italic uppercase tracking-wider\">Intermediación GDS y Venta Directa</p>\n                </div>\n                <div 
+class=\"bg-white text-[#1e293b] px-8 py-3 rounded-full font-black text-sm uppercase tracking-widest shadow-lg\">\n     
+               SISTEMAS GDS\n                </div>\n            </div>\n        </header>\n\n        <main 
+class=\"bg-white p-8 md:p-12 rounded-b-3xl card-shadow space-y-12\">\n            \n            <!-- AVISO DE 
+SUSTITUCIÓN -->\n            <section class=\"transition-alert flex flex-col md:flex-row items-center gap-4 
+shadow-sm\">\n                <div class=\"bg-orange-500 text-white p-3 rounded-full animate-pulse\">\n                
+    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" 
+stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18 2-6.5 
+6.5\"/><path d=\"M2 12h10\"/><path d=\"m18 22-6.5-6.5\"/><path d=\"M22 12h-10\"/></svg>\n                </div>\n      
+          <div class=\"text-center md:text-left\">\n                    <p class=\"text-sm font-black uppercase 
+tracking-tight\">Sistema en proceso de retirada</p>\n                    <p class=\"text-xs font-bold italic\">\"Este 
+canal será sustituido en breve por el nuevo motor Witbooking.\"</p>\n                </div>\n            
+</section>\n\n            <!-- BLOQUE A: ENTRADA -->\n            <section>\n                <div class=\"flex 
+items-center gap-4 mb-6\">\n                    <span class=\"bg-slate-100 text-[#1e293b] w-10 h-10 rounded-full flex 
+items-center justify-center font-bold text-xl shadow-inner text-[#1e293b]\">1</span>\n                    <h2 
+class=\"text-3xl font-bold text-slate-800 tracking-tight text-[#1e293b]\">¿Cómo entra la reserva?</h2>\n               
+ </div>\n                \n                <div class=\"profesor-note\">\n                    <strong>Nota del 
+profesor:</strong> Recordad que, mientras dure la transición, en el Log Channel veréis <strong>SYNXIS 
+(SERCOTEL)</strong>. Se mezclan las reservas directas de nuestra web y las corporativas de Amadeus. Mantened la 
+atención en este canal hasta que Witbooking esté 100% operativo.\n                </div>\n\n                <div 
+class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\n                    <!-- Tipo 1 -->\n                    <div 
+class=\"p-6 border border-slate-200 rounded-3xl bg-slate-50 relative overflow-hidden\">\n                        <div 
+class=\"flex justify-between items-center mb-4\">\n                            <h3 class=\"font-black text-slate-700 
+text-sm uppercase tracking-widest\">1. Pagos Directos</h3>\n                            <span class=\"type-badge 
+bg-emerald-100 text-emerald-700\">Sin Comisión</span>\n                        </div>\n                        <p 
+class=\"text-xs text-slate-600 mb-4 italic leading-relaxed\">\n                            Proceden de motores como: 
+Engine, GoogleAds, Mobile, Trivago...\n                        </p>\n                        <div class=\"bg-white p-4 
+rounded-xl border border-slate-200\">\n                            <p class=\"text-[11px] font-bold text-slate-400 
+uppercase mb-2 italic\">Norma de Cobro:</p>\n                            <p class=\"text-sm font-bold 
+text-slate-800\">Se pagan directamente en el hotel.</p>\n                        </div>\n                    
+</div>\n\n                    <!-- Tipo 2 -->\n                    <div class=\"p-6 border border-slate-200 
+rounded-3xl bg-slate-50 relative overflow-hidden\">\n                        <div class=\"flex justify-between 
+items-center mb-4\">\n                            <h3 class=\"font-black text-slate-700 text-sm uppercase 
+tracking-widest\">2. GDS Amadeus</h3>\n                            <span class=\"type-badge bg-blue-100 
+text-blue-700\">Tarifa Negociada</span>\n                        </div>\n                        <p class=\"text-xs 
+text-slate-600 mb-4 italic leading-relaxed text-justify\">\n                            Reservas corporativas y 
+agencias con condiciones especiales.\n                        </p>\n                        <div class=\"bg-white p-4 
+rounded-xl border border-slate-200\">\n                            <p class=\"text-[11px] font-bold text-slate-400 
+uppercase mb-2 italic\">Norma de Gestión:</p>\n                            <p class=\"text-sm font-bold text-slate-800 
+underline italic\">Seguir manual de \"Agencias Especiales\".</p>\n                        </div>\n                    
+</div>\n                </div>\n            </section>\n\n            <!-- BLOQUE: SOULGUEST -->\n            <section 
+class=\"bg-slate-900 text-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden\">\n                
+<div class=\"absolute top-0 right-0 p-8 opacity-10\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" 
+width=\"120\" height=\"120\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" 
+stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/></svg>\n   
+             </div>\n                \n                <h3 class=\"text-2xl font-black mb-8 flex items-center 
+gap-3\">\n                    <span class=\"bg-blue-500 w-8 h-8 rounded-lg flex items-center justify-center 
+text-xs\">🔗</span>\n                    Integración con SoulGuest\n                </h3>\n\n                <div 
+class=\"grid grid-cols-1 md:grid-cols-2 gap-10\">\n                    <div class=\"space-y-6\">\n                     
+   <p class=\"text-slate-400 text-sm leading-relaxed italic\">\n                            Esta plataforma gestiona 
+automáticamente a los clientes directos (No GDS). Se encarga de enviar:\n                        </p>\n                
+        <ul class=\"text-sm space-y-3 font-medium\">\n                            <li class=\"flex items-center gap-2 
+text-blue-300\">✓ Confirmación de reserva.</li>\n                            <li class=\"flex items-center gap-2 
+text-blue-300\">✓ Enlace de pago anticipado.</li>\n                            <li class=\"flex items-center gap-2 
+text-blue-300\">✓ Check-in online.</li>\n                        </ul>\n                    </div>\n                   
+ <div class=\"bg-white/5 p-6 rounded-2xl border border-white/10 space-y-4\">\n                        <h4 
+class=\"text-xs font-bold text-blue-400 uppercase tracking-widest italic text-center\">Protocolo de Error</h4>\n       
+                 <div class=\"space-y-3\">\n                            <p class=\"text-xs flex items-start gap-2 
+text-slate-300\">\n                                <span class=\"text-red-500 font-bold\">1.</span> \n                 
+               <span>Si falta el email en el PMS: <strong>Añadirlo manualmente</strong> de inmediato.</span>\n         
+                   </p>\n                            <p class=\"text-xs flex items-start gap-2 text-slate-300\">\n     
+                           <span class=\"text-red-500 font-bold\">2.</span> \n                                <span>Si 
+el enlace no se genera: <strong>Forzar envío desde SoulGuest</strong>.</span>\n                            </p>\n      
+                  </div>\n                    </div>\n                </div>\n            </section>\n\n            
+<!-- BLOQUE B: PROCEDIMIENTOS -->\n            <section>\n                <div class=\"flex items-center gap-4 
+mb-6\">\n                    <span class=\"bg-slate-100 text-[#1e293b] w-10 h-10 rounded-full flex items-center 
+justify-center font-bold text-xl shadow-inner text-[#1e293b]\">2</span>\n                    <h2 class=\"text-3xl 
+font-bold text-slate-800 tracking-tight text-[#1e293b]\">Procedimientos Operativos</h2>\n                </div>\n\n    
+            <div class=\"grid grid-cols-1 md:grid-cols-2 gap-12 ml-4 md:ml-12\">\n                    <!-- Directos 
+-->\n                    <div>\n                        <h4 class=\"text-xs font-black text-slate-400 uppercase mb-4 
+tracking-widest border-b pb-2\">B.1 Pagos Directos</h4>\n                        <ul class=\"text-sm space-y-4\">\n    
+                        <li class=\"flex items-start gap-2\">\n                                <span 
+class=\"step-number\">1</span>\n                                <span class=\"text-slate-700\">Leer correo completo y 
+verificar observaciones de cliente.</span>\n                            </li>\n                            <li 
+class=\"flex items-start gap-2\">\n                                <span class=\"step-number\">2</span>\n              
+                  <span class=\"text-slate-700\">Revisar tarifa y aplicar política de cancelación.</span>\n            
+                </li>\n                        </ul>\n                    </div>\n                    <!-- GDS -->\n   
+                 <div>\n                        <h4 class=\"text-xs font-black text-slate-400 uppercase mb-4 
+tracking-widest border-b pb-2\">B.2 GDS Amadeus</h4>\n                        <p class=\"text-xs italic text-slate-600 
+mb-4\">Si se especifican Empresa y Agencia, registrar AMBOS obligatoriamente.</p>\n                        <div 
+class=\"bg-slate-100 p-4 rounded-xl font-mono text-[10px] space-y-1 shadow-inner\">\n                            <p 
+class=\"text-blue-800 font-bold\">EJEMPLO EN PMS:</p>\n                            <p 
+class=\"text-slate-700\">\"Mercadona / AVORIS Retail Division S.L.\"</p>\n                        </div>\n             
+       </div>\n                </div>\n            </section>\n\n            <!-- BLOQUE C: FACTURACIÓN -->\n          
+  <section>\n                <div class=\"flex items-center gap-4 mb-6\">\n                    <span 
+class=\"bg-slate-100 text-[#1e293b] w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl 
+shadow-inner text-[#1e293b]\">3</span>\n                    <h2 class=\"text-3xl font-bold text-slate-800 
+tracking-tight text-[#1e293b]\">Criterio de Facturación</h2>\n                </div>\n\n                <div 
+class=\"grid grid-cols-1 md:grid-cols-2 gap-8 ml-4 md:ml-12\">\n                    <div class=\"bg-slate-50 p-8 
+rounded-3xl border border-slate-200\">\n                        <h4 class=\"text-xs font-black text-slate-400 
+uppercase mb-4 tracking-widest\">Facturación a Cliente (Directo)</h4>\n                        <p class=\"text-sm 
+font-bold text-slate-800 italic underline mb-4\">\"Facturar siempre a nombre del cliente.\"</p>\n                      
+  <p class=\"text-xs text-slate-500 leading-relaxed text-justify italic\">\n                            Según política 
+de cancelación. El cliente puede solicitar su copia en el check-out o envío por email.\n                        </p>\n 
+                   </div>\n                    <div class=\"bg-slate-800 text-white p-8 rounded-3xl shadow-lg 
+border-l-8 border-blue-500\">\n                        <h4 class=\"text-xs font-black text-blue-400 uppercase mb-4 
+tracking-widest\">Facturación a Crédito (GDS)</h4>\n                        <ul class=\"text-[10px] space-y-3 italic 
+text-slate-300\">\n                            <li>🔹 <strong>Crédito con Bono:</strong> AVORIS RETAIL DIVISION 
+S.L.</li>\n                            <li>🔹 <strong>Crédito con Visa:</strong> CWT GLOBAL ESPAÑA, S.L.</li>\n        
+                    <li>🔹 <strong>Corporate:</strong> W2M CORPORATE S.L.U.</li>\n                        </ul>\n      
+              </div>\n                </div>\n            </section>\n        </main>\n\n        <footer class=\"mt-8 
+text-center no-print\">\n            <p class=\"text-orange-600 text-xs font-bold uppercase tracking-widest\">⚠️ NOTA 
+IMPORTANTE: Este protocolo dejará de ser válido tras la implantación total de Witbooking.</p>\n        </footer>\n    
+</div>\n\n",
+data.js:30:    "htmlContent": "</head>\n<body class=\"p-4 md:p-10\">\n\n    <div class=\"max-w-4xl mx-auto\">\n        
+<!-- Header -->\n        <header class=\"bg-blue-900 p-8 rounded-t-3xl text-white card-shadow\">\n            <h1 
+class=\"text-3xl font-extrabold tracking-tight\">Gestión Operativa: Webhotel / Synergy</h1>\n            <p 
+class=\"text-blue-200 font-medium mt-2\">Dirección de Recepción - Hotel Cumbriahotel</p>\n        </header>\n\n        
+<main class=\"bg-white p-8 rounded-b-3xl card-shadow space-y-12\">\n            \n            <!-- BLOQUE A -->\n      
+      <section>\n                <div class=\"flex items-center gap-4 mb-4\">\n                    <span 
+class=\"bg-blue-100 text-blue-800 w-8 h-8 rounded-full flex items-center justify-center font-bold\">A</span>\n         
+           <h2 class=\"text-2xl font-bold text-slate-800\">¿Cómo entra la reserva?</h2>\n                </div>\n      
+          \n                <div class=\"nota-operativa\">\n                    <strong>Punto clave:</strong> Es 
+fundamental verificar que la sincronización entre \"Log Channel\" y \"RoomCloud\" sea exacta. El correo de 
+confirmación es nuestra garantía final de que los datos de la web son los que deben figurar en el sistema.\n           
+     </div>\n\n                <div class=\"grid grid-cols-1 md:grid-cols-2 gap-4 ml-4 md:ml-12\">\n                   
+ <div class=\"p-4 border border-slate-200 rounded-xl\">\n                        <h3 class=\"font-bold text-slate-700 
+mb-2 text-sm uppercase tracking-wider\">Canales Técnicos</h3>\n                        <p class=\"text-sm 
+text-slate-600 font-medium\">Intermediario: <strong>Log Channel</strong></p>\n                        <p 
+class=\"text-sm text-slate-600 font-medium\">Conectividad: <strong>RoomCloud / Synergy</strong></p>\n                  
+  </div>\n                    <div class=\"p-4 border border-blue-200 bg-blue-50 rounded-xl\">\n                       
+ <h3 class=\"font-bold text-blue-800 mb-2 text-sm uppercase tracking-wider\">Entradas vía Web</h3>\n                   
+     <p class=\"text-sm text-slate-700\">Disponibles en modalidades de <strong>Pago Directo</strong> o 
+<strong>Prepagado (TPV Virtual)</strong>.</p>\n                        <p class=\"text-xs text-blue-600 mt-2 font-bold 
+uppercase tracking-tighter\">Obligatorio: Contrastar con el email de confirmación adjunto.</p>\n                    
+</div>\n                </div>\n            </section>\n\n            <!-- BLOQUE B -->\n            <section>\n       
+         <div class=\"flex items-center gap-4 mb-4\">\n                    <span class=\"bg-blue-100 text-blue-800 w-8 
+h-8 rounded-full flex items-center justify-center font-bold\">B</span>\n                    <h2 class=\"text-2xl 
+font-bold text-slate-800\">Procedimientos Operativos</h2>\n                </div>\n\n                <div 
+class=\"nota-operativa\">\n                    <strong>Gestión de Calidad:</strong> La detección de extras y 
+peticiones especiales en las observaciones define la experiencia del cliente. Un error en el bono del SPA o en la 
+carga de suplementos afecta directamente a la imagen del hotel.\n                </div>\n\n                <div 
+class=\"ml-4 md:ml-12 space-y-6\">\n                    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-6\">\n        
+                <div class=\"space-y-3\">\n                            <h4 class=\"text-xs font-bold text-slate-400 
+uppercase tracking-widest\">Auditoría de Entrada</h4>\n                            <ul class=\"text-sm text-slate-700 
+space-y-2\">\n                                <li class=\"flex items-center gap-2\">✅ Revisión manual de 
+observaciones.</li>\n                                <li class=\"flex items-center gap-2\">✅ Verificación de Régimen 
+(MP / PC).</li>\n                                <li class=\"flex items-center gap-2\">✅ Registro de Escapadas y 
+Extras físicos.</li>\n                            </ul>\n                        </div>\n                        <div 
+class=\"bg-red-50 p-4 rounded-xl border border-red-100\">\n                            <h4 class=\"text-xs font-bold 
+text-red-700 uppercase mb-2 tracking-widest\">Pagos y Depósitos</h4>\n                            <p class=\"text-xs 
+text-red-800 font-medium italic\">Actualmente no existe automatización para este canal. Se debe procesar cada depósito 
+de forma manual tras validar el email.</p>\n                        </div>\n                    </div>\n\n             
+       <div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n                        <div class=\"p-4 bg-amber-50 
+border border-amber-200 rounded-xl\">\n                            <h4 class=\"font-bold text-amber-800 text-sm mb-1 
+uppercase\">Protocolo SPA</h4>\n                            <p class=\"text-xs text-amber-900\">Trámite de firma 
+obligatorio. <strong>Borrar siempre la sección del bono</strong> en el texto del correo antes de enviarlo al 
+cliente.</p>\n                        </div>\n                        <div class=\"p-4 bg-slate-800 text-white 
+rounded-xl\">\n                            <h4 class=\"font-bold text-blue-300 text-sm mb-1 uppercase 
+tracking-tighter\">Tarjeta Virtual</h4>\n                            <p class=\"text-[11px] leading-relaxed\">Uso 
+restringido: Este método de pago se aplica <strong>exclusivamente</strong> a las reservas generadas a través de 
+nuestra web propia.</p>\n                        </div>\n                    </div>\n                </div>\n          
+  </section>\n\n            <!-- BLOQUE C -->\n            <section>\n                <div class=\"flex items-center 
+gap-4 mb-4\">\n                    <span class=\"bg-blue-100 text-blue-800 w-8 h-8 rounded-full flex items-center 
+justify-center font-bold\">C</span>\n                    <h2 class=\"text-2xl font-bold text-slate-800\">Estándares de 
+Facturación</h2>\n                </div>\n\n                <div class=\"nota-operativa\">\n                    
+<strong>Normativa Fiscal:</strong> Toda la facturación en este canal se gestiona en <strong>BRUTO</strong>. Es 
+responsabilidad de recepción asegurar que el importe total del folio coincida con la suma de todos los servicios.\n    
+            </div>\n\n                <div class=\"ml-4 md:ml-12 grid grid-cols-1 md:grid-cols-2 gap-8 
+items-center\">\n                    <div class=\"space-y-2\">\n                        <div class=\"flex 
+justify-between p-3 bg-slate-50 rounded-lg border border-slate-200\">\n                            <span 
+class=\"text-xs font-bold uppercase text-slate-400 tracking-tighter\">Descarga Roomcloud</span>\n                      
+      <span class=\"font-bold text-slate-800\">BRUTO</span>\n                        </div>\n                        
+<div class=\"flex justify-between p-3 bg-slate-50 rounded-lg border border-slate-200\">\n                            
+<span class=\"text-xs font-bold uppercase text-slate-400 tracking-tighter\">Cierre de Facturación</span>\n             
+               <span class=\"font-bold text-slate-800\">BRUTO</span>\n                        </div>\n                 
+   </div>\n                    <div class=\"text-center p-4 border-2 border-dashed border-blue-200 rounded-2xl 
+bg-blue-50/50\">\n                        <p class=\"text-[10px] font-bold text-blue-900 uppercase mb-2 
+tracking-widest\">Validación de Importe Final</p>\n                        <p class=\"text-lg font-mono font-bold 
+text-slate-700\">BASE + PACK + EXTRAS</p>\n                        <p class=\"text-[10px] text-slate-400 mt-2 
+italic\">Confirmar que todos los cargos adicionales están integrados.</p>\n                    </div>\n                
+</div>\n            </section>\n\n        </main>\n\n    </div>\n\n",
+data.js:90:    "htmlContent": "</head>\n<body class=\"p-4 md:p-10\">\n\n    <div class=\"max-w-4xl mx-auto\">\n        
+<!-- Header -->\n        <header class=\"bg-[#00a19a] p-8 rounded-t-3xl text-white card-shadow border-b-4 
+border-[#003057]\">\n            <h1 class=\"text-3xl font-extrabold tracking-tight italic\">Lección: Gestión de 
+World2Meet (W2M)</h1>\n            <p class=\"text-teal-100 font-medium mt-2\">Guía de Estándares Operativos - Notas 
+del Profesor</p>\n        </header>\n\n        <main class=\"bg-white p-8 rounded-b-3xl card-shadow space-y-12\">\n    
+        \n            <!-- BLOQUE A -->\n            <section>\n                <div class=\"flex items-center gap-4 
+mb-4\">\n                    <span class=\"bg-teal-100 text-[#00a19a] w-8 h-8 rounded-full flex items-center 
+justify-center font-bold\">a</span>\n                    <h2 class=\"text-2xl font-bold text-slate-800 
+tracking-tight\">¿Cómo entra la reserva?</h2>\n                </div>\n                \n                <div 
+class=\"profesor-note\">\n                    <strong>Nota del profesor:</strong> Las reservas de W2M entran vía 
+<strong>Channel Manager</strong> como \"Agencia WORLD 2 MEET\". Recordad que aquí todo se gestiona en 
+<strong>NETO</strong>. Además, recibiréis un email: es obligatorio imprimir ese bono inmediatamente, porque es vuestro 
+único documento de garantía.\n                </div>\n\n                <div class=\"grid grid-cols-1 md:grid-cols-2 
+gap-4 ml-4 md:ml-12\">\n                    <div class=\"p-5 border border-slate-200 rounded-xl bg-slate-50/50\">\n    
+                    <h3 class=\"font-bold text-slate-700 text-sm uppercase mb-2 tracking-widest 
+text-teal-700\">Identificación</h3>\n                        <p class=\"text-sm text-slate-600\">Entrada: <strong>Vía 
+Channel Manager</strong></p>\n                        <p class=\"text-sm text-slate-600\">Agencia: <strong>WORLD 2 
+MEET</strong></p>\n                        <p class=\"text-xs text-slate-500 mt-2 italic\">Confirmación mediante 
+correo electrónico con todos los datos.</p>\n                    </div>\n                    <div class=\"p-5 border 
+border-teal-200 bg-teal-50 rounded-xl\">\n                        <h3 class=\"font-bold text-teal-800 text-sm 
+uppercase mb-2 tracking-widest\">Configuración PMS</h3>\n                        <div class=\"flex justify-between 
+text-sm font-bold\">\n                            <span class=\"text-teal-600 uppercase\">Descarga</span>\n            
+                <span class=\"bg-teal-600 text-white px-2 rounded\">NETO</span>\n                        </div>\n      
+                  <div class=\"flex justify-between text-sm font-bold mt-2\">\n                            <span 
+class=\"text-teal-600 uppercase\">Facturación</span>\n                            <span class=\"bg-teal-600 text-white 
+px-2 rounded\">NETO</span>\n                        </div>\n                    </div>\n                </div>\n       
+     </section>\n\n            <!-- BLOQUE B -->\n            <section>\n                <div class=\"flex 
+items-center gap-4 mb-4\">\n                    <span class=\"bg-teal-100 text-[#00a19a] w-8 h-8 rounded-full flex 
+items-center justify-center font-bold\">b</span>\n                    <h2 class=\"text-2xl font-bold text-slate-800 
+tracking-tight\">Procedimientos</h2>\n                </div>\n\n                <div class=\"profesor-note\">\n        
+            <strong>Nota del profesor:</strong> Al ser reservas a crédito, el riesgo es que el cliente se vaya y no 
+tengamos el bono para cobrar a la agencia. Por eso, <strong>imprimir y archivar</strong> el bono desde el correo es el 
+paso número uno. Y recordad: nada de depósitos por la estancia.\n                </div>\n\n                <div 
+class=\"ml-4 md:ml-12 space-y-6\">\n                    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-6\">\n        
+                <div class=\"space-y-3\">\n                            <h4 class=\"text-xs font-bold text-slate-400 
+uppercase tracking-widest\">Protocolo Obligatorio</h4>\n                            <ul class=\"text-sm text-slate-700 
+space-y-2 font-medium\">\n                                <li class=\"flex items-center gap-2\">✅ Verificar datos 
+exactos con el bono.</li>\n                                <li class=\"flex items-center gap-2\">✅ <strong>Imprimir y 
+archivar</strong> el bono del email.</li>\n                                <li class=\"flex items-center gap-2\">✅ 
+Solicitar teléfono si falta.</li>\n                                <li class=\"flex items-center gap-2\">✅ Revisar 
+observaciones (camas, etc.).</li>\n                            </ul>\n                        </div>\n                 
+       <div class=\"p-4 bg-teal-50 border border-teal-100 rounded-xl text-teal-900\">\n                            <h4 
+class=\"text-xs font-bold uppercase mb-2 tracking-widest text-teal-700\">Garantía de Crédito</h4>\n                    
+        <p class=\"text-xs italic leading-relaxed font-medium\">\n                                \"Garantía: Bono 
+Requerido\". Al ser crédito, no se solicita nunca depósito ni preautorización por el importe de la reserva.\n          
+                  </p>\n                        </div>\n                    </div>\n                </div>\n           
+ </section>\n\n            <!-- BLOQUE C -->\n            <section>\n                <div class=\"flex items-center 
+gap-4 mb-4\">\n                    <span class=\"bg-teal-100 text-[#00a19a] w-8 h-8 rounded-full flex items-center 
+justify-center font-bold\">c</span>\n                    <h2 class=\"text-2xl font-bold text-slate-800 
+tracking-tight\">Facturación</h2>\n                </div>\n\n                <div class=\"profesor-note\">\n           
+         <strong>Nota del profesor:</strong> La factura se emite a nombre de <strong>World2Meet</strong> el día que el 
+cliente hace el check-out. El cliente no se lleva nada más que el ticket de sus consumos extras. Es la agencia quien 
+gestiona el cobro con él.\n                </div>\n\n                <div class=\"ml-4 md:ml-12 space-y-6\">\n         
+           <div class=\"p-6 bg-slate-800 text-white rounded-2xl shadow-lg border-l-8 border-[#00a19a]\">\n             
+           <h4 class=\"text-xs font-bold text-teal-400 uppercase mb-3 tracking-widest\">Cierre y Envío</h4>\n          
+              <ul class=\"text-sm space-y-2 font-medium\">\n                            <li>• Emitir factura a nombre 
+de: <strong>WORLD2MEET</strong>.</li>\n                            <li>• Momento: El día de salida del huésped.</li>\n 
+                           <li>• Documento: Adjuntar obligatoriamente el <strong>Bono Original</strong>.</li>\n        
+                    <li class=\"text-xs text-slate-400 italic mt-2 underline\">Importante: El cliente no debe llevarse 
+factura de la estancia.</li>\n                        </ul>\n                    </div>\n\n                    <div 
+class=\"alert-critical p-6 rounded-2xl flex items-start gap-4\">\n                        <svg 
+xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" 
+stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21.73 
+18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z\"/><line x1=\"12\" y1=\"9\" x2=\"12\" 
+y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/></svg>\n                        <div>\n                   
+         <h4 class=\"font-bold uppercase text-sm mb-1 tracking-tighter\">Advertencia de Seguridad</h4>\n               
+             <p class=\"text-sm font-semibold italic\">Nunca cobres al cliente de W2M en recepción por la estancia. 
+<strong>Solo cobramos los extras</strong>.</p>\n                        </div>\n                    </div>\n           
+     </div>\n            </section>\n\n        </main>\n    </div>\n\n",
+data.js:121:    "htmlContent": "</head>\n<body class=\"p-4 md:p-10\">\n\n    <div class=\"max-w-5xl mx-auto\">\n       
+ <!-- Header Principal Actualizado -->\n        <header class=\"bg-[#5d2d91] p-10 rounded-t-3xl text-white card-shadow 
+border-b-8 border-[#a855f7]\">\n            <div class=\"flex flex-col md:flex-row justify-between items-center 
+gap-6\">\n                <div>\n                    <h1 class=\"text-4xl font-extrabold tracking-tight italic 
+text-white\">Guía Avanzada: Ecosistema Smartbox</h1>\n                    <p class=\"text-purple-200 font-medium mt-2 
+text-lg\">Smartbox · Dakotabox · Bongo · Cadeaubox · Emozione3 · Odisseias · La Vida es Bella · Buyagift · Red Letter 
+Days</p>\n                </div>\n                <div class=\"bg-white text-[#5d2d91] px-8 py-3 rounded-full 
+font-black text-sm uppercase tracking-widest shadow-lg\">\n                    BONOS\n                </div>\n         
+   </div>\n        </header>\n\n        <main class=\"bg-white p-8 md:p-12 rounded-b-3xl card-shadow space-y-16\">\n   
+         \n            <!-- BLOQUE 1: CONECTIVIDAD -->\n            <section>\n                <div class=\"flex 
+items-center gap-4 mb-6\">\n                    <span class=\"bg-purple-100 text-[#5d2d91] w-10 h-10 rounded-full flex 
+items-center justify-center font-bold text-xl shadow-inner text-[#5d2d91]\">1</span>\n                    <h2 
+class=\"text-3xl font-bold text-slate-800 tracking-tight\">Análisis de Entrada y Conectividad</h2>\n                
+</div>\n                \n                <div class=\"profesor-note\">\n                    <strong>Nota del 
+profesor:</strong> Chicos, Smartbox viaja por <strong>Siteminder</strong>. Es un canal robusto pero muy rígido. Cuando 
+veáis que entra bajo el nombre <span class=\"pms-code\">SMARTBOX EXPERIENCE, LTD</span>, automáticamente debéis saber 
+que el precio es <strong>BRUTO</strong>. Pero cuidado: el sistema suele volcar \"Solo Alojamiento\" por defecto. ¡Es 
+vuestro deber abrir el email de confirmación y comprobar el bono real!\n                </div>\n\n                <div 
+class=\"grid grid-cols-1 md:grid-cols-3 gap-6\">\n                    <div class=\"p-6 border border-slate-200 
+rounded-2xl bg-slate-50 shadow-sm\">\n                        <h3 class=\"font-bold text-purple-900 text-xs uppercase 
+tracking-widest mb-4\">Ficha Técnica</h3>\n                        <ul class=\"text-sm space-y-3\">\n                  
+          <li class=\"flex justify-between border-b pb-1\"><span>Channel:</span> <span 
+class=\"font-bold\">Siteminder</span></li>\n                            <li class=\"flex justify-between border-b 
+pb-1\"><span>Descarga:</span> <span class=\"font-bold text-purple-700 uppercase\">Bruto</span></li>\n                  
+          <li class=\"flex justify-between border-b pb-1\"><span>Facturación:</span> <span class=\"font-bold 
+text-purple-700 uppercase\">Bruto</span></li>\n                        </ul>\n                    </div>\n             
+       <div class=\"md:col-span-2 p-6 bg-purple-50 border border-purple-100 rounded-2xl\">\n                        
+<h3 class=\"font-bold text-purple-900 text-xs uppercase tracking-widest mb-2 italic underline\">La discrepancia del 
+régimen</h3>\n                        <p class=\"text-sm text-slate-700 leading-relaxed italic\">\n                    
+        Es muy común que el bono diga <strong>\"Escapada con Cena y Spa\"</strong> y en el PMS solo aparezca 
+<strong>\"Habitación\"</strong>. El total de la reserva entrará bien (el dinero coincide), pero si no desglosáis los 
+cargos fijos el primer día, el restaurante no sabrá que el cliente tiene la cena incluida.\n                        
+</p>\n                    </div>\n                </div>\n            </section>\n\n            <!-- BLOQUE 2: 
+PROTOCOLO CRÍTICO -->\n            <section>\n                <div class=\"flex items-center gap-4 mb-6\">\n           
+         <span class=\"bg-purple-100 text-[#5d2d91] w-10 h-10 rounded-full flex items-center justify-center font-bold 
+text-xl shadow-inner text-[#5d2d91]\">2</span>\n                    <h2 class=\"text-3xl font-bold text-slate-800 
+tracking-tight\">Procedimientos de Validación</h2>\n                </div>\n\n                <div 
+class=\"alert-critical p-8 rounded-3xl space-y-4 shadow-inner\">\n                    <div class=\"flex items-center 
+gap-4\">\n                        <div class=\"bg-red-600 text-white p-3 rounded-full animate-pulse\">\n               
+             <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" 
+stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21.73 
+18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z\"/><line x1=\"12\" y1=\"9\" x2=\"12\" 
+y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/></svg>\n                        </div>\n                  
+      <h4 class=\"text-xl font-black uppercase tracking-tighter text-red-900\">EL LOCALIZADOR ES SAGRADO</h4>\n        
+            </div>\n                    <p class=\"text-sm font-bold leading-relaxed text-red-800\">\n                 
+       Queda terminantemente prohibido modificar el campo \"Localizador\" o \"Número de Bono\" antes de la noche 
+anterior a la llegada. \n                    </p>\n                    <div class=\"bg-white/50 p-4 rounded-xl text-xs 
+font-semibold grid grid-cols-1 md:grid-cols-2 gap-4\">\n                        <p>❌ No añadir comentarios en ese 
+campo.</p>\n                        <p>❌ No borrar el código original para poner el del cofre.</p>\n                   
+     <p>✅ ¿Por qué? Si Smartbox intenta actualizar la reserva y el localizador no coincide, el PMS devolverá el error 
+<span class=\"text-red-700 font-bold\">\"No se encontró la reserva\"</span>.</p>\n                    </div>\n         
+       </div>\n\n                <div class=\"profesor-note\">\n                    <strong>Nota del 
+profesor:</strong> Al llegar el huésped, el primer clic debe ser <strong>\"Asume crédito\"</strong>. Después, 
+ajustamos el régimen. Si hay noches adicionales contratadas, prestad atención: esas noches son <strong>SIEMPRE en 
+AD</strong>.\n                </div>\n            </section>\n\n            <!-- BLOQUE 3: CASOS PRÁCTICOS -->\n       
+     <section class=\"bg-slate-50 p-8 rounded-3xl border border-slate-200 shadow-inner\">\n                <h3 
+class=\"text-xl font-bold text-slate-800 mb-6 flex items-center gap-2\">\n                    <svg 
+class=\"text-purple-600\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" 
+fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path 
+d=\"M12 7v5l3 3\"/><circle cx=\"12\" cy=\"12\" r=\"10\"/></svg>\n                    Escenarios y Reglas de 
+Cancelación\n                </h3>\n\n                <div class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\n          
+          <div class=\"space-y-4 text-slate-700\">\n                        <div class=\"flex items-start gap-3\">\n   
+                         <div class=\"step-number mt-1 text-white\">1</div>\n                            <div>\n       
+                         <p class=\"font-bold text-sm\">Cancelación gratuita (Hasta 72h)</p>\n                         
+       <p class=\"text-xs italic text-slate-500\">El bono vuelve a quedar disponible. No hay cargos.</p>\n             
+               </div>\n                        </div>\n                        <div class=\"flex items-start 
+gap-3\">\n                            <div class=\"step-number mt-1 text-white\">2</div>\n                            
+<div>\n                                <p class=\"font-bold text-sm\">No-Show o Cancelación tardía (-72h)</p>\n        
+                        <p class=\"text-xs italic text-slate-500\">El bono debe marcarse como 
+<strong>CONSUMIDO</strong> en la extranet.</p>\n                            </div>\n                        </div>\n   
+                 </div>\n                    <div class=\"bg-white p-6 rounded-2xl border-2 border-purple-100 
+shadow-sm\">\n                        <h4 class=\"text-xs font-black text-purple-900 uppercase mb-3\">Sobre el botón 
+\"Modificar Reserva\"</h4>\n                        <p class=\"text-[11px] text-slate-600 leading-relaxed mb-3\">\n    
+                        En la extranet de Smartbox, este botón <strong>ANULA la reserva sin gastos</strong>. No lo 
+uséis para cambios menores.\n                        </p>\n                        <p class=\"text-[10px] font-bold 
+text-red-600 uppercase tracking-tight italic\">\n                            ⚠️ Usadlo solo si queréis liberar el bono 
+fuera de penalización.\n                        </p>\n                    </div>\n                </div>\n            
+</section>\n\n            <!-- BLOQUE 4: FACTURACIÓN -->\n            <section>\n                <div class=\"flex 
+items-center gap-4 mb-6\">\n                    <span class=\"bg-purple-100 text-[#5d2d91] w-10 h-10 rounded-full flex 
+items-center justify-center font-bold text-xl shadow-inner\">3</span>\n                    <h2 class=\"text-3xl 
+font-bold text-slate-800 tracking-tight text-[#5d2d91]\">Cierre y Facturación</h2>\n                </div>\n\n         
+       <div class=\"grid grid-cols-1 md:grid-cols-2 gap-8 ml-4 md:ml-12\">\n                    <div 
+class=\"bg-slate-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden ring-4 ring-purple-500/30\">\n     
+                   <div class=\"flex items-center justify-between mb-6\">\n                            <h4 
+class=\"text-xs font-bold text-purple-400 uppercase tracking-widest\">Protocolo de Entrada</h4>\n                      
+      <span class=\"factura-badge uppercase tracking-tighter\">Facturación Anticipada</span>\n                        
+</div>\n                        \n                        <p class=\"text-sm font-bold text-purple-200 mb-4 
+underline\">\"Se anticipa la factura y se emite en el momento de la entrada.\"</p>\n                        \n         
+               <ul class=\"text-sm space-y-4 font-medium italic text-slate-300\">\n                            <li 
+class=\"flex items-start gap-2\">🔹 Emitir factura a crédito al validar el bono (check-in).</li>\n                     
+       <li class=\"flex items-start gap-2\">🔹 <strong>Grapar factura física al bono</strong> para archivo 
+interno.</li>\n                            <li class=\"flex items-start gap-2\">🔹 Cobrar al cliente: Parking, 
+Minibar, consumos extras.</li>\n                        </ul>\n                        <div class=\"mt-8 pt-4 border-t 
+border-slate-700 flex items-center justify-between text-slate-400\">\n                            <span 
+class=\"text-[10px] uppercase font-bold tracking-widest text-red-400 tracking-tighter\">¿Lleva factura el 
+cliente?</span>\n                            <span class=\"text-xs font-black bg-red-900 text-white px-3 py-1 
+rounded\">NO</span>\n                        </div>\n                    </div>\n\n                    <div 
+class=\"p-8 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col justify-center bg-slate-50\">\n          
+              <h4 class=\"text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest text-center\">Ejemplo de 
+Notas en el PMS</h4>\n                        <div class=\"bg-white p-5 rounded-xl border border-slate-200 font-mono 
+text-[10px] space-y-2 shadow-sm\">\n                            <p class=\"text-purple-700 font-bold\">--- 
+OBSERVACIONES CHANNEL ---</p>\n                            <p class=\"text-slate-600 italic\">Bono: SB-99887766 | 
+Validado en check-in.</p>\n                            <p class=\"text-purple-700 font-bold mt-4\">--- OBSERVACIONES 
+RECEPCIÓN ---</p>\n                            <p class=\"text-slate-600 italic\">Factura emitida al entrar. Régimen 
+corregido a MP + Acceso Spa. Noches extras en AD.</p>\n                        </div>\n                    </div>\n    
+            </div>\n            </section>\n        </main>\n    </div>\n\n",
+data.js:132:    "htmlContent": "</head>\n<body class=\"p-4 md:p-10\">\n\n    <div class=\"max-w-5xl mx-auto\">\n       
+ <!-- Header Principal Unificado -->\n        <header class=\"bg-[#0369a1] p-10 rounded-t-3xl text-white card-shadow 
+border-b-8 border-[#0ea5e9]\">\n            <div class=\"flex flex-col md:flex-row justify-between items-center 
+gap-6\">\n                <div>\n                    <h1 class=\"text-4xl font-extrabold tracking-tight italic 
+text-white text-center md:text-left\">Gestión Operativa: Weekendesk</h1>\n                    <p class=\"text-sky-100 
+font-medium mt-2 text-lg text-center md:text-left\">Protocolo de Intermediación y Reservas de Experiencia</p>\n        
+        </div>\n                <div class=\"bg-white text-[#0369a1] px-8 py-3 rounded-full font-black text-sm 
+uppercase tracking-widest shadow-lg\">\n                    BONOS\n                </div>\n            </div>\n        
+</header>\n\n        <main class=\"bg-white p-8 md:p-12 rounded-b-3xl card-shadow space-y-16\">\n            \n        
+    <!-- BLOQUE 1: CONECTIVIDAD -->\n            <section>\n                <div class=\"flex items-center gap-4 
+mb-6\">\n                    <span class=\"bg-sky-100 text-[#0369a1] w-10 h-10 rounded-full flex items-center 
+justify-center font-bold text-xl shadow-inner\">1</span>\n                    <h2 class=\"text-3xl font-bold 
+text-slate-800 tracking-tight\">Análisis de Entrada</h2>\n                </div>\n                \n                
+<div class=\"profesor-note\">\n                    <strong>Nota del profesor:</strong> Al igual que con Smartbox, 
+Weekendesk viaja por <strong>Siteminder</strong>. Recibiréis la confirmación por email y la descarga en el PMS. Fijaos 
+bien: la descarga es en <strong>BRUTO</strong>. Es vital que reviséis el email porque el PMS no siempre entiende los 
+paquetes complejos y suele volcar \"solo alojamiento\".\n                </div>\n\n                <div class=\"grid 
+grid-cols-1 md:grid-cols-3 gap-6\">\n                    <div class=\"p-6 border border-slate-200 rounded-2xl 
+bg-slate-50 shadow-sm\">\n                        <h3 class=\"font-bold text-sky-900 text-xs uppercase tracking-widest 
+mb-4\">Ficha Técnica</h3>\n                        <ul class=\"text-sm space-y-3\">\n                            <li 
+class=\"flex justify-between border-b pb-1\"><span>Intermediario:</span> <span 
+class=\"font-bold\">WEEKENDESK</span></li>\n                            <li class=\"flex justify-between border-b 
+pb-1\"><span>Conectividad:</span> <span class=\"font-bold text-slate-700\">Siteminder</span></li>\n                    
+        <li class=\"flex justify-between border-b pb-1\"><span>Descarga:</span> <span class=\"font-bold text-sky-700 
+uppercase font-black\">Bruto</span></li>\n                            <li class=\"flex justify-between border-b 
+pb-1\"><span>Facturación:</span> <span class=\"font-bold text-sky-700 uppercase font-black\">Bruto</span></li>\n       
+                 </ul>\n                    </div>\n                    <div class=\"md:col-span-2 p-6 bg-sky-50 
+border border-sky-100 rounded-2xl flex flex-col justify-center\">\n                        <h3 class=\"font-bold 
+text-sky-900 text-xs uppercase tracking-widest mb-2 italic underline\">La garantía del bono</h3>\n                     
+   <p class=\"text-sm text-slate-700 leading-relaxed italic\">\n                            La reserva entra como 
+Agencia Weekendesk, pero nuestra garantía real es el <strong>Bono Requerido</strong>. Al ser una operación a crédito, 
+recordad la norma sagrada: <strong>jamás solicitamos depósito</strong> ni preautorización por la estancia.\n           
+             </p>\n                    </div>\n                </div>\n            </section>\n\n            <!-- 
+BLOQUE 2: PROCEDIMIENTOS -->\n            <section>\n                <div class=\"flex items-center gap-4 mb-6\">\n    
+                <span class=\"bg-sky-100 text-[#0369a1] w-10 h-10 rounded-full flex items-center justify-center 
+font-bold text-xl shadow-inner\">2</span>\n                    <h2 class=\"text-3xl font-bold text-slate-800 
+tracking-tight\">Procedimientos Operativos</h2>\n                </div>\n\n                <div class=\"ml-4 md:ml-12 
+space-y-8\">\n                    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\n                        <div 
+class=\"space-y-4\">\n                            <div class=\"flex items-start gap-3\">\n                             
+   <div class=\"step-number mt-1\">1</div>\n                                <div>\n                                    
+<p class=\"font-bold text-sm\">Validación \"Asume Crédito\"</p>\n                                    <p 
+class=\"text-xs text-slate-500\">Es el primer paso técnico en el PMS para validar la reserva como bono.</p>\n          
+                      </div>\n                            </div>\n                            <div class=\"flex 
+items-start gap-3\">\n                                <div class=\"step-number mt-1\">2</div>\n                        
+        <div>\n                                    <p class=\"font-bold text-sm\">Corrección de Régimen</p>\n          
+                          <p class=\"text-xs text-slate-500 italic\">Si entra como \"Habitación\", cambiadlo 
+manualmente a AD, MP o lo que indique el bono.</p>\n                                </div>\n                           
+ </div>\n                            <div class=\"flex items-start gap-3\">\n                                <div 
+class=\"step-number mt-1\">3</div>\n                                <div>\n                                    <p 
+class=\"font-bold text-sm\">Gestión de Spa y Teléfono</p>\n                                    <p class=\"text-xs 
+text-slate-500\">Responded al correo del Spa y solicitad el teléfono al cliente si no figura en el PMS.</p>\n          
+                      </div>\n                            </div>\n                        </div>\n\n                   
+     <div class=\"p-6 bg-slate-900 text-white rounded-2xl shadow-xl\">\n                            <h4 
+class=\"text-xs font-bold text-sky-400 uppercase mb-3 tracking-widest\">Regla del Desglose Diario</h4>\n               
+             <p class=\"text-xs leading-relaxed italic mb-4\">\n                                Debéis reflejar qué 
+servicios se prestan cada día y su precio individual:\n                            </p>\n                            
+<div class=\"bg-white/10 p-3 rounded-lg font-mono text-[10px] space-y-1\">\n                                <p>• Día 
+1: Alojamiento + Cena + Spa</p>\n                                <p>• Día 2: Desayuno</p>\n                            
+    <p class=\"text-sky-300 font-bold mt-2\">TOTAL PMS = TOTAL BONO</p>\n                            </div>\n          
+              </div>\n                    </div>\n\n                    <div class=\"profesor-note\">\n                
+        <strong>Nota del profesor:</strong> No permitáis discrepancias. Si el bono dice 150€, el desglose diario debe 
+sumar exactamente 150€. Es la única forma de que la auditoría cuadre al final del mes.\n                    </div>\n   
+             </div>\n            </section>\n\n            <!-- BLOQUE 3: FACTURACIÓN -->\n            <section>\n     
+           <div class=\"flex items-center gap-4 mb-6\">\n                    <span class=\"bg-sky-100 text-[#0369a1] 
+w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-inner\">3</span>\n                    
+<h2 class=\"text-3xl font-bold text-slate-800 tracking-tight\">Facturación Anticipada</h2>\n                </div>\n\n 
+               <div class=\"grid grid-cols-1 md:grid-cols-2 gap-8 ml-4 md:ml-12\">\n                    <div 
+class=\"bg-slate-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden ring-4 ring-sky-500/30\">\n        
+                <div class=\"flex items-center justify-between mb-6\">\n                            <h4 
+class=\"text-xs font-bold text-sky-400 uppercase tracking-widest\">Check-in Protocol</h4>\n                            
+<span class=\"factura-badge uppercase tracking-tighter\">FACTURA EN ENTRADA</span>\n                        </div>\n   
+                     \n                        <p class=\"text-sm font-bold text-sky-200 mb-4 underline italic\">\"La 
+factura se anticipa y se emite en el momento de la entrada.\"</p>\n                        \n                        
+<ul class=\"text-sm space-y-4 font-medium italic text-slate-300\">\n                            <li class=\"flex 
+items-start gap-2\">🔹 Facturar a crédito a <strong>nombre del cliente</strong>.</li>\n                            <li 
+class=\"flex items-start gap-2\">🔹 <strong>Grapar factura física al bono</strong> para archivo.</li>\n                
+            <li class=\"flex items-start gap-2\">🔹 Cobrar al cliente SOLO los servicios extras.</li>\n                
+        </ul>\n                        <div class=\"mt-8 pt-4 border-t border-slate-700 flex items-center 
+justify-between text-slate-400\">\n                            <span class=\"text-[10px] uppercase font-bold 
+tracking-widest text-red-400\">¿Se lleva factura el cliente?</span>\n                            <span class=\"text-xs 
+font-black bg-red-900 text-white px-3 py-1 rounded\">NO</span>\n                        </div>\n                    
+</div>\n\n                    <div class=\"p-8 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col 
+justify-center bg-slate-50\">\n                        <h4 class=\"text-xs font-bold text-slate-400 uppercase mb-4 
+tracking-widest text-center italic\">Recordatorio de Seguridad</h4>\n                        <div class=\"p-4 bg-white 
+rounded-xl border border-slate-200 shadow-sm text-center\">\n                            <p class=\"text-xs 
+text-slate-600 font-medium\">Nunca cobréis la estancia a un cliente de Weekendesk. Su bono es su pago. Solo facturamos 
+extras (minibar, parking, etc.).</p>\n                        </div>\n                        <div class=\"mt-6 flex 
+flex-wrap justify-center gap-2\">\n                            <span class=\"bg-sky-100 text-sky-700 text-[10px] px-2 
+py-1 rounded font-bold\">HA</span>\n                            <span class=\"bg-sky-100 text-sky-700 text-[10px] px-2 
+py-1 rounded font-bold\">DE</span>\n                            <span class=\"bg-sky-100 text-sky-700 text-[10px] px-2 
+py-1 rounded font-bold\">SP</span>\n                            <span class=\"bg-sky-100 text-sky-700 text-[10px] px-2 
+py-1 rounded font-bold\">CE</span>\n                        </div>\n                    </div>\n                
+</div>\n            </section>\n        </main>\n    </div>\n\n",
+data.js:269:    "content": "<div class=\"post-body\">\n\n    <!-- Título Principal del Documento -->\n    \n      
+<h1>Protocolo de Recepción</h1>\n      <p>Check-in excelente &amp; Upselling con valor</p>\n    </header>\n\n    <!-- 
+Navegación interna -->\n    <nav class=\"inline\">\n      <a href=\"#checkin\">🛎️ 1. Detalles del check-in</a>\n      
+<a href=\"#upselling\">⚡ 2. Upselling¹ cuando proceda</a>\n    </nav>\n\n    <!-- =========================\n         
+1) DETALLES DEL CHECK-IN\n    ========================== -->\n    <div class=\"section-header\" id=\"checkin\">\n      
+<h2 class=\"section-title\">1. Detalles del Check-in</h2>\n    </div>\n\n    <div class=\"intro-highlight\">\n      ✨ 
+<strong>Objetivo Principal:</strong> Asegurar un check-in ágil, correcto y cálido, dejando preparado el terreno para 
+un upselling<sup>¹</sup> con sentido (solo si aporta valor real al huésped).\n    </div>\n\n    <!-- Cuadrícula de 
+Check-in (2 Columnas) -->\n    <div class=\"grid-2\">\n      \n      <!-- (A) Hoja de bienvenida -->\n      <div 
+class=\"card\">\n        <div class=\"ttl\">📄 Hoja de bienvenida &amp; Check-in online</div>\n        <div 
+class=\"micro\">\n          <p>Entregar al cliente la hoja de bienvenida y explicar brevemente su contenido, 
+destacando el uso del <strong>código QR</strong>, que permite acceder a información relevante sobre los servicios del 
+hotel (desayuno, piscina, minibar, room service, etc.).</p>\n          <div style=\"background: var(--primary-light); 
+padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid var(--primary);\">\n            <p 
+style=\"margin: 0; color: var(--primary);\">🔔 <strong>Prioridad Check-in Online:</strong> Los clientes que hayan 
+realizado el check-in online tienen prioridad tanto en el acceso a la habitación como en la asignación de peticiones 
+especiales (camas supletorias, cunas, preferencias de planta, etc.). Es importante tenerlo en cuenta en el reparto de 
+habitaciones y preparación previa.</p>\n          </div>\n          <p style=\"margin-top: 15px;\">Esta primera 
+interacción es fundamental para asegurar una experiencia satisfactoria desde el primer momento.</p>\n        </div>\n  
+    </div>\n\n      <!-- (B) Política de Cobros -->\n      <div class=\"card\">\n        <div class=\"ttl\">💳 
+Política de Cobros</div>\n        <ul class=\"bull micro\">\n          <li>Cobrar el <strong>importe total de la 
+estancia</strong> a clientes no habituales, parejas locales o perfiles considerados sospechosos.</li>\n          
+<li>Si se detectan dudas respecto al comportamiento del cliente, establecer un crédito de <strong>0 €</strong> como 
+medida preventiva.</li>\n          <li>Los consumos adicionales deberán abonarse en el momento.</li>\n          <li>En 
+reservas con habitaciones subordinadas (por ejemplo, cuando un cliente deja un depósito para varias habitaciones), 
+confirmar con el cliente el procedimiento acordado y las condiciones aplicables.</li>\n        </ul>\n      </div>\n\n 
+     <!-- (C) Observaciones y Datos de Facturación -->\n      <div class=\"card\">\n        <div class=\"ttl\">🧾 
+Observaciones y Facturación</div>\n        <div class=\"micro\">\n          <ul class=\"bull\">\n            
+<li><strong>Registrar observaciones:</strong> hora estimada de salida, solicitudes especiales o posibles 
+incidencias.</li>\n            <li><strong>Preguntar claramente:</strong> si la factura debe emitirse a nombre 
+personal o de empresa.</li>\n          </ul>\n          \n          <div class=\"sep\"></div>\n          \n          
+<p><strong>En caso de facturación a empresa, solicitar:</strong></p>\n          <ul class=\"bull\">\n            
+<li>Nombre fiscal completo y CIF/NIF.</li>\n            <li>Dirección fiscal (CP y localidad).</li>\n            
+<li>Correo electrónico de facturación.</li>\n          </ul>\n          \n          <p style=\"margin-top: 
+15px;\"><strong>Si la empresa no figura en el sistema:</strong></p>\n          <ul class=\"bull\">\n            
+<li>Crear la ficha correspondiente e incluir tarifa especial (si aplica).</li>\n            <li>Solicitar o verificar 
+autorización de crédito.</li>\n            <li>Asignar el formato adecuado a la cuenta (ej. 430+número de 
+ficha).</li>\n          </ul>\n        </div>\n      </div>\n\n      <!-- (D) Verificación técnica -->\n      <div 
+class=\"card\">\n        <div class=\"ttl\">✅ Verificación PMS / Documentación</div>\n        <ul class=\"bull 
+micro\">\n          <li>Confirmar <strong>localizador/nombre</strong>, <strong>tipo de habitación</strong>, <strong>nº 
+de personas</strong>, <strong>régimen</strong>, <strong>tarifa</strong> y <strong>extras</strong>.</li>\n          
+<li>Recoger <strong>documento de identidad</strong> de adultos y completar <strong>fichas policiales</strong>.</li>\n  
+        <li>Revisar <strong>forma de pago</strong>, <strong>preautorización</strong> o cobro NR si aplica.</li>\n      
+    <li>Si se ajusta ocupación/servicios: usar <strong>“mantener precio”</strong>; si se recalcula, realizar 
+<strong>ajuste manual</strong> y dejar <strong>observación</strong>.</li>\n          <li><strong>Parking:</strong> 
+gratuito (no es upsell). Indicar accesos y normas básicas.</li>\n        </ul>\n      </div>\n\n    </div>\n\n    <!-- 
+=========================\n         2) UPSELLING CUANDO PROCEDA\n    ========================== -->\n    <div 
+class=\"section-header\" id=\"upselling\">\n      <h2 class=\"section-title\">2. Upselling¹ cuando proceda</h2>\n    
+</div>\n\n    <div class=\"intro-highlight\" style=\"background-color: var(--primary-light); border-left-color: 
+var(--primary);\">\n      💡 <strong>Regla de oro:</strong> Ofrecer <strong>máximo 2 propuestas</strong>, siempre 
+utilizando la fórmula <strong>beneficio + precio</strong> y finalizando con una <strong>pregunta de cierre</strong>. 
+Tono sugerente, nunca invasivo.\n    </div>\n\n    <!-- Cuadrícula de Conceptos Upselling (2 Columnas) -->\n    <div 
+class=\"grid-2\">\n      <div class=\"card accent-hover\">\n        <div class=\"ttl\">🎯 Objetivo y Momentos 
+Clave</div>\n        <div class=\"micro\">\n          <p>Incrementar el ADR y la satisfacción del cliente ofreciendo 
+mejoras solo si encajan con la motivación de su viaje.</p>\n          <div class=\"sep\"></div>\n          <ul 
+class=\"bull\">\n            <li><strong>Check-in:</strong> receptividad alta si la propuesta es pertinente y resuelve 
+una necesidad.</li>\n            <li><strong>Reserva (tel/email):</strong> el cliente aún está en fase de 
+decisión.</li>\n            <li><strong>Pre-estancia (24–48 h antes):</strong> recordatorio proactivo con extras 
+relevantes.</li>\n          </ul>\n        </div>\n      </div>\n\n      <div class=\"card accent-hover\">\n        
+<div class=\"ttl\">🔎 Señales de Oportunidad</div>\n        <div class=\"micro\">\n          <ul class=\"bull\">\n     
+       <li><strong>Cliente de Empresa:</strong> <br><span class=\"badge\">Silencio / Espacio</span> <span 
+class=\"badge\">Desayuno temprano</span></li>\n            <li><strong>Pareja / Ocasión especial:</strong> <br><span 
+class=\"badge\">Hab. Superior</span> <span class=\"badge\">Spa</span> <span class=\"badge\">Late 
+check-out²</span></li>\n            <li><strong>Familias:</strong> <br><span class=\"badge\">Superior + Cuna</span> 
+<span class=\"badge\">Desayuno Buffet</span></li>\n          </ul>\n          <div class=\"sep\"></div>\n          <p 
+style=\"font-size: 0.95rem; color: var(--text-muted); margin: 0;\"><em>* El late check-out² siempre requiere confirmar 
+disponibilidad en el PMS y dejar nota escrita.</em></p>\n        </div>\n      </div>\n    </div>\n\n    <h3 
+style=\"color: var(--primary); font-size: 1.5rem; margin: 40px 0 20px;\">Catálogo de Productos para Upselling</h3>\n\n 
+   <!-- Cuadrícula de Productos (3 Columnas) -->\n    <div class=\"grid-3\">\n      \n      <!-- Producto 1 -->\n      
+<div class=\"card\">\n        <div class=\"ttl\">🏨 Hab. Superior</div>\n        <ul class=\"bull micro\">\n          
+<li><strong>Cuándo ofrecer:</strong> disponibilidad, ocasión especial, estancias largas.</li>\n          
+<li><strong>Cómo decirlo:</strong> “Por un <strong>pequeño suplemento</strong> disfruta de <strong>más 
+espacio</strong> y <strong>mejores vistas</strong> por <strong>XX €</strong>.”</li>\n          <li><strong>Beneficios 
+clave:</strong> más m², mejores vistas, bañera/amenities premium, zona más silenciosa.</li>\n          
+<li><strong>Backoffice:</strong> cambiar tipo en PMS; <u>mantener precio</u> base si procede; añadir extra y dejar 
+nota clara.</li>\n        </ul>\n      </div>\n\n      <!-- Producto 2 -->\n      <div class=\"card\">\n        <div 
+class=\"ttl\">🥐 Desayuno Buffet</div>\n        <ul class=\"bull micro\">\n          <li><strong>Cuándo 
+ofrecer:</strong> reservas solo alojamiento; durante el check-in; correos de pre-estancia.</li>\n          
+<li><strong>Cómo decirlo:</strong> “¿Incluimos el <strong>desayuno buffet</strong> por <strong>XX € p.p.</strong>? 
+Tendrá <strong>bollería, fruta fresca y productos locales</strong>.”</li>\n          <li><strong>Beneficios 
+clave:</strong> comodidad (no salir del hotel), amplios horarios, opción de café para llevar.</li>\n          
+<li><strong>Backoffice:</strong> añadir régimen en PMS, recalcular total y anotar en observaciones.</li>\n        
+</ul>\n      </div>\n\n      <!-- Producto 3 -->\n      <div class=\"card\">\n        <div class=\"ttl\">💆‍♀️ Spa 
+Cumbria Bienestar</div>\n        <div class=\"micro\">\n          <p style=\"font-size: 0.9rem; margin-top: -10px; 
+margin-bottom: 15px;\"><em>(Aplica a huéspedes de Guadiana y Cumbria)</em></p>\n          <ul class=\"bull\">\n        
+    <li><strong>Cuándo ofrecer:</strong> interés en relax, parejas, escapadas de fin de semana, regalos.</li>\n        
+    <li><strong>Cómo decirlo:</strong> \n              <br>• “Tenemos acceso a <strong>Spa Cumbria Bienestar</strong> 
+con circuito hidrotermal por <strong>XX € p.p.</strong>”\n              <br>• “¿Le apetece un <strong>pack alojamiento 
++ spa</strong> por <strong>XX €</strong>?”\n            </li>\n            <li><strong>Beneficios clave:</strong> 
+relajación profunda, salud, experiencia de estancia completa.</li>\n            <li><strong>Logística:</strong> 
+confirmar <strong>horario y cupo</strong>. Huéspedes de Guadiana: indicar traslado por cuenta del cliente. Cumbria: 
+acceso directo.</li>\n            <li><strong>Backoffice:</strong> añadir extra “Spa Cumbria Bienestar”, anotar hora 
+reservada y nº de personas.</li>\n          </ul>\n        </div>\n      </div>\n\n    </div>\n\n    <!-- Guion de 
+Ventas y KPIs -->\n    <div class=\"card\" style=\"border-top: 4px solid var(--primary);\">\n      <div 
+class=\"ttl\">🗣️ Micro-guion de recepción (Listo para usar)</div>\n      <ol class=\"micro\" style=\"padding-left: 
+20px; line-height: 1.8; margin-bottom: 0;\">\n        <li><strong>Confirmación:</strong> “Tiene una habitación 
+<strong>estándar</strong> reservada para <strong>X noches</strong>.”</li>\n        <li><strong>Mejora de 
+Habitación:</strong> “Hoy podemos ofrecerle una <strong>Superior</strong> por <strong>XX € extra</strong>; con ella 
+gana <strong>más espacio</strong> y <strong>mejores vistas</strong>.”</li>\n        <li><strong>Desayuno:</strong> 
+“¿Añadimos el <strong>buffet</strong> por <strong>XX € p.p.</strong>?”</li>\n        <li><strong>Spa:</strong> 
+“¿Quiere reservar el <strong>circuito termal</strong> por <strong>XX € p.p.</strong> o prefiere el <strong>pack 
+completo</strong> por <strong>XX €</strong>?”</li>\n        <li><strong>Cierre:</strong> “¿Cuál de estas opciones 
+prefiere que le deje preparada para su estancia?”</li>\n      </ol>\n      \n      <div class=\"kpi-container\">\n     
+   <div class=\"kpi-box success\">\n          <span class=\"kpi-title\">✅ PRÁCTICAS CORRECTAS</span>\n          
+Ofrecer siempre el <strong>beneficio</strong> antes del precio y terminar la frase con una <strong>pregunta de 
+cierre</strong> que invite a decidir.\n        </div>\n        <div class=\"kpi-box danger\">\n          <span 
+class=\"kpi-title\">⚠️ QUÉ DEBEMOS EVITAR</span>\n          Listar todos los extras de golpe sin filtrar por el tipo 
+de cliente, o mencionar la palabra \"coste/suplemento\" antes de explicar el valor.\n        </div>\n      </div>\n    
+</div>\n\n    <!-- ===== GLOSARIO ===== -->\n    <div class=\"footnotes\">\n      <p><sup>¹</sup> 
+<strong>Upselling:</strong> técnica de ventas que consiste en ofrecer al cliente una mejora o servicio adicional (por 
+ejemplo, habitación superior, desayuno o acceso a spa) con un coste extra, buscando aumentar la satisfacción del 
+huésped y el ingreso medio del hotel.</p>\n      <p><sup>²</sup> <strong>Late check-out:</strong> salida posterior a 
+la hora oficial de salida, siempre sujeta a disponibilidad del día y, en algunos casos según la política, con un 
+suplemento económico.</p>\n    </div>\n\n  </div>",
+data.js:469:    "content": "<div class=\"wrapper\">\n    \n        <div class=\"brand\">\n            <h1>Sercotel 
+<span>Guadiana</span> · Cumbria <span>Spa & Hotel</span></h1>\n        </div>\n    </header>\n\n    <main>\n        
+<!-- Hero Section -->\n        <section class=\"hero\">\n            <h2>Check-in de Grupos</h2>\n            
+<p>Protocolo integral para la estandarización operativa y la excelencia administrativa en nuestros hoteles.</p>\n      
+  </section>\n\n        <!-- Intro Quote -->\n        <section class=\"intro-quote\">\n            <blockquote>\"La 
+planificación anticipada y la validación rigurosa de la documentación son los pilares para optimizar la atención y 
+evitar la congestión en el hall.\"</blockquote>\n            <p>La gestión coordinada entre los departamentos de 
+Recepción, Comercial y Pisos asegura una operativa impecable. La validación previa es un requisito crítico para el 
+éxito del flujo de trabajo diario.</p>\n        </section>\n\n        <!-- Sección 01 -->\n        <div 
+class=\"bg-alt\">\n            <section class=\"section-container\">\n                <h3>01. Información previa 
+obligatoria</h3>\n                <div class=\"web-grid\">\n                    <div class=\"feature-item\">\n         
+               <h4>Logística y Contacto</h4>\n                        <ul>\n                            
+<li><strong>Rooming list completa:</strong> Nombres, apellidos y datos de identidad integrados directamente en el 
+PMS.</li>\n                            <li><strong>Líder de grupo:</strong> Teléfono operativo y contacto directo del 
+guía o responsable.</li>\n                            <li><strong>Modalidad de llegada:</strong> Hora prevista y 
+especificación de acceso (en bloque o goteo).</li>\n                        </ul>\n                    </div>\n        
+            <div class=\"feature-item\">\n                        <h4>Servicios y Necesidades</h4>\n                   
+     <ul>\n                            <li><strong>Detalle de servicios:</strong> Pensiones contratadas, horarios de 
+restauración y uso de salas.</li>\n                            <li><strong>Turnos de desayuno:</strong> Organización 
+escalonada obligatoria para evitar saturación de salas.</li>\n                            <li><strong>Peticiones 
+especiales:</strong> Alergias, movilidad reducida o preferencias de planta.</li>\n                        </ul>\n      
+              </div>\n                </div>\n            </section>\n        </div>\n\n        <!-- Sección 02 -->\n  
+      <section class=\"section-container\">\n            <h3>02. Documentación interna</h3>\n            <div 
+class=\"web-grid\">\n                <div class=\"feature-item\">\n                    <h4>Preparación del Turno (24h 
+antes)</h4>\n                    <ul>\n                        <li>Copia impresa de la rooming list para control de 
+Recepción y entrega al Guía.</li>\n                        <li><strong>Kits de Bienvenida:</strong> sobres 
+individuales con llaves pre-codificadas y numeradas.</li>\n                        <li><strong>Orden de Servicio 
+(OS):</strong> detalle maestro actualizado de regímenes y servicios especiales.</li>\n                        
+<li>Validación de disponibilidad y llaves de cortesía si aplica.</li>\n                    </ul>\n                
+</div>\n            </div>\n        </section>\n\n        <!-- Sección 03 -->\n        <div class=\"bg-alt\">\n        
+    <section class=\"section-container\">\n                <h3>03. Procedimiento de Bienvenida</h3>\n                
+\n                <div class=\"legal-banner\">\n                    <span>Protocolo Legal</span>\n                    
+<p>Es obligatorio verificar la filiación, autorizaciones y documentación legal original antes de la entrega de 
+llaves.</p>\n                </div>\n\n                <div class=\"web-grid\">\n                    <div 
+class=\"feature-item\">\n                        <h4>Acciones en el Hall</h4>\n                        <ul>\n          
+                  <li>Entrega ágil de llaves al guía o huéspedes según la modalidad pactada.</li>\n                    
+        <li><strong>Registro Legal:</strong> Escaneo de DNI/Pasaportes originales para Cardex y generación del parte 
+de viajeros.</li>\n                            <li><strong>Briefing Estructurado:</strong> Información esencial sobre 
+horarios, credenciales WiFi y servicios del hotel.</li>\n                        </ul>\n                    </div>\n   
+                 <div class=\"feature-item\">\n                        <h4>Gestión Operativa</h4>\n                    
+    <p style=\"font-size: 0.95rem; color: var(--text-muted);\">\n                            <strong>Modalidad 
+Hospitality:</strong> El guía debe recolectar y entregar todos los documentos de identidad en recepción de forma 
+conjunta e inmediata.<br><br>\n                            <strong>Incidencias:</strong> Notificar variaciones 
+(no-shows o pax extra) al departamento Comercial para el ajuste de facturación.\n                        </p>\n        
+            </div>\n                </div>\n            </section>\n        </div>\n\n        <!-- Sección 04 -->\n    
+    <section class=\"section-container\">\n            <h3>04. Asignación de Habitaciones</h3>\n            <div 
+class=\"web-grid\">\n                <div class=\"feature-item\">\n                    <h4>Criterios de 
+Excelencia</h4>\n                    <ul>\n                        <li><strong>Preasignación:</strong> Mínimo 15 días 
+antes de la llegada del grupo al hotel.</li>\n                        <li><strong>Ajuste Final:</strong> Revisión tras 
+recibir la rooming definitiva (7 días antes).</li>\n                        <li><strong>Unificación:</strong> 
+Ubicación en la misma planta o consecutivas para optimizar logística.</li>\n                        
+<li><strong>Pisos:</strong> Coordinación de prioridad de limpieza según la preasignación realizada.</li>\n             
+       </ul>\n                </div>\n            </div>\n        </section>\n\n        <!-- Sección 05 PMS -->\n      
+  <section class=\"pms-web-block\">\n            <h4>05. Facturación y PMS</h4>\n            <p>Garantizar la salud 
+financiera y la coherencia del Revenue Management es responsabilidad de todo el equipo.</p>\n            <div 
+class=\"pms-web-grid\">\n                <div>\n                    <strong>Segmentación</strong>\n                    
+<p style=\"font-size:0.9rem; margin-top:10px; opacity:0.8;\">Aplicación obligatoria del segmento \"Grupos\" desde la 
+confirmación. Prohibido mantener \"grupo tanteo\" el día de llegada.</p>\n                </div>\n                
+<div>\n                    <strong>Factura Proforma</strong>\n                    <p style=\"font-size:0.9rem; 
+margin-top:10px; opacity:0.8;\">Emisión anticipada tras el registro para validar cargos versus la Orden de Servicio 
+(OS).</p>\n                </div>\n                <div>\n                    <strong>Imputación</strong>\n            
+        <p style=\"font-size:0.9rem; margin-top:10px; opacity:0.8;\">Verificar la correcta carga a la Cuenta Master 
+versus cuentas individuales para extras.</p>\n                </div>\n            </div>\n        </section>\n\n       
+ <!-- Objetivo -->\n        <section class=\"objective-web\">\n            <h5>🎯 Objetivo: Detectar y corregir 
+errores de facturación antes del check-out, asegurando la exactitud de los ingresos.</h5>\n        </section>\n\n      
+  <!-- Condiciones Finales -->\n        <section class=\"section-container\">\n            <h3>📋 Condiciones 
+Finales</h3>\n            <div class=\"conditions-web-grid\">\n                <div class=\"condition-web-item\">\n    
+                <strong>💰 Depósitos</strong>\n                    <p style=\"font-size:0.9rem; color: 
+var(--text-muted);\">30% al confirmar para bloqueo de inventario.<br>70% restante 7 días antes de la entrada.</p>\n    
+            </div>\n                <div class=\"condition-web-item\" style=\"border-top-color: var(--danger);\">\n    
+                <strong>🚫 Cancelación</strong>\n                    <p style=\"font-size:0.9rem; color: 
+var(--text-muted);\">Importes no reembolsables desde el momento del pago por bloqueo íntegro del inventario.</p>\n     
+           </div>\n                <div class=\"condition-web-item\">\n                    <strong>📝 Rooming 
+List</strong>\n                    <p style=\"font-size:0.9rem; color: var(--text-muted);\">Fecha límite: 7 días antes 
+de la llegada. Seguimiento activo obligatorio.</p>\n                </div>\n            </div>\n        </section>\n   
+ </main>\n\n    <footer>\n        &copy; 2026 Manual Operativo Interno · Sercotel Guadiana & Cumbria Spa & Hotel · 
+Confidencial\n    </footer>\n</div>",
+data.js:477:    "content": "<div class=\"main-container\">\n\n    <!-- Cabecera visual común -->\n    <div 
+class=\"post-header\">\n      <img alt=\"Ilustración Recepción\" class=\"illustration\" src=\"https://blogger.googleuse
+rcontent.com/img/b/R29vZ2xl/AVvXsEg1pU9iTxe9eqrMOr1Gp7Wjc9NlQHL8nFtdUKZrGrLFsePZNjWtuv5k1hZzJhS9wvVZpSDpY2_7oSLt6AROMc9
+5vShDyQJcffEmwo3yegPPs_N_g3u5V9n0G0i2_gTYTxHfzDYs8_rv4q-7zPlA7gTNLlIeCcZgAigW5fyr58-ijjkwbWMrxWnr0Nr2DfCS/s320/ChatGPT%
+20Image%2015%20jun%202025,%2021_40_25.png\" />\n      <div class=\"content\">\n        <p class=\"phrase\">Agiliza la 
+atención: <b>crea llaves al instante</b> para el huésped</p>\n        <p class=\"phrase\"><b>Control total y 
+rápido</b> en cada emergencia de acceso.</p>\n      </div>\n    </div>\n\n    <!-- Primer bloque de manual (tarjetas 
+emergencia, HT28w, Onity) -->\n    <div class=\"post-body\">\n      <div class=\"section-header\">\n        <h1 
+class=\"section-title\">🔐 Manual: Grabación de Tarjetas de Emergencia y Repuesto</h1>\n      </div>\n      <hr 
+class=\"decorative-line\" />\n\n      <div class=\"intro-highlight\">\n        ✨ <strong>Introducción:</strong> Este 
+documento está destinado a todo el equipo de recepción con el objetivo de facilitar la coordinación entre todo el 
+departamento de forma clara y eficiente.\n      </div>\n      <div class=\"section-body\">\n\n        <h2>🧰 Acceso al 
+módulo</h2>\n        <p>Desde el programa HT28w de Onity, accede a:<br>\n        Menú principal → Tarjetas especiales 
+→ Grabar Tarjetas de Repuesto.<br>\n        Verás una pantalla similar a la siguiente:</p>\n        <img 
+class=\"manual-img\" src=\"https://blogger.googleusercontent.com/img/a/AVvXsEhXU4Xxmi3EDbyuubkMOL4ZmZB60BcWzNUIe6XvDcL1
+mrdtR8AIQfpYHONvuVsXM59Y810dZPKjy1NxY_g7iH3_R41fWu84fJYYMuay_3y8GBUJEDxAfIQtYJxXhVkovcQgtts0aae7clXArKziOfnOVHR_N6mf3Zo
+9-L9cbjf0Fg-QkCMXbuwMssY0fMLk\" alt=\"Pantalla grabación tarjetas repuesto Onity\">\n\n        <h2>⚙️ Configuración de 
+la grabación</h2>\n        <p>\n          Aparecerá una ventana emergente en la que puedes:<br>\n          – Activar o 
+desactivar la casilla para grabar tarjetas programadoras<br>\n          – Especificar el número de tarjetas 
+programadoras y de repuesto<br><br>\n          🔵 <b>Recomendación Onity:</b><br>\n          • Mínimo 3 tarjetas 
+programadoras<br>\n          • Tarjetas de repuesto: al menos el doble que el número de habitaciones<br><br>\n         
+ Ejemplo visual:\n        </p>\n        <!-- Puedes sustituir la imagen inferior si tienes tuya propia -->\n        
+<img class=\"manual-img\" src=\"data:image/png;base64,/9j/4AAQSk...\" alt=\"Configuración grabación Onity\">\n\n       
+ <h2>📅 Caducidad y uso</h2>\n        <p>\n          Todas las tarjetas se graban sin fecha de caducidad, ya 
+que:<br>\n          – No se sabe cuándo se utilizarán<br>\n          – Se pueden reutilizar más de una vez<br><br>\n   
+       Estas tarjetas no son nominativas (no están asignadas a una habitación específica).\n        </p>\n\n        
+<h2>🛠️ Procedimiento de uso en emergencia</h2>\n        <p>\n          1. Pasa la tarjeta programadora por la 
+cerradura afectada.<br>\n          &nbsp;&nbsp;→ Esta tarjeta contiene la información del hotel y debe ser utilizada 
+sólo por el personal.<br>\n          2. Se encenderán las dos luces de la cerradura (roja y verde).<br>\n          3. 
+Con las luces encendidas, pasa la tarjeta de repuesto.<br>\n          &nbsp;&nbsp;→ Esta queda programada como tarjeta 
+de cliente sin caducidad.<br><br>\n          📝 La tarjeta de repuesto se entrega al cliente para usar como cualquier 
+otra tarjeta habitual.\n        </p>\n      </div>\n    </div>\n\n    <!-- Segundo bloque de manual: Programador 
+portátil (integrado) -->\n    <div class=\"post-body\">\n      <div class=\"section-header\">\n        <h1 
+class=\"section-title\">🔑 Manual de Uso: Carga y Apertura con el Programador Portátil</h1>\n      </div>\n      <hr 
+class=\"decorative-line\" />\n\n      <section>\n        <h2>1. Acceder a la función de carga</h2>\n        <div 
+class=\"step\">1️⃣ En la barra superior, haz clic en <strong>Mantenimiento</strong>.</div>\n        <div 
+class=\"step\">2️⃣ Selecciona <strong>Cargar Programador Portátil</strong>.</div>\n        <div class=\"step\"><img 
+class=\"manual-img\" src=\"https://placehold.co/800x400?text=Imagen+No+Disponible\" alt=\"Menú Mantenimiento > Cargar 
+Programador Portátil\"></div>\n      </section>\n\n      <section>\n        <h2>2. Conectar y encender el 
+programador</h2>\n        <div class=\"step\">1️⃣ Enchufa el cable USB desde el PC al conector inferior del 
+programador (ver <strong>Foto 1</strong>).</div>\n        <div class=\"step\">2️⃣ Sitúa el interruptor en 
+<strong>ON</strong> y espera el mensaje en pantalla:</div>\n        <div class=\"step\"><img class=\"manual-img\" 
+src=\"https://placehold.co/800x400?text=Imagen+No+Disponible\" alt=\"Aviso de conexión y encendido\"></div>\n      
+</section>\n\n      <section>\n        <h2>3. Leer registros de aperturas</h2>\n        <div class=\"step note\">Se 
+mostrará la lista con Número de Apertura, Puerta y Fecha/Hora:</div>\n        <div class=\"step\"><img 
+class=\"manual-img\" src=\"https://placehold.co/800x400?text=Imagen+No+Disponible\" alt=\"Lista de aperturas en el 
+portátil\"></div>\n        <div class=\"step\">Opciones:</div>\n        <ul>\n          <li><strong>Leer</strong>: 
+visualizar en pantalla.</li>\n          <li><strong>Cargar</strong>: transferir registros y borrar memoria del 
+dispositivo.</li>\n        </ul>\n        <div class=\"step confirm\"><img class=\"manual-img\" 
+src=\"https://placehold.co/800x400?text=Imagen+No+Disponible\" alt=\"Confirmación de borrado\" style=\"max-width:90px; 
+vertical-align:middle;\"> Si confirmas, los registros del portátil se borrarán tras la carga.</div>\n      
+</section>\n\n      <section>\n        <h2>4. Procedimiento de apertura de puertas</h2>\n        <div class=\"step 
+note\">🔋 Requisito: el programador debe estar cargado y conectado al lector de puertas.</div>\n        <div 
+class=\"step\">1️⃣ Conecta el programador al lector de puerta (puerto inferior).</div>\n        <div 
+class=\"step\">2️⃣ Enciende el interruptor (<strong>ON</strong>).</div>\n        <div class=\"step\">3️⃣ Pulsa 
+<strong>MENU</strong> para desplegar opciones.</div>\n        <div class=\"step\">4️⃣ Selecciona <strong>5. Apertura 
+única</strong> y pulsa <strong>ABRIR</strong>.</div>\n        <div class=\"step\">5️⃣ El lector emitirá un pitido y 
+desbloqueará la puerta. Luego desconecta el programador.</div>\n      </section>\n\n      <section>\n        <h2>5. 
+Consejos y precauciones</h2>\n        <ul>\n          <li>⏳ No interrumpir la carga hasta que el indicador cambie a 
+verde.</li>\n          <li>⚠️ No desconectar durante la transferencia de registros.</li>\n          <li>🧹 Mantén 
+limpio el conector USB y los contactos del lector.</li>\n          <li>🌡️ Almacenar en lugar seco y a temperatura 
+ambiente.</li>\n        </ul>\n      </section>\n    </div>\n  </div>",
+data.js:586:    "content": "<!-- BARRA DE NAVEGACIÓN TIPO WEB -->\n<nav class=\"navbar\">\n    <h1 
+class=\"navbar-title\">Tarifas y Condiciones de Reserva para Grupos</h1>\n</nav>\n\n<div class=\"container\">\n    <h1 
+class=\"section-title\">Tarifas y Condiciones de Reserva para Grupos</h1>\n    <hr class=\"decorative-line\" />\n\n    
+<div class=\"post-body\">\n        <div class=\"intro-highlight\" style=\"font-size:17px; font-style:italic; 
+text-align:center;\">\n            🏨 Para garantizar el excelente funcionamiento de Cumbriahotel, es vital \n         
+   adjuntar y comunicar estas tarifas y condiciones en todos los presupuestos de grupos.\n        </div>\n\n        
+<div class=\"section-body\">\n            \n            <!-- TARIFAS HOTEL CUMBRIA -->\n            <div 
+class=\"hotel-header\">\n                <img alt=\"Logo Hotel Cumbria\" src=\"https://blogger.googleusercontent.com/im
+g/b/R29vZ2xl/AVvXsEjVaqHv-rykkFHHpAaIJZS_YQIlnPINr-6P6UMrnv_nwutA6FZRmf0Wv_mdr5Ik5MrB2LLLvuqJJmp3KOZa_4AWJqq_vsBFZJisaH
+2vx83W97Zgcm2BexM1tTk7ZbkskcXW2svVyIHt0zs4kRhnNIC3F1TRuVWgG6pEts7IUjSx4SuxT-9rKGXp4g21uMuY/s320/hotelcumbria%20logo.jpg
+\" />\n                <h2>Hotel Cumbria - Tarifas 2026</h2>\n            </div>\n\n            <table>\n              
+  <caption>Precio por persona y día · Grupo 2026</caption>\n                <thead>\n                    <tr>\n        
+                <th>Régimen</th>\n                        <th>DUI</th>\n                        <th>Doble</th>\n       
+                 <th>Triple (Doble + Supl.)</th>\n                    </tr>\n                </thead>\n                
+<tbody>\n                    <tr><td>Solo alojamiento</td><td>60,00 €</td><td>30,00 €</td><td>26,67 €</td></tr>\n      
+              <tr><td>Aloj. y desayuno</td><td>67,50 €</td><td>37,50 €</td><td>34,17 €</td></tr>\n                    
+<tr><td>Media pensión</td><td>86,00 €</td><td>56,00 €</td><td>52,67 €</td></tr>\n                    <tr><td>Pensión 
+completa</td><td>104,50 €</td><td>74,50 €</td><td>71,17 €</td></tr>\n                </tbody>\n            
+</table>\n\n            <table>\n                <caption>Precio por habitación/noche 2026</caption>\n                
+<thead>\n                    <tr>\n                        <th>Régimen</th>\n                        <th>DUI</th>\n    
+                    <th>Doble</th>\n                        <th>Doble + Supl.</th>\n                    </tr>\n        
+        </thead>\n                <tbody>\n                    <tr><td>Solo alojamiento</td><td>60,00 €</td><td>60,00 
+€</td><td>80,00 €</td></tr>\n                    <tr><td>Aloj. y desayuno</td><td>67,50 €</td><td>75,00 
+€</td><td>102,50 €</td></tr>\n                    <tr><td>Media pensión</td><td>86,00 €</td><td>112,00 
+€</td><td>158,00 €</td></tr>\n                    <tr><td>Pensión completa</td><td>104,50 €</td><td>149,00 
+€</td><td>213,50 €</td></tr>\n                </tbody>\n            </table>\n\n            <!-- TARIFAS SERCOTEL 
+GUADIANA -->\n            <div class=\"hotel-header\">\n                <img alt=\"Logo Sercotel Guadiana\" src=\"https
+://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEicAsLDnU3gMamJzIr1PNKs0KVSfM1J9_lIIKLDhSIWZeq_V6J45ih_ECrjY65wV54
+RRoX-YMlZKWkSx_Y7UHki_AaiIuFTYHdChZFkvgjMHxYTA5AaKptBp1B6oSp-BmBZcDqfbmJ8LZljxWZf_EI6gHTgFh-1qt4zyLnypxt1nlMmkgx5dslZLu
+kdkbRZ/s320/guadiana%20logo_P%C3%A1gina%20serco.jpg\" />\n                <h2>Sercotel Guadiana - Tarifas 2026</h2>\n  
+          </div>\n\n            <table>\n                <caption>Precio por persona y día · Grupo 2026</caption>\n    
+            <thead>\n                    <tr>\n                        <th>Régimen</th>\n                        
+<th>DUI</th>\n                        <th>Doble</th>\n                        <th>Triple (Doble + Supl.)</th>\n        
+                <th>Cuádruple</th>\n                    </tr>\n                </thead>\n                <tbody>\n     
+               <tr><td>Solo alojamiento</td><td>62,00 €</td><td>31,00 €</td><td>27,33 €</td><td>25,25 €</td></tr>\n    
+                <tr><td>Aloj. y desayuno</td><td>70,00 €</td><td>39,00 €</td><td>35,33 €</td><td>33,25 €</td></tr>\n   
+                 <tr><td>Media pensión</td><td>89,00 €</td><td>58,00 €</td><td>54,33 €</td><td>52,25 €</td></tr>\n     
+               <tr><td>Pensión completa</td><td>108,00 €</td><td>77,00 €</td><td>73,33 €</td><td>71,25 €</td></tr>\n   
+             </tbody>\n            </table>\n\n            <table>\n                <caption>Precio por 
+habitación/noche 2026</caption>\n                <thead>\n                    <tr>\n                        
+<th>Régimen</th>\n                        <th>DUI</th>\n                        <th>Doble</th>\n                       
+ <th>Doble + Supl.</th>\n                        <th>Cuádruple</th>\n                    </tr>\n                
+</thead>\n                <tbody>\n                    <tr><td>Solo alojamiento</td><td>62,00 €</td><td>62,00 
+€</td><td>82,00 €</td><td>101,00 €</td></tr>\n                    <tr><td>Aloj. y desayuno</td><td>70,00 
+€</td><td>78,00 €</td><td>106,00 €</td><td>133,00 €</td></tr>\n                    <tr><td>Media pensión</td><td>89,00 
+€</td><td>116,00 €</td><td>163,00 €</td><td>209,00 €</td></tr>\n                    <tr><td>Pensión 
+completa</td><td>108,00 €</td><td>154,00 €</td><td>220,00 €</td><td>285,00 €</td></tr>\n                </tbody>\n     
+       </table>\n\n            <h2>📋 Normativa aplicable</h2>\n            \n            <div class=\"rules-grid\">\n 
+               \n                <!-- Regla 1 -->\n                <div class=\"rule-card\">\n                    <div 
+class=\"rule-header\">\n                        <div class=\"rule-number\">1</div>\n                        <h3 
+class=\"rule-title\">Validez del Presupuesto</h3>\n                    </div>\n                    <div 
+class=\"rule-content\">\n                        El presente presupuesto tiene una validez de <strong>7 días</strong> 
+desde la fecha de emisión. Transcurrido este plazo, el hotel se reserva el derecho de:\n                        <ul>\n 
+                           <li>Modificar tarifas.</li>\n                            <li>Revisar disponibilidad.</li>\n 
+                       </ul>\n                        <em>Cualquier modificación en fechas, número de habitaciones o 
+servicios implicará la revisión completa del presupuesto.</em>\n                    </div>\n                </div>\n\n 
+               <!-- Regla 2 -->\n                <div class=\"rule-card\">\n                    <div 
+class=\"rule-header\">\n                        <div class=\"rule-number\">2</div>\n                        <h3 
+class=\"rule-title\">Confirmación y Pagos</h3>\n                    </div>\n                    <div 
+class=\"rule-content\">\n                        La reserva se considerará confirmada tras la aceptación por escrito y 
+el pago de:\n                        <ul>\n                            <li><strong>30%</strong> del total estimado en 
+el momento de la confirmación.</li>\n                            <li><strong>70% restante</strong>, a abonar 7 días 
+antes de la llegada.</li>\n                        </ul>\n                        <em>El incumplimiento de los plazos 
+podrá implicar la cancelación automática de la reserva.</em>\n                    </div>\n                </div>\n\n   
+             <!-- Regla 3 (Ancho completo) -->\n                <div class=\"rule-card full-width\">\n                 
+   <div class=\"rule-header\">\n                        <div class=\"rule-number\">3</div>\n                        
+<h3 class=\"rule-title\">Cancelaciones y Reducciones</h3>\n                    </div>\n                    <div 
+class=\"rule-content\">\n                        Aplicable sobre el total de la reserva confirmada:\n                  
+      <div style=\"display: flex; flex-wrap: wrap; gap: 30px; margin-top: 10px;\">\n                            <div 
+style=\"flex: 1; min-width: 300px;\">\n                                <strong>Cancelaciones totales o 
+parciales:</strong>\n                                <ul>\n                                    <li><strong>Más de 30 
+días antes de la llegada:</strong> 30% (depósito no reembolsable).</li>\n                                    
+<li><strong>Entre 30 y 14 días:</strong> 50%.</li>\n                                    <li><strong>Entre 14 y 7 
+días:</strong> 75%.</li>\n                                    <li><strong>Menos de 7 días:</strong> 100%.</li>\n       
+                         </ul>\n                            </div>\n                            <div style=\"flex: 1; 
+min-width: 300px;\">\n                                <strong>Reducciones de habitaciones:</strong>\n                  
+              <ul>\n                                    <li><strong>Hasta 7 días antes de la llegada:</strong> Se 
+permite una reducción de hasta el 15% sin gastos. Reducciones superiores se penalizarán conforme a los porcentajes 
+anteriores.</li>\n                                    <li><strong>Menos de 7 días:</strong> No se permiten 
+reducciones. Se facturará el 100% de la estancia prevista.</li>\n                                </ul>\n               
+             </div>\n                        </div>\n                        <div class=\"alert-box\">\n               
+             ⚠️ Las reducciones se aplican sobre el total de habitaciones confirmadas.<br><br>\n                       
+     ⚠️ <strong>No shows y salidas anticipadas:</strong> 100% de gastos.\n                        </div>\n             
+       </div>\n                </div>\n\n                <!-- Regla 4 -->\n                <div class=\"rule-card\">\n 
+                   <div class=\"rule-header\">\n                        <div class=\"rule-number\">4</div>\n           
+             <h3 class=\"rule-title\">Bloqueo (Release)</h3>\n                    </div>\n                    <div 
+class=\"rule-content\">\n                        Los bloqueos provisionales podrán liberarse, previo aviso por 
+escrito, con un plazo de 24 horas en caso de recibir otra solicitud en firme para las mismas fechas, salvo 
+confirmación mediante depósito.\n                    </div>\n                </div>\n\n                <!-- Regla 5 
+-->\n                <div class=\"rule-card\">\n                    <div class=\"rule-header\">\n                      
+  <div class=\"rule-number\">5</div>\n                        <h3 class=\"rule-title\">Rooming List</h3>\n             
+       </div>\n                    <div class=\"rule-content\">\n                        Deberá enviarse <strong>7 
+días antes</strong> de la llegada.<br><br>\n                        Cambios posteriores sujetos a disponibilidad.\n    
+                </div>\n                </div>\n\n                <!-- Regla 6 -->\n                <div 
+class=\"rule-card\">\n                    <div class=\"rule-header\">\n                        <div 
+class=\"rule-number\">6</div>\n                        <h3 class=\"rule-title\">Servicios de Restauración (F&B)</h3>\n 
+                   </div>\n                    <div class=\"rule-content\">\n                        <ul>\n            
+                <li>Menú único por servicio para todo el grupo.</li>\n                            <li>Envío de menús y 
+horarios previstos mínimo <strong>7 días antes</strong>.</li>\n                        </ul>\n                        
+<div class=\"alert-box\">\n                            ⚠️ <strong>Excepciones</strong> solo por alergias o 
+intolerancias comunicadas previamente.<br><br>\n                            ⚠️ La falta de comunicación en plazo podrá 
+limitar la operativa del servicio o implicar ajustes por parte del hotel.\n                        </div>\n            
+        </div>\n                </div>\n\n                <!-- Regla 7 -->\n                <div 
+class=\"rule-card\">\n                    <div class=\"rule-header\">\n                        <div 
+class=\"rule-number\">7</div>\n                        <h3 class=\"rule-title\">Responsabilidad del Grupo</h3>\n       
+             </div>\n                    <div class=\"rule-content\">\n                        El cliente será 
+responsable del comportamiento del grupo y de cualquier daño ocasionado en las instalaciones del hotel.\n              
+      </div>\n                </div>\n\n                <!-- Regla 8 -->\n                <div class=\"rule-card\">\n  
+                  <div class=\"rule-header\">\n                        <div class=\"rule-number\">8</div>\n            
+            <h3 class=\"rule-title\">Aceptación y Validez</h3>\n                    </div>\n                    <div 
+class=\"rule-content\">\n                        <ul>\n                            <li>Todas las solicitudes están 
+sujetas a disponibilidad en el momento de la confirmación.</li>\n                            <li>La confirmación de la 
+reserva implica la aceptación íntegra de las presentes condiciones.</li>\n                        </ul>\n              
+      </div>\n                </div>\n\n            </div> <!-- Fin de rules-grid -->\n        </div>\n\n        <div 
+class=\"support-note\">\n            🌟 Cada gran grupo que recibimos es fruto de vuestra excelente gestión. \n        
+    Gracias por aplicar estas condiciones con rigor y profesionalidad; vuestro esfuerzo y atención al detalle son la 
+clave para el éxito de nuestro hotel. ¡Gran trabajo, equipo!\n        </div>\n    </div>\n</div>",
+data.js:622:    "content": "<!-- CABECERA (Agrupada como en image_544a21.png) -->\n <div class=\"title-row\">\n  <img 
+alt=\"Icono Noche\" class=\"title-thumb\" src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEieLnulExAJyj
+My0CvR-RZtsSSdEV4gWKsmm0QdSdyyz3adHKGEDFw6sZTp0xgQdLN2i3NdkRYo7ZRY5fgbjEicraxWmhOuJI5ua1cq9c-m-HDlfjVqh5yBtfwdhLfGYKvGR
+NWmaPUw0mHfQytK0wMXlYRcljHYrfLaooi7cJu7BuFYp3WDvd1SVDpsY5o/w200-h133/image.png\" />\n  <h1>Turno de Noche</h1>\n 
+</div>\n <hr class=\"title-underline\" />\n  <div class=\"subtitle-meta\">Área Operativa · Recepción | Manual Maestro 
+de Procedimientos</div>\n\n <!-- CHIPS DE CONTROL -->\n <div class=\"chips\">\n  <span class=\"chip chip--ok\">✅ 
+Integridad Contable</span>\n  <span class=\"chip chip--info\">🛡️ Seguridad Nocturna</span>\n  <span class=\"chip 
+chip--warn\">🕓 Cierre antes 04:00 AM</span>\n </div>\n\n <!-- INTRODUCCIÓN (Con icono 🧭 como en image_545146.png) 
+-->\n <div class=\"section\">\n  <h2>🧭 Introducción al Turno</h2>\n  <p>\n   El turno de noche garantiza la 
+continuidad operativa del hotel cuando la actividad es mínima y la seguridad es prioritaria. Durante este período se 
+realizan las rondas y controles de accesos, se atienden llegadas tardías y urgencias, y se prepara la auditoría y el 
+cierre administrativo del día. Además, se dejan listados y documentación para los primeros equipos de la mañana, 
+anticipando salidas tempranas e incidencias pendientes. El recepcionista de noche combina discreción, criterio y 
+capacidad de respuesta para mantener el servicio sin interrupciones y el hotel en perfecto estado para el nuevo día.\n 
+ </p>\n </div>\n\n  <!-- HORARIO (Diseño card como en image_545146.png) -->\n  <div class=\"card\">\n    <h2>⏰ Horario 
+y Puntualidad</h2>\n    <p>\n      El horario habitual es de <strong>23:00 a 07:00</strong>. Se exige puntualidad 
+absoluta, llegando entre las <strong>22:50 y 22:55</strong> para realizar un relevo exhaustivo de novedades y comenzar 
+la activación de los protocolos de seguridad. La operatividad debe ser plena desde el primer minuto para cubrir 
+<i>late check-ins</i>.\n    </p>\n  </div>\n\n  <div class=\"toolbar\">\n  <a class=\"tool\" href=\"#fase1\"><b>Antes 
+del cierre</b></a>\n  <a class=\"tool\" href=\"#fase2\"><b>Después del cierre</b></a>\n </div>\n\n <!-- FASE 1 -->\n 
+<div class=\"phase-banner phase--before\" id=\"fase1\">FASE 1 · ANTES DEL CIERRE (PRE-AUDITORÍA)</div>\n\n  <section 
+class=\"section\">\n    <h2>📝 Inicio del Turno: Revisión y Preparación</h2>\n    <p>Al inicio del turno se debe 
+actualizar la información relevante y dejar preparada la jornada para evitar incidencias.</p>\n    <ul 
+class=\"list\">\n      <li>Revisar la agenda de novedades junto al turno anterior para identificar eventos o 
+solicitudes especiales.</li>\n      <li>Comprobar posibles incidencias pendientes de seguimiento.</li>\n      
+<li>Confirmar el inventario real: revisar rack, inventory y restricciones (bloqueos, FdS) para una visual global 
+fiable.</li>\n      <li>Comprobar las reservas pendientes de llegada y verificar el estado de pagos/garantías 
+asociados.</li>\n    </ul>\n  </section>\n\n  <section class=\"section\">\n    <h2>🛬 Check-in de llegada 
+tardía</h2>\n    <p>Discreción + agilidad = mejor experiencia nocturna.</p>\n    <ul class=\"list\">\n      
+<li>Verificar reserva, identidad y método de pago/garantía siempre.</li>\n      <li>Registrar parte de viajeros y 
+codificar llave.</li>\n      <li>Informar horarios y normas esenciales con brevedad (desayuno, silencio).</li>\n    
+</ul>\n    <div class=\"postit-attn\">\n      <p class=\"title\">⚠️ Atención Walk-ins:</p>\n      <p class=\"hint\">Si 
+hay entradas sin reserva, exigir identificación y pago/garantía obligatorio antes de entregar llave. Valorar admisión 
+(embriaguez o riesgo).</p>\n    </div>\n  </section>\n\n  <section class=\"section\">\n    <h2>🧐📄 Revisión de 
+Reservas</h2>\n    <p>Imprescindibles antes de lanzar el cierre administrativo.</p>\n    <ul class=\"list\">\n      
+<li><strong>Listado de llegadas (PMS ↔ Channel):</strong>\n        <ul class=\"sub\">\n          <li>Tipos de 
+habitación y asignaciones correctas.</li>\n          <li>Tarifas, régimen contratado y extras validados.</li>\n        
+  <li>Estado: activas / inactivas y cambios de última hora sincronizados.</li>\n        </ul>\n      </li>\n    
+</ul>\n    <div style=\"display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;\">\n        <a class=\"xref\" 
+href=\"https://procedimientoshotelguadiana.blogspot.com/2025/07/revision-de-reservas-guadiana_10.html\" 
+target=\"_blank\">Protocolo Revisión Reservas</a>\n        <a class=\"xref\" 
+href=\"https://procedimientoshotelguadiana.blogspot.com/2025/08/53-salida-y-cierre-de-grupos.html\" 
+target=\"_blank\">Gestión y cierre de grupos</a>\n    </div>\n  </section>\n\n  <section class=\"section\">\n    
+<h2>🚫 No Show</h2>\n    <ul class=\"list\">\n      <li>Comprobar documentación en Channel/WEB (condiciones, release, 
+garantía).</li>\n      <li>Cargar no shows <strong>antes</strong> del cierre según política de tarifa.</li>\n      
+<li>Si es necesario, informar en la extranet de la OTA correspondiente (motivo/soporte).</li>\n    </ul>\n  
+</section>\n\n  <section class=\"section\">\n    <h2>🔑 Cierre de Caja</h2>\n    <div class=\"subbox\">\n      <h3>📋 
+Procedimiento para el cierre de caja</h3>\n      <ol class=\"list\">\n        <li>Sacar el listado de todos los 
+movimientos del turno (ingresos, devoluciones, deducciones, etc.).</li>\n        <li>Realizar el <strong>cierre del 
+TPV</strong> y graparlo al listado.</li>\n        <li>Adjuntar tickets de tarjetas y cargos a habitaciones firmados 
+por el cliente.</li>\n        <li>Preparar sobre firmado con efectivo y documentación. Depositar en caja de 
+seguridad.</li>\n        <li><strong>Validación:</strong> Confirmar que efectivo, TPV y pagos virtuales cuadran 
+perfectamente con el PMS.</li>\n      </ol>\n    </div>\n    <div class=\"warn-box\">⚠️ NORMA INVIOLABLE: Está 
+terminantemente PROHIBIDO coger dinero de caja, incluso dejando un vale.</div>\n    <div class=\"postit-attn\">\n      
+  <p class=\"title\">🔔 Atención:</p>\n        <p class=\"hint\">Después de cuadrar la caja, realiza el cierre 
+inmediatamente. Cualquier movimiento posterior exigirá nuevos listados.</p>\n    </div>\n  </section>\n\n  <div 
+class=\"card\">\n    <h2>✅ Checklist antes del Cierre</h2>\n    <ul class=\"ticklist\" id=\"checklist-f1\">\n      <li 
+class=\"tick\"><input data-phase=\"before\" id=\"a1\" type=\"checkbox\"><label for=\"a1\">Se revisó la agenda de 
+novedades junto al turno anterior.</label><span class=\"status\">OK</span><span 
+class=\"pill-pend\">Pendiente</span></li>\n      <li class=\"tick\"><input data-phase=\"before\" id=\"a2\" 
+type=\"checkbox\"><label for=\"a2\">Se confirmó el inventario real (Rack, Inventory y Bloqueos).</label><span 
+class=\"status\">OK</span><span class=\"pill-pend\">Pendiente</span></li>\n      <li class=\"tick\"><input 
+data-phase=\"before\" id=\"a3\" type=\"checkbox\"><label for=\"a3\">Se confirmó que no quedan llegadas y los No Show 
+fueron cargados.</label><span class=\"status\">OK</span><span class=\"pill-pend\">Pendiente</span></li>\n      <li 
+class=\"tick\"><input data-phase=\"before\" id=\"a4\" type=\"checkbox\"><label for=\"a4\">Caja cerrada, cuadrada y 
+sobre depositado correctamente.</label><span class=\"status\">OK</span><span 
+class=\"pill-pend\">Pendiente</span></li>\n    </ul>\n    <div class=\"phase-confirm\" id=\"confirm-antes\">\n      
+<div class=\"confirm-row\">\n        <input type=\"checkbox\" id=\"ok-antes\" disabled><label 
+for=\"ok-antes\"><b>Confirmación ANTES del cierre:</b> todos los puntos completados.</label>\n        <span 
+class=\"tag\" id=\"tag-antes\" hidden>✓ Fase lista</span>\n      </div>\n    </div>\n    <div id=\"ready-banner\" 
+class=\"ready-banner\">✔ Pudiste realizar el cierre administrativo.</div>\n  </div>\n\n <!-- FASE 2 -->\n <div 
+class=\"phase-banner phase--after\" id=\"fase2\">FASE 2 · DESPUÉS DEL CIERRE (POST-AUDITORÍA)</div>\n\n  <section 
+class=\"section\">\n    <h2>📤 Preparación del nuevo día</h2>\n    <p>Deja la operativa lista para el equipo de 
+mañana: imprime y ordena listados, programa solicitudes especiales (despertadores, desayunos) y redacta el parte de 
+incidencias.</p>\n    \n    <div class=\"subbox\">\n      <h3>🧾 Facturación a crédito (TTOO / Empresas)</h3>\n      
+<ul class=\"list\">\n        <li>Imprimir todas las facturas y documentos de TTOO/Empresas del día.</li>\n        
+<li>Comprobar n.º de bono, comisiones, tarifa y localizador FE antes de adjuntar soportes.</li>\n      </ul>\n    
+</div>\n\n    <div class=\"subbox\">\n      <h3>📨 Listados por departamento</h3>\n      <ul class=\"list\">\n        
+<li><strong>Gobernanta:</strong> Imprimir Listado de Situación (Opción: Listado Ancho) desde hab 0 a última sin 
+filtros.</li>\n        <li><strong>F&B / MesaChef:</strong> Mantener activo el programa MesaChef. Imprimir listado de 
+pensiones clientes. Anotar a mano previsión de desayunos y alérgenos.</li>\n        <li><strong>SPA Zenith 
+Manager:</strong> Realizar comprobación de todas las reservas de SPA activas en el programa Zenith.</li>\n      
+</ul>\n    </div>\n    <div class=\"img-box\">\n        <img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl
+/AVvXsEgKOO3GfxZtmFnLJSCXcZBrw_jhHsu16LQV8kzYorJ0kUq-zfJfOWSJrT_V5bgtCh7lioPkYob8nqwNDfGqxTcGDr6-2gy5BiEsV77B8krO8C5VL2
+j4fazyo9fX3fCPbRU-YQwELNL7eLmJP-aiuq9chygL2ssZ_7fgIBTPog8IbGB3dWfgYQ_UDBJkyOzw/s848/HOSPE.png\" alt=\"HOSPE\">\n       
+ <div class=\"img-caption\">Confirmar sincronización legal MR-HOSPE sin errores antes de las 04:00 AM.</div>\n    
+</div>\n  </section>\n\n  <div class=\"card\">\n    <h2>✅ Checklist después del Cierre</h2>\n    <ul 
+class=\"ticklist\" id=\"checklist-f2\">\n      <li class=\"tick\"><input data-phase=\"after\" id=\"p1\" 
+type=\"checkbox\"><label for=\"p1\">Se imprimieron listados para Gobernanta (Ancho) anotando entradas 
+nuevas.</label><span class=\"status\">OK</span><span class=\"pill-pend\">Pendiente</span></li>\n      <li 
+class=\"tick\"><input data-phase=\"after\" id=\"p2\" type=\"checkbox\"><label for=\"p2\">MesaChef revisado y previsión 
+de F&B entregada a cocina/sala.</label><span class=\"status\">OK</span><span 
+class=\"pill-pend\">Pendiente</span></li>\n      <li class=\"tick\"><input data-phase=\"after\" id=\"p3\" 
+type=\"checkbox\"><label for=\"p3\">Zenith Manager: Reservas de SPA comprobadas y activas.</label><span 
+class=\"status\">OK</span><span class=\"pill-pend\">Pendiente</span></li>\n      <li class=\"tick\"><input 
+data-phase=\"after\" id=\"p4\" type=\"checkbox\"><label for=\"p4\">MR-HOSPE verificado sin errores y LOG CHANNEL 
+revisado.</label><span class=\"status\">OK</span><span class=\"pill-pend\">Pendiente</span></li>\n      <li 
+class=\"tick\"><input data-phase=\"after\" id=\"p5\" type=\"checkbox\"><label for=\"p5\">Facturas a crédito impresas 
+con bonos y localizadores FE revisados.</label><span class=\"status\">OK</span><span 
+class=\"pill-pend\">Pendiente</span></li>\n    </ul>\n    <div class=\"phase-confirm\" id=\"confirm-despues\">\n      
+<div class=\"confirm-row\">\n        <input type=\"checkbox\" id=\"ok-despues\" disabled><label 
+for=\"ok-despues\"><b>Confirmación DESPUÉS del cierre:</b> operativa lista.</label>\n        <span class=\"tag\" 
+id=\"tag-despues\" hidden>✓ Listo</span>\n      </div>\n    </div>\n    <div id=\"final-banner\" 
+class=\"ready-banner\" style=\"background:#ecfdf5; border-color:#bbf7d0; color:#065f46;\">🎉 ¡Excelente trabajo! Turno 
+auditado y cerrado. Que descanses.</div>\n  </div>\n\n <!-- PROTOCOLOS DE EMERGENCIA -->\n <div class=\"section\">\n  
+<h2>🚨 Protocolos de emergencia</h2>\n  <div class=\"emergency-grid\">\n   <section class=\"proto-card proto--fire\">\n
+    <div class=\"proto-head\"><span class=\"proto-badge\">🔥 Incendio</span><h3>Actuación Inmediata</h3></div>\n    
+<div class=\"proto-body\">\n     <ol class=\"steps\">\n      <li>Confirmar foco y aviso 112 (dirección, planta, 
+zona).</li>\n      <li>Evacuar por escaleras (nunca ascensores).</li>\n      <li>Aislar fuego cerrando puertas. Usar 
+extintor si es seguro.</li>\n     </ol>\n          <a class=\"xref\" 
+href=\"https://procedimientoshotelguadiana.blogspot.com/2025/08/73-actuacion-ante-incendios.html\" 
+target=\"_blank\">Protocolo Incendios</a>\n    </div>\n   </section>\n   <section class=\"proto-card proto--med\">\n   
+ <div class=\"proto-head\"><span class=\"proto-badge\">🩺 Médica</span><h3>Aviso y Primeros Auxilios</h3></div>\n    
+<div class=\"proto-body\">\n     <ol class=\"steps\">\n      <li>Valorar consciencia. Avisar 112 si hay riesgo 
+vital.</li>\n      <li>Proteger intimidad y acompañar hasta llegada sanitarios.</li>\n     </ol>\n          <a 
+class=\"xref\" 
+href=\"https://procedimientoshotelguadiana.blogspot.com/2025/08/74-primeros-auxilios-y-emergencias.html\" 
+target=\"_blank\">Protocolo Médico</a>\n    </div>\n   </section>\n  </div>\n </div>\n\n  <div class=\"final-note\">\n 
+   <p>\n      Es fundamental seguir este protocolo rigurosamente. Mantener la consistencia en nuestros procesos 
+nocturnos garantiza la integridad contable, la seguridad absoluta de nuestros huéspedes y un relevo impecable.\n    
+</p>\n  </div>\n\n <!-- BARRA DE ACCIÓN FIJA (Basada en image_54bb19.png) -->\n <div class=\"actionbar\" 
+id=\"actionbar\">\n    <div class=\"status-wrap\">\n        <div id=\"msg-cierre\" class=\"status-msg\">\n            
+<img src=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNC
+Igdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZWY0NDQ0Ij48cGF0aCBkPSJNMTIgMmExMCAxMCAwIDEgMCAxMCAxMEExMCAxMCAwIDAgMCAxMiAyem01I
+DExSDd2LTJoMTB2MnoiLz48L3N2Zz4=\" width=\"20\" height=\"20\" alt=\"Alerta\">\n            <span>Faltan puntos críticos 
+(Fase 1).</span>\n        </div>\n        <a id=\"go-first\" href=\"#\" class=\"chipPend\">Ir al primero</a>\n    
+</div>\n  <button id=\"btn-cierre\" class=\"btn\" disabled>Realizar Cierre de Día</button>\n </div>\n\n<script>\n // 
+Fecha actual (js-date-short)\n (function(){\n  const months = 
+[\"Ene\",\"Feb\",\"Mar\",\"Abr\",\"May\",\"Jun\",\"Jul\",\"Ago\",\"Sep\",\"Oct\",\"Nov\",\"Dic\"];\n  const d = new 
+Date();\n  document.querySelectorAll('.js-date-short').forEach(el=> el.textContent = 
+`${d.getDate()}/${months[d.getMonth()]}/${d.getFullYear()}`);\n })();\n\n const boxes = 
+document.querySelectorAll('input[type=\"checkbox\"][data-phase]');\n  const btn = 
+document.getElementById('btn-cierre');\n  const msg = document.getElementById('msg-cierre');\n  const goFirst = 
+document.getElementById('go-first');\n  const final = document.getElementById('final-banner');\n\n  function update() 
+{\n    const f1 = Array.from(document.querySelectorAll('input[data-phase=\"before\"]'));\n    const f1All = f1.every(b 
+=> b.checked);\n    document.getElementById('ok-antes').checked = f1All;\n    
+document.getElementById('tag-antes').hidden = !f1All;\n    
+document.getElementById('confirm-antes').classList.toggle('done', f1All);\n\n    const f2 = 
+Array.from(document.querySelectorAll('input[data-phase=\"after\"]'));\n    const f2All = f2.every(b => b.checked);\n   
+ document.getElementById('ok-despues').checked = f2All;\n    document.getElementById('tag-despues').hidden = !f2All;\n 
+   document.getElementById('confirm-despues').classList.toggle('done', f2All);\n\n    if (f1All) {\n      btn.disabled 
+= false;\n      msg.innerHTML = \"✅ Fase 1 lista. Auditoría autorizada.\";\n      msg.style.color = \"#065f46\";\n     
+ goFirst.style.display = 'none';\n      document.getElementById('ready-banner').classList.add('show');\n    } else {\n 
+     btn.disabled = true;\n      msg.innerHTML = '<img src=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53
+My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZWY0NDQ0Ij48cGF0aCBkPSJNMTIgMmE
+xMCAxMCAwIDEgMCAxMCAxMEExMCAxMCAwIDAgMCAxMiAyem01IDExSDd2LTJoMTB2MnoiLz48L3N2Zz4=\" width=\"20\" 
+height=\"20\"><span>Faltan puntos críticos (Fase 1).</span>';\n      msg.style.color = \"#9b1c1c\";\n      
+goFirst.style.display = 'inline-block';\n      document.getElementById('ready-banner').classList.remove('show');\n    
+}\n\n    if(f2All) final.classList.add('show'); else final.classList.remove('show');\n\n    boxes.forEach(b => {\n     
+ const parent = b.closest('.tick');\n      if (b.checked) {\n        parent.classList.remove('pending');\n        
+parent.style.opacity = \"0.7\";\n      } else {\n        parent.classList.add('pending');\n        
+parent.style.opacity = \"1\";\n      }\n    });\n\n    const first = Array.from(boxes).find(b => !b.checked);\n    if 
+(first) {\n      goFirst.onclick = e => { e.preventDefault(); first.scrollIntoView({behavior:'smooth', 
+block:'center'}); };\n    }\n  }\n\n  boxes.forEach(cb => cb.addEventListener('change', update));\n  update();\n\n  
+btn.addEventListener('click', () => {\n    if(!btn.disabled) alert(\"✅ Auditoría nocturna confirmada. Iniciando cierre 
+operativo.\");\n  });\n</script>",
+data.js:648:    "content": "<!-- PROTOCOLO RECEPCIÓN: SITUACIONES ESPECIALES Y EMERGENCIAS, CON FRASES MODELO VISIBLES 
+-->\n<div style=\"background:#f7faff;border-radius:1.3rem;box-shadow:0 8px 32px #00aef017;font-family:'Segoe 
+UI',Arial,sans-serif;max-width:980px;margin:2.3rem auto;\">\n  <!-- CABECERA -->\n  <div style=\"padding:2.3rem 2.3rem 
+1rem;display:flex;align-items:center;gap:2.1rem;background:linear-gradient(90deg,#d7eafd 80%,#b0ddff 
+100%);border-radius:1.3rem 1.3rem 0 0;\">\n    <img src=\"https://cdn-icons-png.flaticon.com/512/753/753345.png\" 
+alt=\"Emergencia\" style=\"width:82px;height:82px;background:white;border-radius:100%;box-shadow:0 2px 12px 
+#00aeef18;padding:8px;\">\n    <div>\n      <h1 style=\"font-size:2.25rem;margin:0;color:#025ca4;\">Protocolo de 
+Actuación<br>en Situaciones Especiales</h1>\n      <div 
+style=\"font-size:1.14rem;color:#0b375a;font-weight:600;margin-top:.18em;\">\n      </div>\n    </div>\n  </div>\n \n  
+<div style=\"padding:2.1rem 2.3rem 2.1rem;\">\n    <div style=\"font-size:1.12rem;background:#e9f5ff;padding:1.1rem 
+1.35rem;border-radius:9px;margin-bottom:1.7rem;\">\n      <b>Objetivo:</b> El personal de recepción debe actuar con 
+rapidez, empatía y precisión ante cualquier emergencia, protegiendo a personas y bienes, y siguiendo el protocolo 
+normativo del hotel.\n    </div>\n    \n    <!-- ROBOS Y HURTOS -->\n    <h2 
+style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">1. Robo o hurto (cliente o instalaciones)</h2>\n    <ul 
+style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Escucha y mantén la calma con el afectado.</li>\n      
+<li>Informa de inmediato a Dirección.</li>\n      <li>Inspecciona la habitación y caja fuerte junto al cliente y dos 
+empleados.</li>\n      <li>Si el objeto no aparece, ayuda al cliente a interponer denuncia. Nunca entregues 
+grabaciones de seguridad a particulares: solo a la policía si lo solicita oficialmente.</li>\n      <li>Registra la 
+incidencia (hora, lugar, detalles, testigos, grabaciones).</li>\n    </ul>\n    <div 
+style=\"background:#e9f8ec;border-left:6px solid #32a852;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Le 
+acompaño a revisar la habitación. Si no localizamos el objeto, le ayudo a tramitar la denuncia”.</span>\n    </div>\n  
+  \n    <!-- FALLECIMIENTO -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">2. Fallecimiento 
+de cliente</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Llama al 112 y a las fuerzas de 
+seguridad. No muevas el cuerpo ni alteres la escena.</li>\n      <li>Acompaña y atiende a los acompañantes con 
+discreción y apoyo emocional.</li>\n      <li>Informa inmediatamente a Dirección.</li>\n      <li>Registra: nombre, 
+hora, circunstancias, para archivo interno y autoridades.</li>\n    </ul>\n    <div 
+style=\"background:#f6f6e9;border-left:6px solid #c9c432;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Por 
+favor, mantenga la calma. Los servicios de emergencia han sido avisados y llegarán enseguida”.</span>\n    </div>\n    
+\n    <!-- ACCIDENTES, LESIONES, CAÍDAS -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">3. 
+Accidentes, lesiones o caídas</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Evalúa la 
+gravedad. Si es necesario, llama al 112 y proporciona primeros auxilios básicos si sabes hacerlo.</li>\n      
+<li>Tranquiliza y acompaña al afectado en todo momento. Toma nota de sus datos personales y circunstancias.</li>\n     
+ <li>Señaliza la zona para evitar más accidentes.</li>\n      <li>Informa a Dirección. Registra datos y 
+seguimiento.</li>\n    </ul>\n    <div style=\"background:#e8f1fd;border-left:6px solid #338adf;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Voy 
+a pedir asistencia médica. Por favor, mantenga la calma, ya está todo controlado”.</span>\n    </div>\n    \n    <!-- 
+INTOXICACIONES -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">4. Intoxicaciones 
+alimentarias o químicas</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Llama al 112 e 
+informa a Dirección.</li>\n      <li>No provoques el vómito ni des líquidos si la persona está inconsciente.</li>\n    
+  <li>Lleva al afectado a una zona ventilada y acompáñalo.</li>\n      <li>Registra alimentos o productos implicados 
+si es posible.</li>\n    </ul>\n    <div style=\"background:#f3f1fd;border-left:6px solid #a67fec;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Ya 
+he pedido ayuda médica. Permanezca tranquilo/a, la asistencia está en camino”.</span>\n    </div>\n    \n    <!-- 
+QUEMADURAS Y LESIONES MENORES -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">5. Quemaduras 
+o lesiones menores</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Evalúa el tipo de 
+herida. Lava con agua fría (nunca apliques cremas caseras). Cubre con apósito limpio.</li>\n      <li>Si es grave, 
+avisa a emergencias. Tranquiliza y acompaña al afectado.</li>\n      <li>Registra y comunica a Dirección.</li>\n    
+</ul>\n    <div style=\"background:#ffeceb;border-left:6px solid #fa6565;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Le 
+atenderemos ahora mismo. Si lo considera, llamamos a urgencias”.</span>\n    </div>\n    \n    <!-- INCENDIOS -->\n    
+<h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">6. Incendio</h2>\n    <ul 
+style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Solo intenta apagar el fuego con extintor si es muy 
+pequeño y no hay riesgo personal.</li>\n      <li>Activa la alarma y llama al 112.</li>\n      <li>Evacúa siguiendo 
+rutas señalizadas (señales verdes), prohíbe el uso de ascensores, cierra puertas al salir.</li>\n      <li>Coordina 
+con Dirección y jefe de emergencia.</li>\n      <li>Registra actuación e informa al terminar.</li>\n    </ul>\n    
+<div style=\"background:#fff7e6;border-left:6px solid #ffae3a;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “Por 
+favor, salgan con calma hacia la salida más cercana. No utilicen el ascensor.”</span>\n    </div>\n    \n    <!-- 
+FALLOS TÉCNICOS Y AVERÍAS -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">7. Fallos 
+técnicos o averías</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Llama a mantenimiento y, 
+si es necesario, al servicio técnico externo.</li>\n      <li>Si hay cliente atrapado (ascensor, etc.), mantén la 
+comunicación y espera a profesionales.</li>\n      <li>Informa a Dirección y registra la incidencia.</li>\n      
+<li>Registra la incidencia para posteriores gestiones (seguros, compensaciones, etc.).</li>\n    </ul>\n    <div 
+style=\"background:#d8f6fa;border-left:6px solid #00bac7;padding:1.1em 
+1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      <span 
+style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> “El 
+servicio técnico está en camino. Le mantendré informado hasta que se resuelva”.</span>\n    </div>\n    \n    <!-- 
+DAÑOS POR CLIENTES -->\n    <h2 style=\"color:#0773b8;font-size:1.20rem;margin-bottom:.8em;\">8. Daños ocasionados por 
+clientes</h2>\n    <ul style=\"font-size:1.09rem;margin-bottom:1.3em;\">\n      <li>Informa siempre a Dirección antes 
+de realizar cargos. Documenta el daño con fotos y testimonios.</li>\n      <li>Custodia los objetos dañados si 
+procede. Nunca cobres cargos automáticos sin confirmación por escrito.</li>\n      <li>No efectúes cargos sin 
+consentimiento escrito.</li>\n    </ul>\n    <div style=\"background:#f5eaf7;border-left:6px solid 
+#b77fd7;padding:1.1em 1.3em;margin-bottom:2em;border-radius:10px;display:flex;align-items:center;gap:.85em;\">\n      
+<span style=\"font-size:1.7em;line-height:1;\">💬</span>\n      <span style=\"font-size:1.09em;\"><b>Frase modelo:</b> 
+“Vamos a revisar el incidente y le informaremos antes de generar cualquier cargo”.</span>\n    </div>\n    \n    <!-- 
+CONSEJOS FINALES -->\n    <div style=\"background:#e7f4ff;border-radius:10px;font-size:1.10rem;margin:2.3rem 0 
+0;padding:1.25rem 1.4rem;\">\n      <b>Consejos clave para recepción:</b>\n      <ul style=\"margin-top:.3em;\">\n     
+   <li>Comunica siempre a Dirección y registra todo por escrito (nombres, datos, hora, pruebas).</li>\n        
+<li>Empatía y comunicación clara con clientes afectados.</li>\n        <li>No prometas pagos ni soluciones fuera del 
+protocolo sin autorización.</li>\n        <li>No compartas imágenes de seguridad ni datos personales sin permiso 
+legal.</li>\n        <li>Repasa este protocolo y las señales PCI periódicamente, y participa en simulacros.</li>\n     
+ </ul>\n      <div style=\"color:#026fc9;margin:.7rem 0 0;font-weight:600;\">\n        La prevención y el buen 
+procedimiento protegen a personas y al hotel.<br>\n        <b>Sigue siempre el protocolo y mantén la calma.</b>\n      
+</div>\n    </div>\n  </div>\n</div>",
+data.js:704:    "content": "<div class=\"wrap\">\n\n  <!-- ===== CABECERA: NO TOCAR ===== -->\n  <div 
+class=\"post-header\">\n    <img alt=\"Ilustración Recepción\" class=\"illustration\" src=\"https://blogger.googleuserc
+ontent.com/img/b/R29vZ2xl/AVvXsEg1pU9iTxe9eqrMOr1Gp7Wjc9NlQHL8nFtdUKZrGrLFsePZNjWtuv5k1hZzJhS9wvVZpSDpY2_7oSLt6AROMc95v
+ShDyQJcffEmwo3yegPPs_N_g3u5V9n0G0i2_gTYTxHfzDYs8_rv4q-7zPlA7gTNLlIeCcZgAigW5fyr58-ijjkwbWMrxWnr0Nr2DfCS/s320/ChatGPT%20
+Image%2015%20jun%202025,%2021_40_25.png\" />\n    <div class=\"content\">\n      <p class=\"phrase\">Cualquier error 
+se puede resolver si el trato ha sido impecable</p>\n      <p class=\"phrase\">La mayoría de reseñas negativas no 
+vienen por el fallo, sino por el tono o la actitud percibida</p>\n    </div>\n  </div>\n\n  <!-- ===== META auto ===== 
+-->\n  <div class=\"doc-meta\" role=\"group\" aria-label=\"Metadatos del documento\">\n    <span><b>Última 
+revisión:</b> <span id=\"auto-date-short\">—</span></span>\n    <span><b>Versión:</b> <span 
+id=\"auto-version\">—</span></span>\n    <span class=\"status\"><span class=\"dot green\" aria-hidden=\"true\"></span> 
+🟢 Activo</span>\n    <span><b>Ámbito:</b> Ambos hoteles</span>\n  </div>\n\n  <h1 class=\"title\">🌟 Excelencia en 
+Recepción: Nuestro Protocolo Anti-Reseñas Negativas</h1>\n  <div class=\"soft-line\" aria-hidden=\"true\"></div>\n\n  
+<!-- Navegación -->\n  <nav class=\"doc-nav\" aria-label=\"Índice\">\n    <a href=\"#s0\">🎯 Objetivo</a>\n    <a 
+href=\"#p1\">💳 Pilar 1</a>\n    <a href=\"#p2\">👋 Pilar 2</a>\n    <a href=\"#p3\">🛠️ Pilar 3</a>\n  </nav>\n\n  
+<!-- ===== CONTENIDO (en cards) ===== -->\n  <section class=\"doc-content\" id=\"doc\" 
+data-doc-id=\"prevencion-resenas\" data-version-major=\"1\">\n\n    <div id=\"s0\" class=\"card intro\">\n      
+<p><b>Objetivo:</b> Transformar cada interacción en una experiencia impecable. Los errores de facturación y los 
+malentendidos son el origen de las peores reseñas. ¡Vamos a eliminarlos!</p>\n    </div>\n\n    <div id=\"p1\" 
+class=\"card\">\n      <div class=\"kicker\">💳 Pilar 1: La Cuenta del Huésped — Cero Errores de Cobro</div>\n      
+<p>La precisión en los pagos es el primer paso hacia una estancia sin estrés y una reseña de 5 estrellas.</p>\n\n      
+<h3 id=\"s1\">1) Anticipación: Confirmación Antes de la Llegada</h3>\n      <ul class=\"list\">\n        <li><span 
+class=\"badge ok\">✓</span><span><b>Verificación previa:</b> si la reserva es <b>prepagada</b> o con <b>tarjeta 
+virtual</b> (Booking, Expedia, etc.), confirma que el cargo ha entrado.</span></li>\n        <li><span class=\"badge 
+warn\">!</span><span><b>Regla de oro:</b> nunca pidas un pago si hay duda. Primero consulta 
+internamente.</span></li>\n      </ul>\n\n      <h3 id=\"s2\">2) Check-in impecable: Factura Anticipada 
+obligatoria</h3>\n      <ul class=\"list\">\n        <li><span class=\"badge ok\">✓</span><span><b>Método único:</b> 
+si se paga a la llegada, <b>SIEMPRE</b> con <b>Factura Anticipada</b> en el PMS.</span></li>\n        <li><span 
+class=\"badge err\">✕</span><span><b>Prohibido:</b> cobros manuales o “ya facturamos luego”. Solo la anticipada cierra 
+y vincula bien la cuenta.</span></li>\n      </ul>\n\n      <h3 id=\"s3\">3) Manejo de cambios: zona de alto 
+riesgo</h3>\n      <ul class=\"list\">\n        <li><span class=\"badge warn\">!</span><span><b>Alerta:</b> tras 
+anticipada, cambiar titular, traspasar cargos o modificar régimen/noches puede desajustar la cuenta.</span></li>\n     
+   <li><span class=\"badge warn\">!</span><span><b>Riesgo:</b> el cobro puede “desaparecer” o el PMS marcar la cuenta 
+como <b>pendiente</b>, provocando <b>doble cobro</b> en check-out.</span></li>\n        <li><span class=\"badge 
+ok\">✓</span><span><b>Acción:</b> revisa la cuenta tras cualquier cambio. Si hay inconsistencia, emite nueva 
+<b>Factura Anticipada</b>. Si el sistema está bien, no cargará de nuevo; si pide cargo, el anterior se desvinculó y 
+hay que resolverlo.</span></li>\n      </ul>\n    </div>\n\n    <div id=\"p2\" class=\"card\">\n      <div 
+class=\"kicker\">👋 Pilar 2: La Despedida Estelar — Check-out sin sorpresas</div>\n      <h3 id=\"s4\">4) Preparación 
+y verificación final</h3>\n      <ul class=\"list\">\n        <li><span class=\"badge ok\">✓</span><span><b>Revisión 
+proactiva:</b> repasa la cuenta antes de que el huésped baje.</span></li>\n        <li><span class=\"badge 
+ok\">✓</span><span><b>Verifica cualquier pendiente</b> antes de decir nada. Si es error nuestro o del PMS, <b>disculpa 
+amable</b> y corrige.</span></li>\n      </ul>\n\n      <h3 id=\"s5\">5) Tono y profesionalidad inquebrantables</h3>\n 
+     <p><b>La calma gana:</b> incluso si el cliente está alterado o afirma que ha pagado, no dudes de su palabra de 
+forma directa.</p>\n      <div class=\"card\" style=\"background:#f8fafc; border-color:#e5e7eb; margin:8px 0 6px\">\n  
+      <p style=\"margin:0\"><b>Respuesta estándar:</b> 💬 “Un segundo por favor, lo reviso en el sistema. Le confirmo 
+en un momento.”</p>\n      </div>\n      <p><b>Prohibido:</b> ironía, nerviosismo o impaciencia. Somos la cara del 
+hotel.</p>\n    </div>\n\n    <div id=\"p3\" class=\"card\">\n      <div class=\"kicker\">🛠️ Pilar 3: Gestión de 
+Incidentes — De queja a solución</div>\n\n      <h3 id=\"s6\">6) Respuesta inmediata a fallos técnicos</h3>\n      <ul 
+class=\"list\">\n        <li><span class=\"badge ok\">✓</span><span><b>Prioridad absoluta:</b> si hay problema de 
+agua, limpieza o técnico, el tiempo es esencial.</span></li>\n        <li><span class=\"badge 
+ok\">✓</span><span><b>Acción:</b> anotar y comunicar a Mantenimiento o Pisos de inmediato.</span></li>\n        
+<li><span class=\"badge ok\">✓</span><span><b>Agradecimiento:</b> “Gracias por informarnos; lo revisamos ahora mismo y 
+le avisamos cuando esté solucionado.”</span></li>\n      </ul>\n\n      <h3 id=\"s7\">7) Documentación: nuestra 
+memoria imbatible</h3>\n      <ul class=\"list\">\n        <li><span class=\"badge ok\">✓</span><span><b>Registro 
+obligatorio:</b> dejar por escrito <b>quién</b> atendió, <b>qué</b> ocurrió y <b>cómo</b> se resolvió.</span></li>\n   
+     <li><span class=\"badge ok\">✓</span><span><b>Poder de los datos:</b> nos permite responder con hechos si aparece 
+una reseña negativa.</span></li>\n      </ul>\n      <p>\n        <a class=\"btn\" target=\"_blank\" 
+rel=\"noopener\"\n           href=\"https://forms.office.com/pages/responsepage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAA
+AAAO__Rak1htURTFUNVVET0ZZVUhWVU9KSFk1TlFGMVNSTC4u&origin=lprLink&route=shorturl\">\n          Registrar incidente · 
+Formulario\n        </a>\n      </p>\n    </div>\n\n    <div class=\"card intro\" style=\"margin-top:10px\">\n      ✨ 
+<b>Recuerda:</b> un cobro correcto, una disculpa sincera y una gestión rápida convierten un 2★ en un 5★.\n    </div>\n 
+ </section>\n\n  <!-- Pie visual unificado -->\n  <hr class=\"doc-end-rule\" />\n  <div 
+class=\"doc-end-space\"></div>\n</div>\n\n<!-- Lightbox -->\n<div class=\"lightbox\" id=\"lightbox\" 
+aria-modal=\"true\" role=\"dialog\" aria-label=\"Imagen ampliada\">\n  <button class=\"close\" 
+aria-label=\"Cerrar\">Cerrar ✕</button>\n  <img alt=\"\" src=\"\" />\n</div>\n\n<!-- Scripts: fecha corta + versión 
+auto + zoom -->\n<script>\n(function(){\n  // Fecha corta: 04/Oct/25 (Europe/Madrid)\n  try{\n    const el = 
+document.getElementById('auto-date-short');\n    if(el){\n      const now = new Date();\n      const day = 
+String(now.getDate()).padStart(2,'0');\n      const months = 
+[\"Ene\",\"Feb\",\"Mar\",\"Abr\",\"May\",\"Jun\",\"Jul\",\"Ago\",\"Sep\",\"Oct\",\"Nov\",\"Dic\"];\n      const mon = 
+months[now.getMonth()];\n      const yy = String(now.getFullYear()).slice(-2);\n      el.textContent = 
+`${day}/${mon}/${yy}`;\n    }\n  }catch(e){}\n\n  // Versión automática (mayor en data-version-major, subversión por 
+cambios locales)\n  try{\n    const host = document.querySelector('.doc-content');\n    const major = 
+Number(host?.dataset.versionMajor || 1);\n    const docId = host?.dataset.docId || location.pathname || 'doc';\n    
+const key = `docver:${docId}`;\n    const keyDigest = `docver:${docId}:digest`;\n\n    const txt = (host?.innerText || 
+'').replace(/s+/g,' ').trim();\n    let hash = 5381; for(let i=0;i<txt.length;i++){ hash=((hash<<5)+hash) + 
+txt.charCodeAt(i) }\n    const digest = (hash>>>0).toString(16);\n\n    const lastDigest = 
+localStorage.getItem(keyDigest);\n    let minor = Number(localStorage.getItem(key) || '0');\n\n    if(!lastDigest){ 
+minor = Math.max(minor,1); localStorage.setItem(key, String(minor)); localStorage.setItem(keyDigest, digest); }\n    
+else if(lastDigest !== digest){ minor = Math.max(minor+1,1); localStorage.setItem(key, String(minor)); 
+localStorage.setItem(keyDigest, digest); }\n\n    const verEl = document.getElementById('auto-version');\n    
+if(verEl) verEl.textContent = `${major}.${minor}`;\n  }catch(e){\n    const verEl = 
+document.getElementById('auto-version');\n    if(verEl) verEl.textContent = '1.1';\n  }\n\n  // Lightbox\n  try{\n    
+const lb = document.getElementById('lightbox');\n    const lbImg = lb.querySelector('img');\n    const closeBtn = 
+lb.querySelector('.close');\n\n    document.addEventListener('click',(e)=>{\n      const img = 
+e.target.closest('img.zoomable');\n      if(img){ e.preventDefault(); lbImg.src = img.src; lb.classList.add('open'); 
+}\n      if(e.target === lb || e.target === closeBtn){ lb.classList.remove('open'); lbImg.src=''; }\n    });\n    
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ 
+lb.classList.remove('open'); lbImg.src=''; } });\n  }catch(e){}\n})();\n</script>",
+
+

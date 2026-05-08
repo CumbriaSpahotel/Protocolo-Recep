@@ -35,6 +35,21 @@ const upload = multer({
 app.use(cors());
 app.use(express.json({limit: '50mb'}));
 
+// Cargar variables de entorno desde .env si existe
+function loadEnv() {
+    const envPath = path.join(__dirname, '.env');
+    if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf-8');
+        envContent.split('\n').forEach(line => {
+            const [key, ...valueParts] = line.split('=');
+            if (key && valueParts.length > 0) {
+                process.env[key.trim()] = valueParts.join('=').trim();
+            }
+        });
+    }
+}
+loadEnv();
+
 // Define API routes FIRST, then static files to avoid path collisions
 app.post('/api/save', (req, res) => {
     try {
@@ -42,8 +57,6 @@ app.post('/api/save', (req, res) => {
         
         // ====================================================================
         // CRITICAL: Read EXISTING data.js first to preserve data not being sent.
-        // The browser only sends what it's updating (e.g. cloudConfig).
-        // We must NOT replace other sections with empty defaults.
         // ====================================================================
         let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [] };
         
@@ -51,9 +64,7 @@ app.post('/api/save', (req, res) => {
         if (fs.existsSync(dataFilePath)) {
             try {
                 const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
-                // Parse each variable from the existing file using regex
                 const extractVar = (varName) => {
-                    // Match: var/const varName = <JSON>;
                     const regex = new RegExp(`(?:var|const|let)\\s+${varName}\\s*=\\s*([\\s\\S]*?);\\s*(?:(?:var|const|let)\\s|$)`, 'm');
                     const match = fileContent.match(regex);
                     if (match && match[1]) {
@@ -67,29 +78,54 @@ app.post('/api/save', (req, res) => {
                 existing.home = extractVar('home_config') || {};
                 existing.cloud = extractVar('cloud_config') || { scriptUrl: '', sheetId: '', geminiApiKey: '' };
                 existing.menus = extractVar('menus_data') || [];
-                console.log(`📖 Datos existentes leídos: ${existing.protocols.length} protocolos, ${existing.channels.length} canales`);
             } catch (parseErr) {
-                console.warn('⚠️ No se pudo parsear data.js existente, se usarán valores del request:', parseErr.message);
+                console.warn('⚠️ Error parseando data.js:', parseErr.message);
             }
         }
         
-        // Merge: use request data if provided (even if empty), otherwise keep existing
-        // We only fallback if the property is UNDEFINED (missing from payload), NOT if it's empty [] or {}
         const isSet = (val) => val !== undefined && val !== null;
-        
         const channels = isSet(data.channelsConfig) ? data.channelsConfig : existing.channels;
         const protocols = isSet(data.protocols) ? data.protocols : existing.protocols;
         const nav = isSet(data.navConfig) ? data.navConfig : existing.nav;
         const home = isSet(data.homeConfig) ? data.homeConfig : existing.home;
         const menus = isSet(data.menusConfig) ? data.menusConfig : existing.menus;
         
-        // Cloud config is special: always merge field-by-field so we don't lose the API key
+        // Cloud config merge
         const cloud = { ...existing.cloud };
         if (data.cloudConfig) {
             if (data.cloudConfig.scriptUrl !== undefined) cloud.scriptUrl = data.cloudConfig.scriptUrl;
             if (data.cloudConfig.sheetId !== undefined) cloud.sheetId = data.cloudConfig.sheetId;
-            if (data.cloudConfig.geminiApiKey !== undefined) cloud.geminiApiKey = data.cloudConfig.geminiApiKey;
+            
+            // SECURITY: If geminiApiKey is provided, save it to .env, NOT data.js
+            if (data.cloudConfig.geminiApiKey !== undefined && data.cloudConfig.geminiApiKey.trim() !== "") {
+                const newKey = data.cloudConfig.geminiApiKey.trim();
+                const envPath = path.join(__dirname, '.env');
+                let envLines = [];
+                if (fs.existsSync(envPath)) {
+                    envLines = fs.readFileSync(envPath, 'utf-8').split('\n');
+                }
+                
+                let found = false;
+                const newEnvLines = envLines.map(line => {
+                    if (line.startsWith('GEMINI_API_KEY=')) {
+                        found = true;
+                        return `GEMINI_API_KEY=${newKey}`;
+                    }
+                    return line;
+                });
+                
+                if (!found) {
+                    newEnvLines.push(`GEMINI_API_KEY=${newKey}`);
+                }
+                
+                fs.writeFileSync(envPath, newEnvLines.join('\n'), 'utf-8');
+                process.env.GEMINI_API_KEY = newKey;
+                console.log('🔐 Gemini API Key guardada de forma segura en .env');
+            }
         }
+        
+        // ALWAYS keep geminiApiKey empty in data.js to prevent leaks
+        cloud.geminiApiKey = "";
 
         let jsContent = '';
         jsContent += 'var channels_config = ' + JSON.stringify(channels, null, 2) + ';\n\n';
@@ -99,13 +135,8 @@ app.post('/api/save', (req, res) => {
         jsContent += 'var cloud_config = ' + JSON.stringify(cloud, null, 2) + ';\n\n';
         jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
 
-        if(!jsContent || jsContent.length < 50) {
-           throw new Error("Contenido generado insuficiente o vacío");
-        }
-
         fs.writeFileSync(dataFilePath, jsContent, 'utf-8');
-        console.log(`✅ data.js actualizado correctamente (${(jsContent.length / 1024).toFixed(0)} KB, ${protocols.length} protocolos, ${channels.length} canales)`);
-        res.json({ success: true, message: 'Datos guardados correctamente' });
+        res.json({ success: true, message: 'Datos guardados correctamente (Secrets en .env)' });
     } catch (e) {
         console.error('❌ Error al guardar:', e);
         res.status(500).json({ success: false, message: e.message });
@@ -397,13 +428,16 @@ app.post('/api/chat', async (req, res) => {
     try {
         const { contents, generationConfig, safetySettings } = req.body;
         
-        // 1. Get API Key from current data.js to ensure it's up to date
-        const dataFilePath = path.join(__dirname, 'data.js');
-        let apiKey = '';
-        if (fs.existsSync(dataFilePath)) {
-            const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
-            const keyMatch = fileContent.match(/"geminiApiKey":\s*"([^"]+)"/);
-            if (keyMatch) apiKey = keyMatch[1];
+        // 1. Get API Key - Prioritize environment variable, then fallback to data.js
+        let apiKey = process.env.GEMINI_API_KEY;
+        
+        if (!apiKey) {
+            const dataFilePath = path.join(__dirname, 'data.js');
+            if (fs.existsSync(dataFilePath)) {
+                const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+                const keyMatch = fileContent.match(/"geminiApiKey":\s*"([^"]+)"/);
+                if (keyMatch) apiKey = keyMatch[1];
+            }
         }
 
         if (!apiKey) {

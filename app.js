@@ -586,22 +586,23 @@ function renderHome() {
     const welcomeText = (typeof home_config !== 'undefined' && home_config.welcome) ? home_config.welcome.text : 'Bienvenido al sistema centralizado de procedimientos y normativas de trabajo.';
     const heroVideoUrl = (typeof home_config !== 'undefined' && home_config.welcome && home_config.welcome.hero_video) ? home_config.welcome.hero_video.trim() : '';
 
-    // Convertir URL de Drive a embed si es necesario
+    // Solo embeber YouTube; Drive y otros proveedores se abren externamente por CSP.
     let heroVideoEmbed = '';
+    let heroVideoExternal = '';
     if (heroVideoUrl) {
         const driveMatch = heroVideoUrl.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
         if (driveMatch && driveMatch[1]) {
-            heroVideoEmbed = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+            heroVideoExternal = heroVideoUrl;
         } else if (heroVideoUrl.includes('youtube.com') || heroVideoUrl.includes('youtu.be')) {
             const ytMatch = heroVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (ytMatch) heroVideoEmbed = `https://www.youtube.com/embed/${ytMatch[1]}`;
         } else {
-            heroVideoEmbed = heroVideoUrl;
+            heroVideoExternal = heroVideoUrl;
         }
     }
 
     // Sección de video hero (solo si hay URL configurada)
-    const heroVideoSection = heroVideoEmbed ? `
+    const heroVideoSection = (heroVideoEmbed || heroVideoExternal) ? `
         <div class="hero-video-section premium-shadow">
             <div class="hero-video-header">
                 <div class="hero-video-badge">
@@ -609,15 +610,24 @@ function renderHome() {
                     <span>VIDEO CORPORATIVO</span>
                 </div>
             </div>
-            <div class="hero-video-wrapper">
-                <iframe 
-                    src="${heroVideoEmbed}" 
-                    allow="autoplay; encrypted-media" 
-                    allowfullscreen
-                    loading="lazy"
-                    title="Video corporativo">
-                </iframe>
-            </div>
+            ${heroVideoEmbed ? `
+                <div class="hero-video-wrapper">
+                    <iframe 
+                        src="${heroVideoEmbed}" 
+                        allow="autoplay; encrypted-media" 
+                        allowfullscreen
+                        loading="lazy"
+                        title="Video corporativo">
+                    </iframe>
+                </div>
+            ` : `
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;">
+                    <p style="margin:0 0 10px; color:#64748b; font-weight:600;">Este video debe abrirse en su plataforma por políticas CSP.</p>
+                    <a href="${heroVideoExternal}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; gap:8px; align-items:center; background:#0a6aa1; color:#fff; text-decoration:none; padding:10px 14px; border-radius:8px; font-weight:700;">
+                        <span>Abrir video</span><i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            `}
         </div>
     ` : '';
 
@@ -1028,44 +1038,71 @@ function loadProtocol(p, highlightText = '') {
     if (p.video_url) {
         let finalVideoUrl = p.video_url;
         let isDrive = false;
+        let isYouTube = false;
+        let driveId = '';
 
         // Formateo inteligente para Google Drive
         if (finalVideoUrl.includes('drive.google.com')) {
             isDrive = true;
-            // Asegurarnos de usar /preview para que se pueda embeber
             if (finalVideoUrl.includes('/view')) {
                 finalVideoUrl = finalVideoUrl.replace(/\/view.*$/, '/preview');
             } else if (finalVideoUrl.includes('?id=')) {
                 const id = finalVideoUrl.split('id=')[1].split('&')[0];
                 finalVideoUrl = `https://drive.google.com/file/d/${id}/preview`;
             } else if (!finalVideoUrl.endsWith('/preview')) {
-                // Si es un enlace de carpeta o similar, intentamos convertirlo
                 const match = finalVideoUrl.match(/\/d\/([^\/]+)/);
                 if (match) finalVideoUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
             }
+            const driveMatch = finalVideoUrl.match(/\/d\/([^\/\?&]+)/);
+            if (driveMatch && driveMatch[1]) driveId = driveMatch[1];
         }
 
-        videoSection = `
-            <div class="video-wrapper" style="margin-top: 4rem; padding-top: 2rem; border-top: 2px solid #f1f5f9;">
-                <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <span style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Contenido Multimedia Relacionado
-                    </span>
-                </div>
-                <div class="video-container">
-                    <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                </div>
-                
-                ${isDrive ? `
-                    <div style="margin-top: 1rem; text-align: center;">
-                        <a href="${p.video_url}" target="_blank" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 8px; background: #0a6aa1; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; box-shadow: 0 4px 12px rgba(10, 106, 161, 0.2);">
-                            <i class="fab fa-google-drive"></i> Ver vídeo en pantalla completa (Google Drive)
-                        </a>
-                        <p style="font-size: 0.75rem; color: #666; margin-top: 8px;">Si no ves el vídeo arriba, asegúrate de tener permisos en Google Drive o pulsa el botón azul.</p>
-                    </div>
-                ` : ''}
+        const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch && ytMatch[1]) {
+            isYouTube = true;
+            finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+        const isMp4 = finalVideoUrl.toLowerCase().endsWith('.mp4') || finalVideoUrl.toLowerCase().endsWith('.webm');
+        const driveOpenUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : p.video_url;
 
-                ${p.video_caption ? `<p class="video-caption">${p.video_caption}</p>` : ''}
+        videoSection = `
+            <div class="video-wrapper" style="margin-top: 4rem; padding: 2.5rem; border-radius: 22px; background: linear-gradient(165deg, #f8fcff 0%, #eef4fb 100%); border: 1px solid #d7e4f3; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <span style="background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 0.65rem 1.25rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.28);">
+                        <i class="fas fa-play-circle" style="margin-right: 6px;"></i> CONTENIDO MULTIMEDIA RELACIONADO
+                    </span>
+                    ${p.video_caption ? `<h3 style="margin-top: 1rem; color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing:0.01em;">${p.video_caption}</h3>` : ''}
+                </div>
+
+                ${isDrive ? `
+                    <div class="video-container" style="max-width: 980px; margin: 0 auto; padding-bottom: 75%; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                        <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                    <div style="max-width:980px; margin:12px auto 0; text-align:right;">
+                        <a href="${driveOpenUrl}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 11px 16px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 800; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.26);">
+                            <span>Abrir en Drive</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                ` : isYouTube ? `
+                    <div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                        <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                ` : isMp4 ? `
+                    <div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                        <video controls style="width: 100%; height: 100%; border: none; display: block;">
+                            <source src="${finalVideoUrl}" type="video/mp4">
+                        </video>
+                    </div>
+                ` : `
+                    <div class="drive-access-card" style="background: white; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                        <p style="margin:0 0 12px; color:#475569; font-weight:600;">Este proveedor bloquea la carga embebida por seguridad (CSP).</p>
+                        <a href="${p.video_url}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: #0a6aa1; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 700;">
+                            <span>Abrir video en pestaña nueva</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                `}
             </div>
         `;
     }
@@ -1361,20 +1398,19 @@ function initVideoUnits(root) {
         if (titleEl) titleEl.textContent = title;
 
         if (id) {
-            const embedUrl = id.includes('http') ? id : `https://drive.google.com/file/d/${id}/preview`;
             const viewUrl = id.includes('http') ? id : `https://drive.google.com/file/d/${id}/view?usp=sharing`;
-            
+
+            // Drive suele bloquear frame-ancestors en muchos contextos; forzamos apertura externa.
             if (iframe) {
-                iframe.src = embedUrl;
-                iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+                iframe.removeAttribute('src');
             }
             if (btn) btn.href = viewUrl;
             if (overlay) overlay.href = viewUrl;
-            
-            if (player) player.hidden = false;
-            if (fallback) fallback.hidden = true;
+
+            if (player) player.hidden = true;
+            if (fallback) fallback.hidden = false;
             if (statusEl) {
-                statusEl.textContent = 'Disponible';
+                statusEl.textContent = 'Abrir externo';
                 statusEl.className = 'vu-status ok';
                 statusEl.style.background = '#dcfce7';
                 statusEl.style.color = '#16a34a';
@@ -1406,6 +1442,7 @@ function initVideoUnits(root) {
 function scanAndConvertVideoLinks(root) {
     const links = root.querySelectorAll('.protocol-full-body a');
     links.forEach(link => {
+        if (link.closest('.video-wrapper') || link.closest('.drive-access-card') || link.classList.contains('btn-premium-video')) return;
         const url = link.getAttribute('href') || '';
         const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
         const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -1428,7 +1465,13 @@ function scanAndConvertVideoLinks(root) {
 
             let embedHtml = '';
             if (driveMatch) {
-                embedHtml = `<iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allow="autoplay" allowfullscreen></iframe>`;
+                embedHtml = `<div style="padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="font-weight:700; color:#0a6aa1; text-decoration:none;">Abrir video de Google Drive en pestaña nueva</a>
+                </div>`;
+                container.style.height = 'auto';
+                container.style.paddingBottom = '0';
+                container.style.background = 'transparent';
+                container.style.boxShadow = 'none';
             } else if (ytMatch) {
                 embedHtml = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>`;
             } else if (isMp4) {
@@ -2761,3 +2804,4 @@ window.handleChatCategoryClick = (catId) => {
         }
     }
 };
+
