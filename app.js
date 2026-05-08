@@ -1026,16 +1026,45 @@ function loadProtocol(p, highlightText = '') {
     // Sección de video independiente (completamente fuera del HTML del protocolo)
     let videoSection = '';
     if (p.video_url) {
+        let finalVideoUrl = p.video_url;
+        let isDrive = false;
+
+        // Formateo inteligente para Google Drive
+        if (finalVideoUrl.includes('drive.google.com')) {
+            isDrive = true;
+            // Asegurarnos de usar /preview para que se pueda embeber
+            if (finalVideoUrl.includes('/view')) {
+                finalVideoUrl = finalVideoUrl.replace(/\/view.*$/, '/preview');
+            } else if (finalVideoUrl.includes('?id=')) {
+                const id = finalVideoUrl.split('id=')[1].split('&')[0];
+                finalVideoUrl = `https://drive.google.com/file/d/${id}/preview`;
+            } else if (!finalVideoUrl.endsWith('/preview')) {
+                // Si es un enlace de carpeta o similar, intentamos convertirlo
+                const match = finalVideoUrl.match(/\/d\/([^\/]+)/);
+                if (match) finalVideoUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+            }
+        }
+
         videoSection = `
             <div class="video-wrapper" style="margin-top: 4rem; padding-top: 2rem; border-top: 2px solid #f1f5f9;">
                 <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <span style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; rounded-full; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                         Contenido Multimedia Relacionado
                     </span>
                 </div>
                 <div class="video-container">
-                    <iframe src="${p.video_url}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                    <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
                 </div>
+                
+                ${isDrive ? `
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="${p.video_url}" target="_blank" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 8px; background: #0a6aa1; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; box-shadow: 0 4px 12px rgba(10, 106, 161, 0.2);">
+                            <i class="fab fa-google-drive"></i> Ver vídeo en pantalla completa (Google Drive)
+                        </a>
+                        <p style="font-size: 0.75rem; color: #666; margin-top: 8px;">Si no ves el vídeo arriba, asegúrate de tener permisos en Google Drive o pulsa el botón azul.</p>
+                    </div>
+                ` : ''}
+
                 ${p.video_caption ? `<p class="video-caption">${p.video_caption}</p>` : ''}
             </div>
         `;
@@ -1246,11 +1275,15 @@ function loadProtocol(p, highlightText = '') {
     // 4. Cleanup & Interactive Elements
     // Scripts evaluation - Wrapped in IIFE to avoid global namespace collisions (e.g. STORAGE_NS)
     mainColumn.querySelectorAll('script').forEach(oldScript => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-        // Use an IIFE and a generic block scope to isolate constants/lets
-        newScript.textContent = `(function(){\n${oldScript.textContent}\n})();`;
-        oldScript.parentNode.replaceChild(newScript, oldScript);
+        try {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            // Use an IIFE and a generic block scope to isolate constants/lets
+            newScript.textContent = `(function(){\n try {\n${oldScript.textContent}\n} catch(e) { console.warn("Error ejecutando script del protocolo:", e); }\n})();`;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        } catch(err) {
+            console.error("Error al procesar script:", err);
+        }
     });
 
     // Remove floating navigation bars from content
