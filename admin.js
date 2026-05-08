@@ -239,20 +239,39 @@ window.scanHtmlLinks = function() {
                 } else {
                     el.setAttribute('src', finalUrl);
                 }
-                // Construir bloque con wrapper + caption opcional
                 const captionText = val2.trim();
-                const newContainerHtml = `<div class="video-container">${el.outerHTML}</div>`;
-                const videoBlock = captionText
-                    ? `<div class="video-wrapper">${newContainerHtml}<p class="video-caption">${captionText}</p></div>`
-                    : `<div class="video-wrapper">${newContainerHtml}</div>`;
-
-                const editor2 = document.getElementById('html-editor');
-                if (editor2.value.includes(originalHtml)) {
-                    editor2.value = editor2.value.replace(originalHtml, videoBlock);
-                    showToast('✅ Vídeo actualizado');
-                    window.scanHtmlLinks();
+                
+                // NUEVA LÓGICA: Si es el video principal (o queremos que lo sea), actualizamos los campos específicos
+                const videoUrlInput = document.getElementById('edit-video-url');
+                const videoCaptionInput = document.getElementById('edit-video-caption');
+                
+                if (videoUrlInput && videoCaptionInput) {
+                    videoUrlInput.value = finalUrl;
+                    videoCaptionInput.value = captionText;
+                    showToast('🎬 Datos de vídeo cargados en la sección de Vídeo');
+                    
+                    // Si el video original estaba en el editor HTML, lo quitamos para limpiar el código
+                    const editor2 = document.getElementById('html-editor');
+                    if (editor2.value.includes(originalHtml)) {
+                        editor2.value = editor2.value.replace(originalHtml, '');
+                        showToast('✅ Vídeo movido a la sección independiente');
+                        window.scanHtmlLinks();
+                    }
                 } else {
-                    alert('No se pudo encontrar el fragmento original. Pulsa "Refrescar Lista".');
+                    // Fallback antiguo: Construir bloque con wrapper + caption opcional e insertar en HTML
+                    const newContainerHtml = `<div class="video-container">${el.outerHTML}</div>`;
+                    const videoBlock = captionText
+                        ? `<div class="video-wrapper">${newContainerHtml}<p class="video-caption">${captionText}</p></div>`
+                        : `<div class="video-wrapper">${newContainerHtml}</div>`;
+
+                    const editor2 = document.getElementById('html-editor');
+                    if (editor2.value.includes(originalHtml)) {
+                        editor2.value = editor2.value.replace(originalHtml, videoBlock);
+                        showToast('✅ Vídeo actualizado en el HTML');
+                        window.scanHtmlLinks();
+                    } else {
+                        alert('No se pudo encontrar el fragmento original. Pulsa "Refrescar Lista".');
+                    }
                 }
                 return;
             } else {
@@ -1849,6 +1868,10 @@ function openEditor(index = -1) {
             cbHasErrors.checked = false;
             document.getElementById('common-errors-list-container').style.display = 'none';
         }
+
+        // CARGAR DATOS DE VÍDEO PRINCIPAL
+        document.getElementById('edit-video-url').value = p.video_url || '';
+        document.getElementById('edit-video-caption').value = p.video_caption || '';
         
         // Preserve raw HTML to avoid stripping
         const rawContent = p.content || '';
@@ -2530,6 +2553,9 @@ function saveProtocol() {
         });
     }
 
+    const videoUrl = document.getElementById('edit-video-url').value.trim();
+    const videoCaption = document.getElementById('edit-video-caption').value.trim();
+
     const p = {
         title: title,
         section: section,
@@ -2538,6 +2564,8 @@ function saveProtocol() {
         published: publishedDate,
         updated: updatedDate,
         content: content,
+        video_url: videoUrl || undefined,
+        video_caption: videoCaption || undefined,
         isCritical: isCritical,
         isAnnouncement: isAnnouncement,
         commonErrors: currentCommonErrors.length > 0 ? currentCommonErrors : undefined,
