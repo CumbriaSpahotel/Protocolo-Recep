@@ -4,12 +4,31 @@ const mainColumn = document.getElementById('main-column');
 const postsList = document.getElementById('posts-list');
 const navItems = document.getElementById('top-nav-items');
 
+// Safe Storage Helper to handle Tracking Prevention blocks
+const safeStorage = {
+    getItem: (key) => {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            console.warn('[Storage] Access blocked by browser:', e.message);
+            return null;
+        }
+    },
+    setItem: (key, value) => {
+        try {
+            localStorage.setItem(key, value);
+        } catch (e) {
+            console.warn('[Storage] Write blocked by browser:', e.message);
+        }
+    }
+};
+
 // Hotel Context Management
-let currentHotel = localStorage.getItem('selectedHotel') || 'Ambos hoteles';
+let currentHotel = safeStorage.getItem('selectedHotel') || 'Ambos hoteles';
 
 function setHotel(hotel) {
     currentHotel = hotel;
-    localStorage.setItem('selectedHotel', hotel);
+    safeStorage.setItem('selectedHotel', hotel);
     // Refresh UI
     renderNavigation();
     updateHotelButtons();
@@ -25,6 +44,64 @@ function setHotel(hotel) {
         botContext.innerHTML = `<span style="width:6px; height:6px; background:#4ade80; border-radius:50%; display:inline-block;"></span> IA · ${currentHotel}`;
     }
 }
+
+// Global Channel Explorer Functions
+window.filterChannels = function(query) {
+    const q = query.toLowerCase().trim();
+    const tabs = document.querySelectorAll('.channel-tab');
+    let firstVisible = null;
+
+    tabs.forEach(tab => {
+        const name = tab.getAttribute('data-name');
+        const isMatch = name.includes(q);
+        tab.style.display = isMatch ? 'flex' : 'none';
+        if (isMatch && !firstVisible) firstVisible = tab;
+    });
+
+    // If active tab is hidden, switch to first visible
+    const activeTab = document.querySelector('.channel-tab.active');
+    if (activeTab && activeTab.style.display === 'none' && firstVisible) {
+        firstVisible.click();
+    }
+};
+
+window.selectChannelTab = function(id, btn) {
+    // Hide all panes
+    document.querySelectorAll('.channel-pane').forEach(p => p.style.display = 'none');
+    // Show selected
+    const target = document.getElementById('panel-' + id);
+    if(target) target.style.display = 'block';
+    
+    // Update buttons
+    document.querySelectorAll('.channel-tab').forEach(b => {
+        b.style.background = 'rgba(255,255,255,0.05)';
+        b.style.color = '#94a3b8';
+        b.style.borderColor = 'rgba(255,255,255,0.05)';
+        b.classList.remove('active');
+    });
+    
+    if (btn) {
+        btn.style.background = '#fbbf24';
+        btn.style.color = '#0f172a';
+        btn.style.borderColor = '#fbbf24';
+        btn.classList.add('active');
+    }
+
+    // Scroll to top of explorer if needed
+    const container = document.getElementById('channel-nav-container');
+    if (container) {
+        const offset = 80; // height of header
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = container.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+};
 
 function updateHotelButtons() {
     const btns = {
@@ -109,7 +186,7 @@ const getCatMap = () => {
 
 function init() {
     // Initialize Theme
-    const isDark = localStorage.getItem('darkMode') === 'true';
+    const isDark = safeStorage.getItem('darkMode') === 'true';
     const themeBtn = document.getElementById('theme-toggle');
     const icon = themeBtn ? themeBtn.querySelector('i') : null;
 
@@ -140,7 +217,7 @@ function init() {
         // If geminiApiKey is empty (e.g. on GitHub Pages), try to load it from localStorage
         try {
             if (typeof cloud_config !== 'undefined' && !cloud_config.geminiApiKey) {
-                const storedKey = localStorage.getItem('geminiApiKey_override');
+                const storedKey = safeStorage.getItem('geminiApiKey_override');
                 if (storedKey) {
                     cloud_config.geminiApiKey = storedKey;
                     console.log('[Config] Clave Gemini cargada desde almacenamiento local del navegador.');
@@ -224,7 +301,7 @@ function initApp() {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark);
+            safeStorage.setItem('darkMode', isDark);
             
             const icon = themeBtn.querySelector('i');
             if (isDark) {
@@ -1118,14 +1195,20 @@ function loadProtocol(p, highlightText = '') {
             currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel
         );
 
-        content = `
-            <div class="channel-explorer-container" style="position: relative;">
+        // Define the dynamic part (the explorer itself)
+        const dynamicExplorer = `
+            <div class="channel-explorer-container" style="position: relative; margin-top: 2rem;">
                 <div class="channel-info-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #0369a1; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 18px; border: 1px solid #e2e8f0;">
                     <div style="background: #e0f2fe; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="fas fa-project-diagram" style="color: #0369a1; font-size: 1.2rem;"></i>
                     </div>
-                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6;">
-                        <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1; margin-bottom: 6px;">Gestión de Canales de Venta</p>
+                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1;">Gestión de Canales de Venta</p>
+                            <a href="admin.html#tab-canales" class="admin-only-flex" style="font-size: 0.7rem; background: #0369a1; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 700; gap: 5px; align-items: center;">
+                                <i class="fas fa-edit"></i> Gestionar Canales
+                            </a>
+                        </div>
                         Consulta la operativa detallada, criterios de facturación y particularidades de cada canal. Utiliza el <strong>buscador</strong> para filtrar por nombre o el <strong>selector de hotel</strong> para ajustar la vista a tu centro de trabajo.
                     </div>
                 </div>
@@ -1146,11 +1229,12 @@ function loadProtocol(p, highlightText = '') {
                 </div>
 
                 <div id="channel-nav-container" style="position: sticky; top: 10px; z-index: 1000; margin-bottom: 30px;">
-                    <nav class="channel-nav-sticky" style="display: flex; gap: 10px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px; border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow-x: auto; scrollbar-width: none; border: 1px solid rgba(255,255,255,0.1);">
+                    <nav class="channel-nav-sticky" style="display: flex; gap: 10px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); overflow-x: auto; scrollbar-width: none; border: 1px solid rgba(255,255,255,0.15); align-items: center; position: relative;">
+                        <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(to left, rgba(15, 23, 42, 0.95), transparent); pointer-events: none; border-radius: 0 20px 20px 0; z-index: 2;"></div>
                         ${relevantChannels.map((c, idx) => `
-                            <button onclick="selectChannelTab('${c.id}', this)" id="btn-tab-${c.id}" class="channel-tab ${idx === 0 ? 'active' : ''}" data-name="${c.name.toLowerCase()}" style="padding: 10px 20px; font-size: 0.8rem; background: ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; color: ${idx === 0 ? '#0f172a' : '#94a3b8'}; border-radius: 12px; border: 1px solid ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.3s; min-width: 130px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <span style="font-size: 1.1rem;">${c.icon}</span>
-                                <span>${c.name}</span>
+                            <button onclick="selectChannelTab('${c.id}', this)" id="btn-tab-${c.id}" class="channel-tab ${idx === 0 ? 'active' : ''}" data-name="${c.name.toLowerCase()}" style="padding: 10px 18px; font-size: 0.8rem; background: ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; color: ${idx === 0 ? '#0f172a' : '#94a3b8'}; border-radius: 12px; border: 1px solid ${idx === 0 ? '#fbbf24' : 'transparent'}; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.3s; min-width: max-content; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; position: relative; z-index: 1;">
+                                <span style="font-size: 1.1rem; line-height: 1;">${c.icon}</span>
+                                <span style="line-height: 1.2;">${c.name}</span>
                                 ${c.isGift ? '<span style="background: #a855f7; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🎁</span>' : ''}
                             </button>
                         `).join('')}
@@ -1191,59 +1275,8 @@ function loadProtocol(p, highlightText = '') {
                 </div>
             </div>
 
-            <script>
-                function filterChannels(query) {
-                    const q = query.toLowerCase().trim();
-                    const tabs = document.querySelectorAll('.channel-tab');
-                    let firstVisible = null;
-
-                    tabs.forEach(tab => {
-                        const name = tab.getAttribute('data-name');
-                        const isMatch = name.includes(q);
-                        tab.style.display = isMatch ? 'flex' : 'none';
-                        if (isMatch && !firstVisible) firstVisible = tab;
-                    });
-
-                    // If active tab is hidden, switch to first visible
-                    const activeTab = document.querySelector('.channel-tab.active');
-                    if (activeTab && activeTab.style.display === 'none' && firstVisible) {
-                        firstVisible.click();
-                    }
-                }
-
-                function selectChannelTab(id, btn) {
-                    // Hide all panes
-                    document.querySelectorAll('.channel-pane').forEach(p => p.style.display = 'none');
-                    // Show selected
-                    const target = document.getElementById('panel-' + id);
-                    if(target) target.style.display = 'block';
-                    
-                    // Update buttons
-                    document.querySelectorAll('.channel-tab').forEach(b => {
-                        b.style.background = 'rgba(255,255,255,0.05)';
-                        b.style.color = '#94a3b8';
-                        b.style.borderColor = 'rgba(255,255,255,0.05)';
-                        b.classList.remove('active');
-                    });
-                    btn.style.background = '#fbbf24';
-                    btn.style.color = '#0f172a';
-                    btn.style.borderColor = '#fbbf24';
-                    btn.classList.add('active');
-
-                    // Scroll to top of explorer if needed
-                    const container = document.getElementById('channel-nav-container');
-                    const offset = 80; // height of header
-                    const bodyRect = document.body.getBoundingClientRect().top;
-                    const elementRect = container.getBoundingClientRect().top;
-                    const elementPosition = elementRect - bodyRect;
-                    const offsetPosition = elementPosition - offset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            </script>
+                </div>
+            </div>
 
             <style>
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -1254,6 +1287,34 @@ function loadProtocol(p, highlightText = '') {
                 .channel-pane { scroll-margin-top: 150px; }
             </style>
         `;
+
+        const hasPlaceholder = p.content && p.content.includes('{{CHANNELS_EXPLORER}}');
+        
+        if (hasPlaceholder) {
+            content = p.content.replace('{{CHANNELS_EXPLORER}}', dynamicExplorer);
+        } else {
+            // Default legacy wrapper if no placeholder is found
+            const defaultWrapper = `
+                <div class="channel-explorer-container" style="position: relative; margin-top: 2rem;">
+                    <div class="channel-info-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #0369a1; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 18px; border: 1px solid #e2e8f0;">
+                        <div style="background: #e0f2fe; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-project-diagram" style="color: #0369a1; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1;">Gestión de Canales de Venta</p>
+                                <a href="admin.html#tab-canales" class="admin-only-flex" style="font-size: 0.7rem; background: #0369a1; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 700; gap: 5px; align-items: center;">
+                                    <i class="fas fa-edit"></i> Gestionar Canales
+                                </a>
+                            </div>
+                            Consulta la operativa detallada, criterios de facturación y particularidades de cada canal. Utiliza el <strong>buscador</strong> para filtrar por nombre o el <strong>selector de hotel</strong> para ajustar la vista a tu centro de trabajo.
+                        </div>
+                    </div>
+                    ${dynamicExplorer}
+                </div>
+            `;
+            content = (p.content ? `<div class="protocol-intro" style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px dashed #e2e8f0;">${p.content}</div>` : '') + defaultWrapper;
+        }
     }
 
     // 2. Metadata & Highlighting

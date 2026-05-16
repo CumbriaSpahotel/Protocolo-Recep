@@ -174,8 +174,8 @@ const protocols_data = [
     "source": "Ambos hoteles",
     "status": "Activo",
     "published": "2026-05-16T11:17:17.983Z",
-    "updated": "2026-05-16T11:17:17.983Z",
-    "content": "<p>.</p>",
+    "updated": "2026-05-16T12:05:10.947Z",
+    "content": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Introducción - Canales de Venta Online</title>\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n            line-height: 1.6;\n            color: #333333;\n            background-color: #f8f9fa;\n            margin: 0;\n            padding: 20px; /* Margen exterior suave para que no pegue al borde de la pantalla */\n        }\n        .container {\n            width: 100%; /* Ancho completo */\n            box-sizing: border-box;\n            background: #ffffff;\n            padding: 40px;\n            border-radius: 12px;\n            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);\n        }\n        .header-section {\n            border-bottom: 2px solid #eef2f5;\n            padding-bottom: 20px;\n            margin-bottom: 30px;\n        }\n        h1 {\n            color: #0b3c5d;\n            font-size: 24px;\n            margin: 0;\n        }\n        .option-container {\n            background-color: #ffffff;\n            border: 1px solid #e0e6ed;\n            border-radius: 8px;\n            padding: 25px;\n            margin-bottom: 30px;\n            width: 100%; /* Las opciones también ocupan todo el ancho */\n            box-sizing: border-box;\n        }\n        .option-title {\n            font-size: 14px;\n            text-transform: uppercase;\n            letter-spacing: 1px;\n            color: #888;\n            margin-bottom: 15px;\n            font-weight: bold;\n        }\n        p {\n            margin: 0 0 15px 0;\n            text-align: justify;\n        }\n        strong {\n            color: #0b3c5d;\n        }\n        ul {\n            margin: 0;\n            padding-left: 20px;\n        }\n        li {\n            margin-bottom: 8px;\n        }\n    </style>\n</head>\n<body>\n\n<div class=\"container\">\n\n    <div class=\"header-section\">\n        <h1>📡 Canales de Venta Online</h1>\n    </div>\n\n    <div class=\"option-container\">\n        <div class=\"option-title\">Opción 1: Enfoque Manual de Usuario / Operativo</div>\n        <p>Bienvenido al módulo de <strong>Gestión de Canales de Venta</strong>, la herramienta centralizada para la consulta, optimización y seguimiento de nuestras plataformas de distribución digital.</p>\n        <p>Este apartado está diseñado para ofrecer al equipo una visión clara y detallada de la operativa, los criterios de facturación y las particularidades comerciales de cada canal de venta activo (como Booking, Expedia, entre otros). A través de esta interfaz, el usuario puede interactuar de forma ágil mediante el <strong>buscador dinámico</strong> o filtrar la información específica utilizando el <strong>selector de hotel</strong> para ajustar la vista a su centro de trabajo actual de manera inmediata.</p>\n    </div>\n\n    <div class=\"option-container\">\n        <div class=\"option-title\">Opción 2: Enfoque Técnico / Corporativo</div>\n        <p>La sección de <strong>Canales de Venta Online</strong> constituye el núcleo informativo para la gestión de la distribución hotelera de nuestros establecimientos. Su objetivo principal es unificar y simplificar el acceso a los procedimientos operativos de cada OTA y canal partner.</p>\n        \n        <p><strong>Funcionalidades clave de la sección:</strong></p>\n        <ul>\n            <li><strong>Centralización Operativa:</strong> Acceso inmediato a las políticas de distribución, criterios de facturación y particularidades de cada canal.</li>\n            <li><strong>Segmentación Multi-hotel:</strong> Filtros rápidos para alternar la gestión de la vista entre el <em>Hotel Guadiana</em> y el <em>Hotel Cumbria</em>.</li>\n            <li><strong>Búsqueda Eficiente:</strong> Barra de filtrado predictivo para la localización exacta de plataformas de venta específicas.</li>\n        </ul>\n    </div>\n\n</div>\n\n</body>\n</html>",
     "isCritical": false,
     "isAnnouncement": false,
     "categories": [
@@ -823,29 +823,8 @@ const navigation_config = {
   },
   "2": {
     "name": "Reservas y Tarifas",
-    "icon": "fa-file-invoice-dollar",
-    "subsections": {
-      "2.1": {
-        "name": "Canales de venta",
-        "links": [
-          {
-            "icon": "fa-link",
-            "text": "Carpeta Drive · Acuerdos Guadiana",
-            "url": "https://1drv.ms/f/c/7cdc5f6b199a606e/Eu15SkObEfRIjYCa-smmtyEBi8Hkn2Rs5hXCUZEo09_DBg?e=kT1DYB"
-          },
-          {
-            "icon": "fa-link",
-            "text": "Carpeta Drive · Acuerdos Cumbria",
-            "url": "https://1drv.ms/f/c/7cdc5f6b199a606e/EoFYJQY8YC5DuLglsQVseVsBdo7tZf9HjQiwm264hs6oLg?e=3lCwit"
-          },
-          {
-            "icon": "fa-link",
-            "text": "Carpeta Drive · Acuerdos Sercotel",
-            "url": "https://1drv.ms/f/c/7cdc5f6b199a606e/EiI8tlEGxlJIjvGYaMI_KB4BwSmCbdbMF7fT9EwjUnhDWg?e=wX2ewe"
-          }
-        ]
-      }
-    },
+    "icon": "fa-thumbs-up",
+    "subsections": {},
     "links": []
   },
   "3": {
