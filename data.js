@@ -169,6 +169,16 @@ var channels_config = [
 
 const protocols_data = [
   {
+    "title": "Canales de venta",
+    "section": "2.1",
+    "source": "Ambos hoteles",
+    "status": "Activo",
+    "content": "",
+    "categories": [
+      "2ª Sección"
+    ]
+  },
+  {
     "title": "Groupon",
     "section": "10.1",
     "source": "Cumbria Bienestar",
@@ -812,7 +822,7 @@ const navigation_config = {
     "icon": "fa-file-invoice-dollar",
     "subsections": {
       "2.1": {
-        "name": "Acuerdos",
+        "name": "Canales de venta",
         "links": [
           {
             "icon": "fa-link",

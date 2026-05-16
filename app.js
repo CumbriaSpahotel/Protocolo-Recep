@@ -1119,66 +1119,98 @@ function loadProtocol(p, highlightText = '') {
         );
 
         content = `
-            <div class="channel-explorer-container">
-                <div class="channel-info-banner" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 5px solid #2196f3; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 15px;">
-                    <i class="fas fa-info-circle" style="color: #1976d2; font-size: 1.4rem; margin-top: 2px;"></i>
-                    <div style="font-size: 0.95rem; color: #1565c0; line-height: 1.5;">
-                        <p style="margin: 0; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 4px;">Información para el Usuario:</p>
-                        Este explorador te permite consultar la operativa específica de cada canal. 
-                        <strong>1. Filtra por Hotel</strong> para reducir la lista a los canales activos en tu centro. 
-                        <strong>2. Pulsa en un Canal</strong> de la cuadrícula para ver sus detalles, procedimientos y notas específicas sin tener que desplazarte.
+            <div class="channel-explorer-container" style="position: relative;">
+                <div class="channel-info-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #0369a1; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 18px; border: 1px solid #e2e8f0;">
+                    <div style="background: #e0f2fe; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-project-diagram" style="color: #0369a1; font-size: 1.2rem;"></i>
+                    </div>
+                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6;">
+                        <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1; margin-bottom: 6px;">Gestión de Canales de Venta</p>
+                        Consulta la operativa detallada, criterios de facturación y particularidades de cada canal. Utiliza el <strong>buscador</strong> para filtrar por nombre o el <strong>selector de hotel</strong> para ajustar la vista a tu centro de trabajo.
                     </div>
                 </div>
 
-                <div class="channel-filter-bar" style="margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #f4f6f8; padding: 10px; border-radius: 12px; border: 1px solid #e0e4e8;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #5c7081; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 5px;">📍 Hotel:</span>
-                    ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
-                        <button onclick="setHotel('${h}')" style="padding: 6px 14px; border-radius: 8px; border: 1px solid ${currentHotel === h ? 'var(--accent-blue)' : '#ccc'}; background: ${currentHotel === h ? 'var(--accent-blue)' : 'white'}; color: ${currentHotel === h ? 'white' : '#555'}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
-                            ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
-                        </button>
-                    `).join('')}
+                <div class="channel-controls" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; align-items: stretch;">
+                    <div class="search-wrapper" style="flex: 1; min-width: 280px; position: relative;">
+                        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        <input type="text" id="channel-search" placeholder="Buscar canal (ej. Booking, Expedia...)" oninput="filterChannels(this.value)" style="width: 100%; padding: 14px 15px 14px 45px; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 0.95rem; outline: none; transition: all 0.2s; background: white; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+                    </div>
+                    
+                    <div class="hotel-selector" style="background: white; border: 2px solid #e2e8f0; padding: 4px; border-radius: 14px; display: flex; gap: 4px;">
+                        ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
+                            <button onclick="setHotel('${h}')" style="padding: 8px 16px; border-radius: 10px; border: none; background: ${currentHotel === h ? '#0369a1' : 'transparent'}; color: ${currentHotel === h ? 'white' : '#64748b'}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                                ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
+                            </button>
+                        `).join('')}
+                    </div>
                 </div>
 
-                <nav class="channel-nav-sticky" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; position: sticky; top: -10px; z-index: 100; background: #004a66; padding: 15px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow: visible;">
-                    ${relevantChannels.map((c, idx) => `
-                        <button onclick="selectChannelTab('${c.id}', this)" class="channel-tab ${idx === 0 ? 'active' : ''}" style="padding: 10px; font-size: 0.75rem; background: ${idx === 0 ? 'var(--accent-gold)' : 'rgba(255,255,255,0.1)'}; color: ${idx === 0 ? '#000' : 'white'}; border-radius: 8px; border: 1px solid ${c.isGift ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255,255,255,0.1)'}; font-weight: 700; text-align: center; cursor: pointer; transition: all 0.2s; min-height: 45px; position: relative;">
-                            ${c.isGift ? '<span style="position: absolute; top: -5px; right: -5px; background: #a855f7; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🎁</span>' : ''}
-                            ${c.name}
-                        </button>
-                    `).join('')}
-                </nav>
+                <div id="channel-nav-container" style="position: sticky; top: 10px; z-index: 1000; margin-bottom: 30px;">
+                    <nav class="channel-nav-sticky" style="display: flex; gap: 10px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px; border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow-x: auto; scrollbar-width: none; border: 1px solid rgba(255,255,255,0.1);">
+                        ${relevantChannels.map((c, idx) => `
+                            <button onclick="selectChannelTab('${c.id}', this)" id="btn-tab-${c.id}" class="channel-tab ${idx === 0 ? 'active' : ''}" data-name="${c.name.toLowerCase()}" style="padding: 10px 20px; font-size: 0.8rem; background: ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; color: ${idx === 0 ? '#0f172a' : '#94a3b8'}; border-radius: 12px; border: 1px solid ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.3s; min-width: 130px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span style="font-size: 1.1rem;">${c.icon}</span>
+                                <span>${c.name}</span>
+                                ${c.isGift ? '<span style="background: #a855f7; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🎁</span>' : ''}
+                            </button>
+                        `).join('')}
+                    </nav>
+                </div>
 
-                <div id="channels-render-list" style="min-height: 400px; background: rgba(255,255,255,0.02); border-radius: 20px; padding: 5px;">
+                <div id="channels-render-list" style="min-height: 400px; padding: 0;">
                     ${relevantChannels.length > 0 ? relevantChannels.map((c, idx) => `
-                        <div id="panel-${c.id}" class="channel-pane" style="display: ${idx === 0 ? 'block' : 'none'}; animation: fadeIn 0.3s ease-out;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a58c5f; padding-bottom: 10px; margin-bottom: 20px;">
-                                <h2 style="border:none; margin:0; color: #004a66; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                                    ${c.icon} ${c.name}
-                                    ${c.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
+                        <div id="panel-${c.id}" class="channel-pane" style="display: ${idx === 0 ? 'block' : 'none'}; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 25px;">
+                                <h2 style="border:none; margin:0; color: #0f172a; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 15px; letter-spacing: -0.5px;">
+                                    <span style="background: #f1f5f9; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">${c.icon}</span>
+                                    ${c.name}
+                                    ${c.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
                                 </h2>
-                                <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#004a66' : c.hotel === 'Sercotel Guadiana' ? '#a58c5f' : '#27ae60'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
-                                    ${c.hotel || 'Ambos hoteles'}
-                                </span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#64748b' : c.hotel === 'Sercotel Guadiana' ? '#0369a1' : '#10b981'}; color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                        <i class="fas fa-hotel" style="margin-right: 5px;"></i> ${c.hotel || 'Ambos hoteles'}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="channel-card" style="background: white; border-radius: 16px; padding: 30px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                <h3 style="margin-top:0; color: var(--accent-blue); font-size: 1.2rem;">${c.summary || 'Resumen del Canal'}</h3>
-                                <div class="channel-procedimiento" style="color: #444; line-height: 1.7; font-size: 1.05rem;">
+                            <div class="channel-card" style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #0369a1, #fbbf24);"></div>
+                                <h3 style="margin-top:0; color: #0f172a; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 20px;">${c.summary || 'Resumen Operativo'}</h3>
+                                <div class="channel-procedimiento" style="color: #334155; line-height: 1.8; font-size: 1rem; font-weight: 500;">
                                     ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
                                 </div>
-                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:25px; background: #fafafa; padding: 20px; border-radius: 12px; border: 1px solid #efefef;">${c.htmlContent}</div>` : ''}
+                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:35px;">${c.htmlContent}</div>` : ''}
                                 ${c.notes ? `
-                                    <div class="channel-notes" style="margin-top:25px; padding:20px; background:#fff9e6; border-left:5px solid var(--accent-gold); border-radius:8px;">
-                                        <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:#856404; text-transform: uppercase; letter-spacing: 1px;"><i class="fas fa-exclamation-circle"></i> Notas del Canal</h4>
-                                        <p style="margin:0; font-size:0.95rem; color: #735e1d; font-style:italic;">${c.notes.replace(/\n/g, '<br>')}</p>
+                                    <div class="channel-notes" style="margin-top:35px; padding:25px; background: linear-gradient(135deg, #fffcf0 0%, #fff9e6 100%); border-left: 6px solid #fbbf24; border-radius: 16px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.1);">
+                                        <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#854d0e; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-lightbulb"></i> Notas de Importancia</h4>
+                                        <p style="margin:0; font-size:0.95rem; color: #713f12; font-style:italic; line-height: 1.6;">${c.notes.replace(/\n/g, '<br>')}</p>
                                     </div>
                                 ` : ''}
                             </div>
                         </div>
-                    `).join('') : '<div style="padding: 40px; text-align: center; color: #999;"><i class="fas fa-search fa-3x" style="margin-bottom: 10px; opacity: 0.3;"></i><p>No hay canales configurados para este hotel.</p></div>'}
+                    `).join('') : '<div style="padding: 100px 40px; text-align: center; color: #94a3b8; background: #f8fafc; border-radius: 24px; border: 2px dashed #e2e8f0;"><i class="fas fa-search fa-4x" style="margin-bottom: 20px; opacity: 0.2; color: #0369a1;"></i><p style="font-size: 1.1rem; font-weight: 600;">No se han encontrado canales</p><p style="font-size: 0.9rem; opacity: 0.7;">Prueba con otros términos o cambia el hotel de referencia.</p></div>'}
                 </div>
             </div>
 
             <script>
+                function filterChannels(query) {
+                    const q = query.toLowerCase().trim();
+                    const tabs = document.querySelectorAll('.channel-tab');
+                    let firstVisible = null;
+
+                    tabs.forEach(tab => {
+                        const name = tab.getAttribute('data-name');
+                        const isMatch = name.includes(q);
+                        tab.style.display = isMatch ? 'flex' : 'none';
+                        if (isMatch && !firstVisible) firstVisible = tab;
+                    });
+
+                    // If active tab is hidden, switch to first visible
+                    const activeTab = document.querySelector('.channel-tab.active');
+                    if (activeTab && activeTab.style.display === 'none' && firstVisible) {
+                        firstVisible.click();
+                    }
+                }
+
                 function selectChannelTab(id, btn) {
                     // Hide all panes
                     document.querySelectorAll('.channel-pane').forEach(p => p.style.display = 'none');
@@ -1188,23 +1220,38 @@ function loadProtocol(p, highlightText = '') {
                     
                     // Update buttons
                     document.querySelectorAll('.channel-tab').forEach(b => {
-                        b.style.background = 'rgba(255,255,255,0.1)';
-                        b.style.color = 'white';
+                        b.style.background = 'rgba(255,255,255,0.05)';
+                        b.style.color = '#94a3b8';
+                        b.style.borderColor = 'rgba(255,255,255,0.05)';
                         b.classList.remove('active');
                     });
-                    btn.style.background = 'var(--accent-gold)';
-                    btn.style.color = '#000';
+                    btn.style.background = '#fbbf24';
+                    btn.style.color = '#0f172a';
+                    btn.style.borderColor = '#fbbf24';
                     btn.classList.add('active');
 
                     // Scroll to top of explorer if needed
-                    document.querySelector('.channel-nav-sticky').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const container = document.getElementById('channel-nav-container');
+                    const offset = 80; // height of header
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const elementRect = container.getBoundingClientRect().top;
+                    const elementPosition = elementRect - bodyRect;
+                    const offsetPosition = elementPosition - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
                 }
             </script>
 
             <style>
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                .channel-tab:hover:not(.active) { background: rgba(255,255,255,0.2) !important; }
-                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                .channel-tab:hover:not(.active) { background: rgba(255,255,255,0.15) !important; color: white !important; }
+                .channel-tab.active { box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3); }
+                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 25px auto; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05); }
+                .channel-nav-sticky::-webkit-scrollbar { display: none; }
+                .channel-pane { scroll-margin-top: 150px; }
             </style>
         `;
     }
