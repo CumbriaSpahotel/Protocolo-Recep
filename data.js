@@ -169,11 +169,15 @@ var channels_config = [
 
 const protocols_data = [
   {
-    "title": "Canales de venta",
+    "title": "📡Canales de Venta Online",
     "section": "2.1",
     "source": "Ambos hoteles",
     "status": "Activo",
-    "content": "",
+    "published": "2026-05-16T11:17:17.983Z",
+    "updated": "2026-05-16T11:17:17.983Z",
+    "content": "<p>.</p>",
+    "isCritical": false,
+    "isAnnouncement": false,
     "categories": [
       "2ª Sección"
     ]
