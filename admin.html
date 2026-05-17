@@ -600,15 +600,19 @@
                 <textarea id="modal-channel-notes" class="channel-input" rows="2" style="background:#f9f9f9; width: 100%; font-size: 0.85rem; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Notas internas o avisos..."></textarea>
             </div>
 
-            <div class="channel-html-area">
+            <div class="channel-html-area" style="margin-top: 15px;">
                 <div class="channel-html-label" style="display:flex; justify-content:space-between; margin-bottom:5px; align-items: center;">
-                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado</label>
+                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado / Multimedia</label>
                     <div style="display:flex; gap:8px;">
                         <button type="button" onclick="window.selectChannelMedia('image')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #27ae60 !important; border-radius: 20px;"><i class="fas fa-image"></i> + Imagen</button>
                         <button type="button" onclick="window.selectChannelMedia('video')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #f39c12 !important; border-radius: 20px;"><i class="fas fa-video"></i> + Video</button>
                     </div>
                 </div>
-                <textarea id="modal-channel-html" class="channel-input" rows="4" style="font-family: monospace; font-size:0.85rem; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Tablas, enlaces o diseños especiales..."></textarea>
+                
+                <!-- Media Manager List for Channels -->
+                <div id="channel-media-list" style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+
+                <textarea id="modal-channel-html" class="channel-input" rows="4" style="font-family: monospace; font-size:0.82rem; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #fafafa;" placeholder="Código HTML o multimedia..."></textarea>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">

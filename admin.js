@@ -3510,17 +3510,21 @@ async function uploadChannelMedia(file, type) {
         const result = await res.json();
         
         if (result.success) {
+            // Pedir pie de foto / título
+            const caption = prompt(`Introduce un pie de texto para este ${type} (opcional):`, "");
+            const captionHtml = caption ? `<p style="font-size:0.85rem; color:#64748b; font-style:italic; margin-top:8px; text-align:center;">${caption}</p>` : '';
+            
             let mediaHtml = '';
             if (type === 'image') {
-                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><img src="${result.url}" alt="Información canal" style="max-width:100%; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>`;
+                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><img src="${result.url}" alt="Información canal" style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08);">${captionHtml}</div>`;
             } else {
-                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><video controls style="max-width:100%; border-radius:8px;"><source src="${result.url}" type="${file.type}">Tu navegador no soporta video.</video></div>`;
+                mediaHtml = `\n<div style="text-align:center; margin:15px 0;"><video controls style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08);"><source src="${result.url}" type="${file.type}">Tu navegador no soporta video.</video>${captionHtml}</div>`;
             }
             
             const textarea = document.getElementById(`modal-channel-html`);
             if (textarea) {
                 textarea.value += mediaHtml;
-                showToast('✅ Media insertado correctamente en el modal');
+                showToast('✅ Media insertado correctamente con su texto');
             }
         } else {
             alert('Error al subir: ' + result.message);
@@ -3539,6 +3543,132 @@ window.updateChannelData = (idx, field, value) => {
         window.channels_config[idx].id = value.toLowerCase().replace(/[^a-z0-9]/g, '-');
     }
 };
+
+// --- Professional Media Manager for Channels ---
+window.scanChannelHtml = function() {
+    const textarea = document.getElementById('modal-channel-html');
+    const list = document.getElementById('channel-media-list');
+    if (!textarea || !list) return;
+    
+    const html = textarea.value;
+    list.innerHTML = '';
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Find images and videos (with or without wrappers)
+    const elements = [];
+    
+    // Scan for images
+    doc.querySelectorAll('img').forEach(img => {
+        const wrapper = img.closest('div');
+        const caption = wrapper ? wrapper.querySelector('p')?.innerText : '';
+        elements.push({
+            type: 'image',
+            src: img.getAttribute('src'),
+            caption: caption || '',
+            original: wrapper ? wrapper.outerHTML : img.outerHTML
+        });
+    });
+    
+    // Scan for videos
+    doc.querySelectorAll('video').forEach(vid => {
+        const wrapper = vid.closest('div');
+        const caption = wrapper ? wrapper.querySelector('p')?.innerText : '';
+        elements.push({
+            type: 'video',
+            src: vid.querySelector('source')?.getAttribute('src') || vid.getAttribute('src'),
+            caption: caption || '',
+            original: wrapper ? wrapper.outerHTML : vid.outerHTML
+        });
+    });
+
+    if (elements.length === 0) {
+        list.style.display = 'none';
+        return;
+    }
+    
+    list.style.display = 'flex';
+    elements.forEach((el, i) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; font-size:0.8rem;';
+        
+        const icon = el.type === 'image' ? '<i class="fas fa-image" style="color:#27ae60;"></i>' : '<i class="fas fa-video" style="color:#f39c12;"></i>';
+        
+        item.innerHTML = `
+            <div style="flex-shrink:0;">${icon}</div>
+            <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:#475569;">
+                ${el.caption || 'Sin texto'}
+            </div>
+            <div style="display:flex; gap:5px;">
+                <button type="button" title="Editar texto" onclick="window.editChannelMediaText(${i})" style="border:none; background:#e2e8f0; color:#64748b; padding:4px 8px; border-radius:4px; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                <button type="button" title="Eliminar" onclick="window.deleteChannelMedia(${i})" style="border:none; background:#fee2e2; color:#ef4444; padding:4px 8px; border-radius:4px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        
+        // Store metadata for the actions
+        item.dataset.original = el.original;
+        item.dataset.type = el.type;
+        item.dataset.src = el.src;
+        item.dataset.caption = el.caption;
+        
+        list.appendChild(item);
+    });
+};
+
+window.editChannelMediaText = function(idx) {
+    const list = document.getElementById('channel-media-list');
+    const item = list.children[idx];
+    const originalHtml = item.dataset.original;
+    const currentCaption = item.dataset.caption;
+    
+    const newCaption = prompt('Nuevo texto para el media:', currentCaption);
+    if (newCaption === null) return;
+    
+    const textarea = document.getElementById('modal-channel-html');
+    const type = item.dataset.type;
+    const src = item.dataset.src;
+    
+    const captionHtml = newCaption ? `<p style="font-size:0.85rem; color:#64748b; font-style:italic; margin-top:8px; text-align:center;">${newCaption}</p>` : '';
+    let newHtml = '';
+    
+    if (type === 'image') {
+        newHtml = `<div style="text-align:center; margin:15px 0;"><img src="${src}" alt="Información canal" style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08);">${captionHtml}</div>`;
+    } else {
+        newHtml = `<div style="text-align:center; margin:15px 0;"><video controls style="max-width:100%; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08);"><source src="${src}">Tu navegador no soporta video.</video>${captionHtml}</div>`;
+    }
+    
+    textarea.value = textarea.value.replace(originalHtml, newHtml);
+    window.scanChannelHtml();
+};
+
+window.deleteChannelMedia = function(idx) {
+    if (!confirm('¿Seguro que quieres eliminar este elemento multimedia?')) return;
+    const list = document.getElementById('channel-media-list');
+    const item = list.children[idx];
+    const originalHtml = item.dataset.original;
+    
+    const textarea = document.getElementById('modal-channel-html');
+    textarea.value = textarea.value.replace(originalHtml, '').trim();
+    window.scanChannelHtml();
+};
+
+// Trigger scan when opening modal or changing textarea
+const originalOpenChannelModal = window.openChannelModal;
+window.openChannelModal = function(index) {
+    originalOpenChannelModal(index);
+    setTimeout(window.scanChannelHtml, 100);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const channelHtmlArea = document.getElementById('modal-channel-html');
+    if (channelHtmlArea) {
+        channelHtmlArea.addEventListener('input', () => {
+            clearTimeout(window._channelScanTimeout);
+            window._channelScanTimeout = setTimeout(window.scanChannelHtml, 300);
+        });
+    }
+});
 
 window.removeChannel = (idx) => {
     if (confirm('¿Eliminar este canal permanentemente?')) {

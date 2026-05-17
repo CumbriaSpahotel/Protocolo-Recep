@@ -27,6 +27,7 @@ const safeStorage = {
 let currentHotel = safeStorage.getItem('selectedHotel') || 'Ambos hoteles';
 
 function setHotel(hotel) {
+    const scrollPos = window.scrollY;
     currentHotel = hotel;
     safeStorage.setItem('selectedHotel', hotel);
     // Refresh UI
@@ -35,8 +36,13 @@ function setHotel(hotel) {
     
     const currentView = viewHistory[viewHistory.length - 1];
     if (currentView.type === 'home') renderHome();
-    else if (currentView.type === 'protocol') loadProtocol(currentView.payload);
+    else if (currentView.type === 'protocol') loadProtocol(currentView.payload, '', true);
     else if (currentView.type === 'category') renderCategory(currentView.name, currentView.id);
+    
+    // Restore scroll position after a short delay to allow DOM update
+    setTimeout(() => {
+        window.scrollTo(0, scrollPos);
+    }, 0);
     
     // Update the chatbot context if it exists
     const botContext = document.querySelector('.chatbot-header span:last-child');
@@ -1084,7 +1090,7 @@ function renderCategory(name, id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function loadProtocol(p, highlightText = '') {
+function loadProtocol(p, highlightText = '', skipScroll = false) {
     const pId = p.section || p.title;
     location.hash = `protocol/${encodeURIComponent(pId)}`;
     toggleHomeComponents(false);
@@ -1197,94 +1203,124 @@ function loadProtocol(p, highlightText = '') {
 
         // Define the dynamic part (the explorer itself)
         const dynamicExplorer = `
-            <div class="channel-explorer-container" style="position: relative; margin-top: 2rem;">
-                <div class="channel-info-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #0369a1; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 18px; border: 1px solid #e2e8f0;">
-                    <div style="background: #e0f2fe; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fas fa-project-diagram" style="color: #0369a1; font-size: 1.2rem;"></i>
-                    </div>
-                    <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1;">Gestión de Canales de Venta</p>
-                            <a href="admin.html#tab-canales" class="admin-only-flex" style="font-size: 0.7rem; background: #0369a1; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 700; gap: 5px; align-items: center;">
-                                <i class="fas fa-edit"></i> Gestionar Canales
-                            </a>
+            <div class="channel-explorer-container" style="position: relative; margin-top: 1rem;">
+                <!-- Modern Search & Filter Header -->
+                <div class="channel-header-premium" style="background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 30px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between;">
+                        <div style="flex: 1; min-width: 300px; position: relative;">
+                            <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
+                            <input type="text" id="channel-search" placeholder="Buscar por nombre, plataforma o servicio..." oninput="filterChannelsGrid(this.value)" style="width: 100%; padding: 16px 20px 16px 52px; border-radius: 16px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 1rem; outline: none; transition: all 0.3s; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.08)';" onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
                         </div>
-                        Consulta la operativa detallada, criterios de facturación y particularidades de cada canal. Utiliza el <strong>buscador</strong> para filtrar por nombre o el <strong>selector de hotel</strong> para ajustar la vista a tu centro de trabajo.
+                        
+                        <div class="hotel-filter-pills" style="display: flex; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 14px;">
+                            ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
+                                <button onclick="setHotel('${h}')" style="padding: 10px 20px; border-radius: 10px; border: none; background: ${currentHotel === h ? '#0369a1' : 'transparent'}; color: ${currentHotel === h ? 'white' : '#64748b'}; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                                    ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
+                                </button>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
 
-                <div class="channel-controls" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; align-items: stretch;">
-                    <div class="search-wrapper" style="flex: 1; min-width: 280px; position: relative;">
-                        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                        <input type="text" id="channel-search" placeholder="Buscar canal (ej. Booking, Expedia...)" oninput="filterChannels(this.value)" style="width: 100%; padding: 14px 15px 14px 45px; border-radius: 14px; border: 2px solid #e2e8f0; font-size: 0.95rem; outline: none; transition: all 0.2s; background: white; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
-                    </div>
+                <!-- Channel Grid View (Ultra-Compact List) -->
+                <div id="channels-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 25px;">
+                    ${relevantChannels.map((c, idx) => `
+                        <div class="channel-card-mini" onclick="showChannelDetail('${c.id}')" data-name="${c.name.toLowerCase()}" data-hotel="${c.hotel}" style="background: white; padding: 8px 12px; border-radius: 10px; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; position: relative;">
+                            <div style="flex-shrink: 0; width: 32px; height: 32px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; position: relative;">
+                                ${c.icon}
+                                ${c.isGift ? '<span style="position: absolute; top: -4px; right: -4px; background: #a855f7; color: white; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1px solid white;">🎁</span>' : ''}
+                            </div>
+                            <div style="overflow: hidden; text-align: left;">
+                                <h4 style="margin: 0; color: #0f172a; font-size: 0.72rem; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.name}</h4>
+                                <p style="margin: 0; font-size: 0.5rem; color: #64748b; text-transform: uppercase; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.hotel.replace('Sercotel ', '').replace(' Spa & Hotel', '')}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Detail View Container (Hidden by default) -->
+                <div id="channel-detail-view" style="display: none;">
+                    <button onclick="hideChannelDetail()" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; background: #f1f5f9; color: #64748b; border: none; border-radius: 12px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <i class="fas fa-arrow-left"></i> Volver al listado
+                    </button>
                     
-                    <div class="hotel-selector" style="background: white; border: 2px solid #e2e8f0; padding: 4px; border-radius: 14px; display: flex; gap: 4px;">
-                        ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
-                            <button onclick="setHotel('${h}')" style="padding: 8px 16px; border-radius: 10px; border: none; background: ${currentHotel === h ? '#0369a1' : 'transparent'}; color: ${currentHotel === h ? 'white' : '#64748b'}; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
-                                ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
-                            </button>
-                        `).join('')}
-                    </div>
+                    <div id="channel-detail-content"></div>
                 </div>
 
-                <div id="channel-nav-container" style="position: sticky; top: 10px; z-index: 1000; margin-bottom: 30px;">
-                    <nav class="channel-nav-sticky" style="display: flex; gap: 10px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); overflow-x: auto; scrollbar-width: none; border: 1px solid rgba(255,255,255,0.15); align-items: center; position: relative;">
-                        <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(to left, rgba(15, 23, 42, 0.95), transparent); pointer-events: none; border-radius: 0 20px 20px 0; z-index: 2;"></div>
-                        ${relevantChannels.map((c, idx) => `
-                            <button onclick="selectChannelTab('${c.id}', this)" id="btn-tab-${c.id}" class="channel-tab ${idx === 0 ? 'active' : ''}" data-name="${c.name.toLowerCase()}" style="padding: 10px 18px; font-size: 0.8rem; background: ${idx === 0 ? '#fbbf24' : 'rgba(255,255,255,0.05)'}; color: ${idx === 0 ? '#0f172a' : '#94a3b8'}; border-radius: 12px; border: 1px solid ${idx === 0 ? '#fbbf24' : 'transparent'}; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.3s; min-width: max-content; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; position: relative; z-index: 1;">
-                                <span style="font-size: 1.1rem; line-height: 1;">${c.icon}</span>
-                                <span style="line-height: 1.2;">${c.name}</span>
-                                ${c.isGift ? '<span style="background: #a855f7; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🎁</span>' : ''}
-                            </button>
-                        `).join('')}
-                    </nav>
-                </div>
+                <!-- Logic Injection -->
+                <script>
+                    window.filterChannelsGrid = function(query) {
+                        const q = query.toLowerCase().trim();
+                        const cards = document.querySelectorAll('.channel-card-mini');
+                        const detailView = document.getElementById('channel-detail-view');
+                        const gridView = document.getElementById('channels-grid-view');
+                        
+                        if (detailView.style.display === 'block') {
+                            hideChannelDetail();
+                        }
 
-                <div id="channels-render-list" style="min-height: 400px; padding: 0;">
-                    ${relevantChannels.length > 0 ? relevantChannels.map((c, idx) => `
-                        <div id="panel-${c.id}" class="channel-pane" style="display: ${idx === 0 ? 'block' : 'none'}; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 25px;">
-                                <h2 style="border:none; margin:0; color: #0f172a; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 15px; letter-spacing: -0.5px;">
-                                    <span style="background: #f1f5f9; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">${c.icon}</span>
-                                    ${c.name}
-                                    ${c.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
-                                </h2>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span class="hotel-badge" style="background: ${c.hotel === 'Ambos hoteles' ? '#64748b' : c.hotel === 'Sercotel Guadiana' ? '#0369a1' : '#10b981'}; color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                        <i class="fas fa-hotel" style="margin-right: 5px;"></i> ${c.hotel || 'Ambos hoteles'}
+                        cards.forEach(card => {
+                            const name = card.getAttribute('data-name');
+                            card.style.display = name.includes(q) ? 'flex' : 'none';
+                        });
+                    };
+
+                    window.showChannelDetail = function(id) {
+                        const grid = document.getElementById('channels-grid-view');
+                        const detail = document.getElementById('channel-detail-view');
+                        const content = document.getElementById('channel-detail-content');
+                        
+                        // Find data in global config
+                        const config = typeof channels_config !== 'undefined' ? channels_config.find(c => c.id === id) : null;
+                        if (!config) return;
+
+                        // Render detail content
+                        content.innerHTML = \`
+                            <div class="channel-pane animate-in" style="animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 25px;">
+                                    <h2 style="border:none; margin:0; color: #0f172a; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 15px; letter-spacing: -0.5px;">
+                                        <span style="background: #f1f5f9; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">\${config.icon}</span>
+                                        \${config.name}
+                                        \${config.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
+                                    </h2>
+                                    <span style="background: \${config.hotel === 'Ambos hoteles' ? '#64748b' : config.hotel === 'Sercotel Guadiana' ? '#0369a1' : '#10b981'}; color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <i class="fas fa-hotel" style="margin-right: 5px;"></i> \${config.hotel}
                                     </span>
                                 </div>
-                            </div>
-                            <div class="channel-card" style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
-                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #0369a1, #fbbf24);"></div>
-                                <h3 style="margin-top:0; color: #0f172a; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 20px;">${c.summary || 'Resumen Operativo'}</h3>
-                                <div class="channel-procedimiento" style="color: #334155; line-height: 1.8; font-size: 1rem; font-weight: 500;">
-                                    ${c.content ? `<p>${c.content.replace(/\n/g, '<br>')}</p>` : ''}
-                                </div>
-                                ${c.htmlContent ? `<div class="channel-custom-html" style="margin-top:35px;">${c.htmlContent}</div>` : ''}
-                                ${c.notes ? `
-                                    <div class="channel-notes" style="margin-top:35px; padding:25px; background: linear-gradient(135deg, #fffcf0 0%, #fff9e6 100%); border-left: 6px solid #fbbf24; border-radius: 16px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.1);">
-                                        <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#854d0e; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-lightbulb"></i> Notas de Importancia</h4>
-                                        <p style="margin:0; font-size:0.95rem; color: #713f12; font-style:italic; line-height: 1.6;">${c.notes.replace(/\n/g, '<br>')}</p>
+                                <div class="channel-card" style="background: white; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #0369a1, #fbbf24);"></div>
+                                    <h3 style="margin-top:0; color: #0f172a; font-size: 1.4rem; font-weight: 800; margin-bottom: 20px;">\${config.summary || 'Resumen Operativo'}</h3>
+                                    <div style="color: #334155; line-height: 1.8; font-size: 1rem; font-weight: 500;">
+                                        \${config.content ? '<p>' + config.content.replace(/\\n/g, '<br>') + '</p>' : ''}
                                     </div>
-                                ` : ''}
+                                    \${config.htmlContent ? '<div class="channel-custom-html" style="margin-top:30px;">' + config.htmlContent + '</div>' : ''}
+                                    \${config.notes ? \`
+                                        <div style="margin-top:35px; padding:25px; background: #fffcf0; border-left: 6px solid #fbbf24; border-radius: 16px;">
+                                            <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#854d0e; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-lightbulb"></i> Notas de Importancia</h4>
+                                            <p style="margin:0; font-size:0.95rem; color: #713f12; font-style:italic; line-height: 1.6;">\${config.notes.replace(/\\n/g, '<br>')}</p>
+                                        </div>
+                                    \` : ''}
+                                </div>
                             </div>
-                        </div>
-                    `).join('') : '<div style="padding: 100px 40px; text-align: center; color: #94a3b8; background: #f8fafc; border-radius: 24px; border: 2px dashed #e2e8f0;"><i class="fas fa-search fa-4x" style="margin-bottom: 20px; opacity: 0.2; color: #0369a1;"></i><p style="font-size: 1.1rem; font-weight: 600;">No se han encontrado canales</p><p style="font-size: 0.9rem; opacity: 0.7;">Prueba con otros términos o cambia el hotel de referencia.</p></div>'}
-                </div>
-            </div>
+                        \`;
 
-                </div>
+                        grid.style.display = 'none';
+                        detail.style.display = 'block';
+                        window.scrollTo({ top: document.querySelector('.channel-explorer-container').offsetTop - 20, behavior: 'smooth' });
+                    };
+
+                    window.hideChannelDetail = function() {
+                        document.getElementById('channels-grid-view').style.display = 'grid';
+                        document.getElementById('channel-detail-view').style.display = 'none';
+                    };
+                </script>
             </div>
 
             <style>
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-                .channel-tab:hover:not(.active) { background: rgba(255,255,255,0.15) !important; color: white !important; }
-                .channel-tab.active { box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3); }
-                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 25px auto; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05); }
-                .channel-nav-sticky::-webkit-scrollbar { display: none; }
-                .channel-pane { scroll-margin-top: 150px; }
+                .channel-card-mini:hover { transform: translateY(-5px); border-color: #0369a1; box-shadow: 0 15px 35px rgba(3, 105, 161, 0.1); }
+                .channel-card-mini:hover .card-bg-effect { transform: scale(1.5); }
+                .channel-custom-html img, .channel-custom-html video { max-width: 100%; height: auto; display: block; margin: 25px auto; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
             </style>
         `;
 
@@ -1293,27 +1329,7 @@ function loadProtocol(p, highlightText = '') {
         if (hasPlaceholder) {
             content = p.content.replace('{{CHANNELS_EXPLORER}}', dynamicExplorer);
         } else {
-            // Default legacy wrapper if no placeholder is found
-            const defaultWrapper = `
-                <div class="channel-explorer-container" style="position: relative; margin-top: 2rem;">
-                    <div class="channel-info-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-left: 5px solid #0369a1; padding: 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; align-items: start; gap: 18px; border: 1px solid #e2e8f0;">
-                        <div style="background: #e0f2fe; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fas fa-project-diagram" style="color: #0369a1; font-size: 1.2rem;"></i>
-                        </div>
-                        <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; flex: 1;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                <p style="margin: 0; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; color: #0369a1;">Gestión de Canales de Venta</p>
-                                <a href="admin.html#tab-canales" class="admin-only-flex" style="font-size: 0.7rem; background: #0369a1; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-weight: 700; gap: 5px; align-items: center;">
-                                    <i class="fas fa-edit"></i> Gestionar Canales
-                                </a>
-                            </div>
-                            Consulta la operativa detallada, criterios de facturación y particularidades de cada canal. Utiliza el <strong>buscador</strong> para filtrar por nombre o el <strong>selector de hotel</strong> para ajustar la vista a tu centro de trabajo.
-                        </div>
-                    </div>
-                    ${dynamicExplorer}
-                </div>
-            `;
-            content = (p.content ? `<div class="protocol-intro" style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px dashed #e2e8f0;">${p.content}</div>` : '') + defaultWrapper;
+            content = (p.content ? `<div class="protocol-intro" style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px dashed #e2e8f0;">${p.content}</div>` : '') + dynamicExplorer;
         }
     }
 
@@ -1472,7 +1488,7 @@ function loadProtocol(p, highlightText = '') {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }, 500);
-    } else {
+    } else if (!skipScroll) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
