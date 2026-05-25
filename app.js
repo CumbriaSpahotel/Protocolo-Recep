@@ -1474,24 +1474,40 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
             </footer>
         </article>
         
-        <div id="comments-section-container" style="margin-top: 3rem; border-top: 2px dashed #eee; padding-top: 2rem;">
-            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.2rem;"><i class="fas fa-comments"></i> Comentarios y Notas del Equipo</h3>
+        <div id="comments-section-container" style="margin-top: 4rem; padding-top: 2.5rem; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; width: 100px; height: 4px; background: linear-gradient(90deg, var(--accent-blue, #3b82f6), #10b981); border-radius: 4px;"></div>
+            <h3 style="color: #1e293b; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
+                <div style="background: linear-gradient(135deg, var(--accent-blue, #3b82f6), #60a5fa); padding: 0.5rem; border-radius: 8px; color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);">
+                    <i class="fas fa-comments"></i>
+                </div>
+                Comentarios y Notas del Equipo
+            </h3>
             
-            <div id="comments-container-${pId}" class="comments-list" style="margin-bottom: 2rem;">
-                <div style="text-align: center; color: #999; padding: 1rem; font-style: italic; border: 1px dashed #ddd; border-radius: 8px;">
-                    Cargando comentarios...
+            <div id="comments-container-${pId}" class="comments-list" style="margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="text-align: center; color: #94a3b8; padding: 2rem; border: 1px dashed #cbd5e1; border-radius: 12px; font-weight: 500;">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando comentarios...
                 </div>
             </div>
             
-            <div class="comment-form" style="display: flex; flex-direction: column; gap: 1rem; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                <h4 style="margin: 0; color: #495057; font-size: 1rem;">Añadir un nuevo comentario</h4>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" id="comment-author" placeholder="Tu nombre (Ej: Juan - Recepción)" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-family: inherit;">
+            <div class="comment-form" style="display: flex; flex-direction: column; gap: 1.25rem; background: #ffffff; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1)); border-radius: 50%; filter: blur(20px); pointer-events: none;"></div>
+                <h4 style="margin: 0; color: #334155; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-pen-alt" style="color: var(--accent-blue, #3b82f6);"></i> Añadir un nuevo comentario
+                </h4>
+                <div style="position: relative;">
+                    <input type="text" id="comment-author" placeholder="Tu nombre (Ej: Juan - Recepción)" style="width: 100%; padding: 14px 14px 14px 14px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; font-family: inherit; font-size: 0.95rem; background: #f8fafc; transition: all 0.2s ease; box-sizing: border-box;" onfocus="this.style.background='#ffffff'; this.style.borderColor='var(--accent-blue, #3b82f6)'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';">
                 </div>
-                <textarea id="comment-text" placeholder="Escribe tu comentario, duda o sugerencia aquí..." style="width: 100%; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical; outline: none;"></textarea>
-                <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="align-self: flex-start; padding: 12px 24px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s;">
-                    <i class="fas fa-paper-plane"></i> Enviar Comentario
-                </button>
+                <div style="position: relative;">
+                    <textarea id="comment-text" placeholder="Escribe tu comentario, duda o sugerencia aquí..." style="width: 100%; min-height: 120px; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.95rem; resize: vertical; outline: none; background: #f8fafc; transition: all 0.2s ease; box-sizing: border-box;" onfocus="this.style.background='#ffffff'; this.style.borderColor='var(--accent-blue, #3b82f6)'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-start; align-items: center; margin-top: 0.5rem; gap: 1rem; flex-wrap: wrap;">
+                    <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="padding: 12px 28px; background: linear-gradient(135deg, var(--accent-blue, #3b82f6), #2563eb); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(37, 99, 235, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(37, 99, 235, 0.3)';">
+                        <i class="fas fa-paper-plane"></i> Enviar Comentario
+                    </button>
+                    <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic; display: flex; align-items: center; gap: 0.25rem;">
+                        <i class="fas fa-lock"></i> Guardado seguro y notificación automática
+                    </span>
+                </div>
             </div>
         </div>
     `;
@@ -2267,19 +2283,28 @@ function renderComments(pId) {
     }
     
     container.innerHTML = filteredComments.map(c => `
-        <div class="comment-item" style="background: white; padding: 1.2rem; border-radius: 12px; border: 1px solid #eee; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); animation: fadeIn 0.4s ease;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; align-items: center;">
-                <strong style="color: var(--accent-blue); font-size: 1rem;"><i class="fas fa-user-circle"></i> ${c.author}</strong>
-                <span style="font-size: 0.75rem; color: #999; background: #f8f9fa; padding: 2px 8px; border-radius: 4px;">${new Date(c.date).toLocaleString()}</span>
-            </div>
-            <div style="font-size: 0.95rem; color: #444; line-height: 1.5;">${c.text}</div>
-            
-            ${c.reply ? `
-                <div class="admin-reply" style="margin-top: 15px; padding: 12px 15px; background: #f1f8ff; border-left: 4px solid #0a6aa1; border-radius: 0 8px 8px 0; font-size: 0.9rem;">
-                    <div style="font-weight: 800; color: #032d4b; margin-bottom: 5px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <i class="fas fa-reply-all"></i> Respuesta de Administración:
+        <div class="comment-item" style="background: #ffffff; padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); animation: fadeIn 0.4s ease; transition: transform 0.2s; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-blue, #3b82f6);"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 32px; height: 32px; background: #eff6ff; color: var(--accent-blue, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                        \${c.author.charAt(0).toUpperCase()}
                     </div>
-                    <div style="color: #455a64; font-style: italic;">"${c.reply}"</div>
+                    <strong style="color: #1e293b; font-size: 1.05rem; font-weight: 700;">\${c.author}</strong>
+                </div>
+                <span style="font-size: 0.75rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                    <i class="far fa-clock" style="margin-right: 4px;"></i> \${new Date(c.date).toLocaleString()}
+                </span>
+            </div>
+            <div style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin-left: 2.75rem;">\${c.text}</div>
+            
+            \${c.reply ? `
+                <div class="admin-reply" style="margin-top: 1.25rem; margin-left: 2.75rem; padding: 1rem 1.25rem; background: #f0fdf4; border-radius: 12px; font-size: 0.9rem; position: relative;">
+                    <div style="position: absolute; left: -8px; top: 1.5rem; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 8px solid #f0fdf4;"></div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 800; color: #166534; margin-bottom: 0.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <i class="fas fa-check-circle"></i> Respuesta de Administración
+                    </div>
+                    <div style="color: #15803d; line-height: 1.5;">\${c.reply}</div>
                 </div>
             ` : ''}
         </div>
