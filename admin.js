@@ -1893,16 +1893,40 @@ function openEditor(index = -1) {
         // Try to set category and parent from section
         if (p.section) {
             const parts = p.section.split('.');
-            const catId = parts[0];
-            document.getElementById('edit-category').value = catId;
+            let catId = '';
+            let parentId = '';
             
-            // If it's a sub-id (X.Y.Z), parent is X.Y
-            if (parts.length > 2) {
-                const parentId = `${parts[0]}.${parts[1]}`;
-                updateParentSections(parentId);
+            const categorySelect = document.getElementById('edit-category');
+            
+            if (parts.length >= 2) {
+                const possibleSubCat = `${parts[0]}.${parts[1]}`;
+                const hasSubCat = Array.from(categorySelect.options).some(opt => opt.value === possibleSubCat);
+                
+                if (hasSubCat) {
+                    catId = possibleSubCat;
+                    if (parts.length > 2) {
+                        if (parts.length > 3) {
+                            parentId = parts.slice(0, -1).join('.');
+                        } else {
+                            parentId = '';
+                        }
+                    }
+                } else {
+                    catId = parts[0];
+                    if (parts.length > 1) {
+                        if (parts.length > 2) {
+                            parentId = parts.slice(0, -1).join('.');
+                        } else {
+                            parentId = '';
+                        }
+                    }
+                }
             } else {
-                updateParentSections('');
+                catId = parts[0];
             }
+
+            document.getElementById('edit-category').value = catId;
+            updateParentSections(parentId);
         } else {
             document.getElementById('edit-category').value = '';
             updateParentSections('');

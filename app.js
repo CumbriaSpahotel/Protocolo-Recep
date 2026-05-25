@@ -2264,6 +2264,7 @@ function renderComments(pId) {
     if (!container) return;
     
     if (typeof comments_data === 'undefined' || !Array.isArray(comments_data)) {
+        container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; border: 1px dashed #cbd5e1; border-radius: 12px; font-weight: 500;"><i class="fas fa-info-circle" style="margin-right: 8px;"></i> No hay comentarios todavía. ¡Sé el primero en aportar!</div>';
         return;
     }
     
@@ -2276,6 +2277,7 @@ function renderComments(pId) {
     });
     
     if (filteredComments.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; border: 1px dashed #cbd5e1; border-radius: 12px; font-weight: 500;"><i class="fas fa-info-circle" style="margin-right: 8px;"></i> No hay comentarios todavía. ¡Sé el primero en aportar!</div>';
         return;
     }
     
