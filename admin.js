@@ -847,6 +847,25 @@ function initAdmin() {
     // Save
     document.getElementById('btn-save').addEventListener('click', saveProtocol);
 
+    // Export to Word from Editor (Takes active unsaved screen contents)
+    const btnExportWord = document.getElementById('btn-export-word');
+    if (btnExportWord) {
+        btnExportWord.addEventListener('click', () => {
+            const title = document.getElementById('edit-title').value || 'Sin Título';
+            const section = document.getElementById('edit-section').value || '';
+            const source = document.getElementById('edit-source').value || 'Ambos hoteles';
+            
+            let content = '';
+            if (isHtmlMode) {
+                content = document.getElementById('html-editor').value;
+            } else {
+                content = quill.root.innerHTML;
+            }
+            
+            downloadHtmlAsWord(title, section, source, content);
+        });
+    }
+
     // Delete in Editor
     const btnDeleteEditor = document.getElementById('btn-delete-editor');
     if (btnDeleteEditor) {
@@ -1585,6 +1604,7 @@ function renderAdminTable(data) {
             </td>
             <td style="color: #6c757d; font-size: 0.85rem; font-weight: 500;">${dateVal}</td>
             <td class="actions-cell">
+                <button class="btn-icon" onclick="exportProtocolToWord(${actualIndex})" title="Descargar Word" style="color: #2980b9;"><i class="fas fa-file-word"></i></button>
                 <button class="btn-icon" onclick="openEditor(${actualIndex})" title="Editar"><i class="fas fa-edit"></i></button>
                 <button class="btn-icon btn-delete" onclick="deleteProtocol(${actualIndex})" title="Eliminar"><i class="fas fa-trash"></i></button>
             </td>
@@ -2780,6 +2800,281 @@ function formatAdminDate(dateStr) {
 
 window.openEditor = openEditor;
 window.deleteProtocol = deleteProtocol;
+
+function downloadHtmlAsWord(title, section, source, contentHtml) {
+    try {
+        if (!contentHtml || contentHtml.trim() === '') {
+            showToast('⚠️ El contenido del protocolo está vacío.');
+            console.warn('Word Export: Content is empty.');
+            return;
+        }
+
+        // Sanitizar el HTML para Word usando DOMParser
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(contentHtml, 'text/html');
+
+        // 1. Eliminar elementos inapropiados
+        const tagsToRemove = ['script', 'button', 'input', 'select', 'textarea', 'style'];
+        tagsToRemove.forEach(tag => {
+            doc.querySelectorAll(tag).forEach(el => el.remove());
+        });
+
+        // Eliminar elementos ocultos o controles internos del editor
+        doc.querySelectorAll('.ql-tooltip, .ql-clipboard, .ql-hidden, .html-links-manager, #html-links-manager').forEach(el => el.remove());
+        doc.querySelectorAll('[hidden]').forEach(el => el.remove());
+        doc.querySelectorAll('*').forEach(el => {
+            if (el.style.display === 'none') {
+                el.remove();
+            }
+        });
+
+        // 2. Eliminar atributos de eventos (onclick, onchange, etc.) en todos los elementos
+        doc.querySelectorAll('*').forEach(el => {
+            for (let i = el.attributes.length - 1; i >= 0; i--) {
+                const attr = el.attributes[i];
+                if (attr.name.startsWith('on')) {
+                    el.removeAttribute(attr.name);
+                }
+            }
+        });
+
+        // 3. Convertir rutas relativas de imágenes a absolutas
+        const baseUrl = window.location.origin;
+        doc.querySelectorAll('img').forEach(img => {
+            const src = img.getAttribute('src');
+            if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:')) {
+                img.src = baseUrl + '/' + src.replace(/^\/+/, '');
+            }
+        });
+
+        const sanitizedContent = doc.body.innerHTML;
+
+        // Limpiar el nombre del archivo: eliminar caracteres inválidos de Windows y limitar longitud
+        let safeTitle = title.trim()
+            .replace(/[\x00-\x1f\/\\:\*\?"<>\|]/g, '_')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (safeTitle.length > 80) {
+            safeTitle = safeTitle.substring(0, 80).trim();
+        }
+
+        const filename = (safeTitle || 'documento') + '.doc';
+
+        // Documento HTML estructurado para Word compatible con A4 y CSS simple
+        const htmlString = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>${title}</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        @page {
+            size: 21.0cm 29.7cm;
+            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+        }
+        @page Section1 {
+            size: 21.0cm 29.7cm;
+            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+        }
+        div.WordSection1 {
+            page: Section1;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #333333;
+            line-height: 1.6;
+            font-size: 11pt;
+        }
+        h1 {
+            font-size: 20pt;
+            color: #0b2740;
+            margin-bottom: 5pt;
+            margin-top: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 14pt;
+            color: #0a6aa1;
+            margin-top: 18pt;
+            margin-bottom: 6pt;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: bold;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2pt;
+        }
+        h3 {
+            font-size: 12pt;
+            color: #2c3e50;
+            margin-top: 14pt;
+            margin-bottom: 4pt;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: bold;
+        }
+        p, li {
+            font-size: 11pt;
+            margin-bottom: 6pt;
+        }
+        .doc-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5pt;
+        }
+        .doc-header-table td {
+            border: none;
+            padding: 4px 0;
+            vertical-align: middle;
+            background-color: transparent;
+        }
+        .doc-header-title {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #0b2740;
+        }
+        .doc-metadata {
+            font-size: 9.5pt;
+            color: #666666;
+            text-align: right;
+        }
+        .doc-metadata span {
+            font-weight: bold;
+            color: #333;
+        }
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 8pt;
+            padding-left: 20pt;
+        }
+        li {
+            margin-bottom: 3pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12pt 0;
+        }
+        th {
+            background-color: #f2f7fa;
+            color: #0b1220;
+            font-weight: bold;
+            text-align: left;
+            border: 1px solid #d1d5db;
+            padding: 6pt 8pt;
+            font-size: 10pt;
+        }
+        td {
+            border: 1px solid #e5e7eb;
+            padding: 6pt 8pt;
+            font-size: 10pt;
+        }
+        tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+        
+        /* Custom notes / Alerts */
+        .custom-note {
+            background-color: #f3f8fc;
+            border-left: 4px solid #0a6aa1;
+            padding: 10px 15px;
+            margin: 12pt 0;
+        }
+        .custom-note strong {
+            color: #0a6aa1;
+            font-size: 9.5pt;
+            font-weight: bold;
+        }
+        .custom-note-warning {
+            background-color: #fffaf0;
+            border-left: 4px solid #dd6b20;
+            padding: 10px 15px;
+            margin: 12pt 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .video-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8pt;
+            text-align: center;
+            margin: 12pt 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="WordSection1">
+        <table class="doc-header-table">
+            <tr>
+                <td>
+                    <div class="doc-header-title">${title}</div>
+                    <div style="font-size: 11pt; color: #555; margin-top: 3pt;">Sección: ${section || 'Sin definir'}</div>
+                </td>
+                <td class="doc-metadata">
+                    <div>Hotel: <span>${source || 'Ambos hoteles'}</span></div>
+                    <div style="margin-top: 3pt;">Exportado el: <span>${new Date().toLocaleDateString('es-ES')}</span></div>
+                </td>
+            </tr>
+        </table>
+        
+        <hr style="height:2px; color:#0a6aa1; background-color:#0a6aa1; border:none; margin-bottom:20pt;">
+        
+        <div class="doc-body">
+            ${sanitizedContent}
+        </div>
+    </div>
+</body>
+</html>
+        `;
+
+        // Generar descarga del Blob con prefijo BOM UTF-8
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const blob = new Blob([bom, htmlString], { type: 'application/msword;charset=utf-8' });
+
+        if (navigator.msSaveBlob) {
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        showToast('📝 Word descargado correctamente');
+    } catch (error) {
+        console.error('Error al exportar a Word:', error);
+        alert('❌ Error al exportar a Word: ' + error.message);
+    }
+}
+
+function exportProtocolToWord(index) {
+    if (index === undefined || index === null || index < 0) {
+        showToast('❌ Error: Índice de protocolo inválido.');
+        return;
+    }
+    const p = adminProtocols[index];
+    if (!p) {
+        showToast('❌ Error: Protocolo no encontrado.');
+        return;
+    }
+    downloadHtmlAsWord(p.title || 'Sin Título', p.section || '', p.source || 'Ambos hoteles', p.content || '');
+}
+
+window.exportProtocolToWord = exportProtocolToWord;
 
 // Icon Bank Functions
 function openIconBank(inputElement) {
