@@ -326,7 +326,11 @@ function initApp() {
     // Logo click
     document.querySelector('.main-header h1').style.cursor = 'pointer';
     document.querySelector('.main-header h1').addEventListener('click', () => {
-        window.location.hash = 'protocol/1.7';
+        viewHistory = [{ type: 'home' }];
+        renderHome();
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelector('.nav-link[data-cat="inicio"]').classList.add('active');
+        document.querySelector('.app-wrapper').classList.remove('reading-mode');
     });
 
     // Inicio link click
@@ -334,7 +338,9 @@ function initApp() {
     if (inicioLink) {
         inicioLink.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.hash = 'protocol/1.7';
+            viewHistory = [{ type: 'home' }];
+            renderHome();
+            setActiveNav(inicioLink);
         });
     }
 
@@ -448,7 +454,9 @@ function renderNavigation() {
     inicioItem.innerHTML = '<i class="fas fa-th-large"></i> Inicio <i class="fas fa-caret-down"></i>';
     inicioItem.onclick = (e) => {
         e.preventDefault();
-        window.location.hash = 'protocol/1.7';
+        viewHistory = [{ type: 'home' }];
+        renderHome();
+        setActiveNav(inicioItem);
     };
     
     const inicioDropdown = document.createElement('div');
@@ -696,8 +704,6 @@ function toggleHomeComponents(isHome) {
 }
 
 function renderHome() {
-    window.location.hash = 'protocol/1.7';
-    return;
     toggleHomeComponents(true);
     document.querySelector('.app-wrapper').classList.add('reading-mode');
     
@@ -2087,8 +2093,11 @@ function getRedirectedSection(sectionId) {
 // Helper for Hash-based routing
 function handleHashRouting() {
     const hash = window.location.hash.slice(1);
-    if (!hash || hash === 'inicio') {
-        window.location.hash = 'protocol/1.7';
+    if (!hash) {
+        if (viewHistory.length > 1 && viewHistory[viewHistory.length - 1].type !== 'home') {
+            viewHistory = [{ type: 'home' }];
+            renderHome();
+        }
         return;
     }
 
@@ -2102,13 +2111,10 @@ function handleHashRouting() {
             
             // Highlight navigation tab
             const sectionStr = String(p.section || '');
-            if (sectionStr === '1.7') {
-                const inicioLink = document.querySelector('.nav-link[data-cat="inicio"]');
-                if (inicioLink) setActiveNav(inicioLink);
-            } else {
-                const catId = sectionStr.split('.')[0];
-                const link = document.querySelector(`.nav-link[data-cat="${catId}"]`);
-                if (link) setActiveNav(link);
+            const catId = sectionStr.split('.')[0];
+            const link = document.querySelector(`.nav-link[data-cat="${catId}"]`);
+            if (link) {
+                setActiveNav(link);
             }
         }
     } else if (hash.startsWith('category/')) {
