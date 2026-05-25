@@ -23,6 +23,19 @@ const safeStorage = {
     }
 };
 
+// Setup seamless iframe resizing for channel details
+window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'resize-iframe') {
+        const iframe = document.getElementById('iframe-' + e.data.id);
+        if (iframe) {
+            const newHeight = (e.data.height + 20) + 'px';
+            if (iframe.style.height !== newHeight) {
+                iframe.style.height = newHeight;
+            }
+        }
+    }
+});
+
 // Hotel Context Management
 let currentHotel = safeStorage.getItem('selectedHotel') || 'Ambos hoteles';
 
@@ -506,9 +519,7 @@ function renderNavigation() {
             // 1. Find all relevant protocols for this category prefix (e.g., "1.")
             const catProtocols = protocols.filter(p => {
                 const matchSection = p.section && (String(p.section) === id || String(p.section).startsWith(id + '.'));
-                // Filter by hotel context
-                const matchHotel = currentHotel === 'Ambos hoteles' || !p.source || p.source === 'Ambos hoteles' || p.source === 'General' || p.source === currentHotel;
-                return matchSection && matchHotel;
+                return matchSection;
             });
             
             // 2. Build a map of all unique section IDs present in these protocols
@@ -1235,33 +1246,45 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
     }
 
 
-    const isChannelProtocol = p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
+    const isChannelProtocol = p.section === '3.5' || p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
 
 
     
     // 1. Prepare Content (Special Channel Case)
     if (isChannelProtocol && typeof channels_config !== 'undefined') {
         const relevantChannels = channels_config.filter(c => 
-            currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel
+            !c.isHidden && (currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel)
         );
 
         // Define the dynamic part (the explorer itself)
         const dynamicExplorer = `
             <div class="channel-explorer-container" style="position: relative; margin-top: 1rem;">
+                <!-- Global Warning for Cancellations (Compact) -->
+                <div style="background: #fff5f5; border-left: 5px solid #ef4444; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); display: flex; gap: 15px; align-items: flex-start;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 1.5rem; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 6px 0; color: #b91c1c; font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Aviso Importante: Modificaciones y Cancelaciones</h3>
+                        <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #7f1d1d; line-height: 1.5;">
+                            <strong>Nunca modificar ni cancelar en el PMS reservas de canales externos</strong> (Booking, Expedia, Web propia, etc.). La modificación o cancelación debe gestionarse siempre desde el <strong>canal de origen correspondiente</strong> para evitar descuadres. Si actúas directamente en el PMS, la reserva podría no actualizarse en el canal online.
+                        </p>
+                        <div style="background: #fee2e2; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; color: #7f1d1d; display: inline-block; border: 1px solid #fca5a5;">
+                            <strong><i class="fas fa-check-circle" style="margin-right:4px;"></i>Norma operativa:</strong> Si la reserva entra por un canal externo, primero se revisa el origen y se gestiona la modificación o cancelación desde dicho canal correcto.
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Modern Search & Filter Header -->
                 <div class="channel-header-premium" style="background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 30px;">
                     <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between;">
-                        <div style="flex: 1; min-width: 300px; position: relative;">
+                        <div style="flex: 1; min-width: 250px; position: relative;">
                             <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
-                            <input type="text" id="channel-search" placeholder="Buscar por nombre, plataforma o servicio..." oninput="filterChannelsGrid(this.value)" style="width: 100%; padding: 16px 20px 16px 52px; border-radius: 16px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 1rem; outline: none; transition: all 0.3s; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.08)';" onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
+                            <input type="text" id="channel-search" placeholder="Buscar por nombre o servicio..." oninput="filterChannelsGrid()" style="width: 100%; padding: 16px 20px 16px 52px; border-radius: 16px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 1rem; outline: none; transition: all 0.3s; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.08)';" onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
                         </div>
-                        
-                        <div class="hotel-filter-pills" style="display: flex; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 14px;">
-                            ${['Sercotel Guadiana', 'Cumbria Spa & Hotel', 'Ambos hoteles'].map(h => `
-                                <button onclick="setHotel('${h}')" style="padding: 10px 20px; border-radius: 10px; border: none; background: ${currentHotel === h ? '#0369a1' : 'transparent'}; color: ${currentHotel === h ? 'white' : '#64748b'}; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
-                                    ${h.replace('Sercotel ', '').replace(' Spa & Hotel', '')}
-                                </button>
-                            `).join('')}
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <input type="hidden" id="channel-hotel-filter" value="all">
+                            <button class="hotel-filter-btn" data-hotel="all" onclick="setChannelHotelFilter('all')" style="padding: 12px 20px; border-radius: 14px; border: none; background: #0ea5e9; color: white; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);">🏨 Todos</button>
+                            <button class="hotel-filter-btn" data-hotel="Sercotel Guadiana" onclick="setChannelHotelFilter('Sercotel Guadiana')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🏨 Guadiana</button>
+                            <button class="hotel-filter-btn" data-hotel="Cumbria Spa & Hotel" onclick="setChannelHotelFilter('Cumbria Spa & Hotel')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🏨 Cumbria</button>
                         </div>
                     </div>
                 </div>
@@ -1269,14 +1292,16 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 <!-- Channel Grid View (Ultra-Compact List) -->
                 <div id="channels-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 25px;">
                     ${relevantChannels.map((c, idx) => `
-                        <div class="channel-card-mini" onclick="showChannelDetail('${c.id}')" data-name="${c.name.toLowerCase()}" data-hotel="${c.hotel}" style="background: white; padding: 8px 12px; border-radius: 10px; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; position: relative;">
-                            <div style="flex-shrink: 0; width: 32px; height: 32px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; position: relative;">
+                        <div class="channel-card-mini" onclick="showChannelDetail('${c.id}')" data-name="${c.name.toLowerCase()}" data-hotel="${c.hotel || 'Ambos hoteles'}" style="background: white; padding: 10px 12px; border-radius: 12px; border: 1px solid #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; position: relative;">
+                            <div style="flex-shrink: 0; width: 38px; height: 38px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; position: relative; border: 1px solid #e2e8f0;">
                                 ${c.icon}
-                                ${c.isGift ? '<span style="position: absolute; top: -4px; right: -4px; background: #a855f7; color: white; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1px solid white;">🎁</span>' : ''}
+                                ${c.isGift ? '<span style="position: absolute; top: -5px; right: -5px; background: #a855f7; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; border: 2px solid white; box-shadow: 0 2px 4px rgba(168,85,247,0.3);">🎁</span>' : ''}
                             </div>
-                            <div style="overflow: hidden; text-align: left;">
-                                <h4 style="margin: 0; color: #0f172a; font-size: 0.72rem; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.name}</h4>
-                                <p style="margin: 0; font-size: 0.5rem; color: #64748b; text-transform: uppercase; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.hotel.replace('Sercotel ', '').replace(' Spa & Hotel', '')}</p>
+                            <div style="overflow: hidden; text-align: left; flex: 1;">
+                                <h4 style="margin: 0 0 3px 0; color: #0f172a; font-size: 0.8rem; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.name}</h4>
+                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${c.hotel === 'Ambos hoteles' ? '#8b5cf6' : c.hotel === 'Sercotel Guadiana' ? '#0ea5e9' : '#10b981'}; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                    ${c.hotel === 'Ambos hoteles' ? 'Ambos Hoteles' : c.hotel === 'Sercotel Guadiana' ? 'Guadiana' : 'Cumbria'}
+                                </div>
                             </div>
                         </div>
                     `).join('')}
@@ -1293,11 +1318,35 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
 
                 <!-- Logic Injection -->
                 <script>
-                    window.filterChannelsGrid = function(query) {
-                        const q = query.toLowerCase().trim();
+                    window.setChannelHotelFilter = function(val) {
+                        document.getElementById('channel-hotel-filter').value = val;
+                        
+                        document.querySelectorAll('.hotel-filter-btn').forEach(btn => {
+                            if (btn.getAttribute('data-hotel') === val) {
+                                btn.style.background = '#0ea5e9';
+                                btn.style.color = 'white';
+                                btn.style.border = 'none';
+                                btn.style.boxShadow = '0 4px 10px rgba(14, 165, 233, 0.2)';
+                            } else {
+                                btn.style.background = '#f8fafc';
+                                btn.style.color = '#64748b';
+                                btn.style.border = '1px solid #e2e8f0';
+                                btn.style.boxShadow = 'none';
+                            }
+                        });
+                        
+                        filterChannelsGrid();
+                    };
+
+                    window.filterChannelsGrid = function() {
+                        const searchInput = document.getElementById('channel-search');
+                        const hotelFilter = document.getElementById('channel-hotel-filter');
+                        
+                        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                        const h = hotelFilter ? hotelFilter.value : 'all';
+                        
                         const cards = document.querySelectorAll('.channel-card-mini');
                         const detailView = document.getElementById('channel-detail-view');
-                        const gridView = document.getElementById('channels-grid-view');
                         
                         if (detailView.style.display === 'block') {
                             hideChannelDetail();
@@ -1305,7 +1354,12 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
 
                         cards.forEach(card => {
                             const name = card.getAttribute('data-name');
-                            card.style.display = name.includes(q) ? 'flex' : 'none';
+                            const hotel = card.getAttribute('data-hotel');
+                            
+                            const matchName = name.includes(q);
+                            const matchHotel = h === 'all' || hotel === h || hotel === 'Ambos hoteles';
+                            
+                            card.style.display = (matchName && matchHotel) ? 'flex' : 'none';
                         });
                     };
 
@@ -1318,6 +1372,39 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                         const config = typeof channels_config !== 'undefined' ? channels_config.find(c => c.id === id) : null;
                         if (!config) return;
 
+                        // Prepare HTML Content intelligently
+                        let safeHtmlContent = '';
+                        if (config.htmlContent) {
+                            if (config.htmlContent.toLowerCase().includes('<!doctype html>') || config.htmlContent.toLowerCase().includes('<html')) {
+                                let escaped = config.htmlContent;
+                                
+                                // HACK: Remove the dark full-screen body from the pasted HTML so it blends perfectly
+                                escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0; padding:0; background: transparent; font-family: Outfit, sans-serif;">');
+                                escaped = escaped.replace(/class="print-card[^"]*"/i, 'class="" style="width: 100%; border: none; box-shadow: none; background: transparent;"');
+                                
+                                // Auto-resize script to make it seamless
+                                const resizeScript = \`
+                                &lt;script&gt;
+                                    function sendHeight() {
+                                        const wrapper = document.getElementById('iframe-content-wrapper') || document.body.firstElementChild || document.body;
+                                        const height = wrapper.offsetHeight || wrapper.scrollHeight || document.documentElement.scrollHeight;
+                                        window.parent.postMessage({ type: 'resize-iframe', id: '\${config.id}', height: height }, '*');
+                                    }
+                                    window.addEventListener('load', sendHeight);
+                                    window.addEventListener('resize', sendHeight);
+                                    new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true });
+                                &lt;/script&gt;
+                                </body>
+                                \`;
+                                escaped = escaped.replace(new RegExp('</body>', 'i'), resizeScript);
+                                escaped = escaped.replace(/"/g, '&quot;');
+                                
+                                safeHtmlContent = '<div class="channel-custom-html" style="margin-top:30px;"><iframe id="iframe-' + config.id + '" srcdoc="' + escaped + '" style="width:100%; height:1000px; border:none; background: transparent; overflow: hidden;" scrolling="no"></iframe></div>';
+                            } else {
+                                safeHtmlContent = '<div class="channel-custom-html" style="margin-top:30px; border-top: 1px solid #f1f5f9; padding-top: 30px;">' + config.htmlContent + '</div>';
+                            }
+                        }
+
                         // Render detail content
                         content.innerHTML = \`
                             <div class="channel-pane animate-in" style="animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
@@ -1327,9 +1414,6 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                                         \${config.name}
                                         \${config.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
                                     </h2>
-                                    <span style="background: \${config.hotel === 'Ambos hoteles' ? '#64748b' : config.hotel === 'Sercotel Guadiana' ? '#0369a1' : '#10b981'}; color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        <i class="fas fa-hotel" style="margin-right: 5px;"></i> \${config.hotel}
-                                    </span>
                                 </div>
                                 <div class="channel-card" style="background: white; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
                                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #0369a1, #fbbf24);"></div>
@@ -1337,11 +1421,17 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                                     <div style="color: #334155; line-height: 1.8; font-size: 1rem; font-weight: 500;">
                                         \${config.content ? '<p>' + config.content.replace(/\\n/g, '<br>') + '</p>' : ''}
                                     </div>
-                                    \${config.htmlContent ? '<div class="channel-custom-html" style="margin-top:30px;">' + config.htmlContent + '</div>' : ''}
+                                    \${safeHtmlContent}
                                     \${config.notes ? \`
                                         <div style="margin-top:35px; padding:25px; background: #fffcf0; border-left: 6px solid #fbbf24; border-radius: 16px;">
                                             <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#854d0e; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-lightbulb"></i> Notas de Importancia</h4>
                                             <p style="margin:0; font-size:0.95rem; color: #713f12; font-style:italic; line-height: 1.6;">\${config.notes.replace(/\\n/g, '<br>')}</p>
+                                        </div>
+                                    \` : ''}
+                                    \${config.errors ? \`
+                                        <div style="margin-top:25px; padding:25px; background: #fff2f2; border-left: 6px solid #ef4444; border-radius: 16px;">
+                                            <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#b91c1c; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-exclamation-triangle"></i> Errores Frecuentes</h4>
+                                            <p style="margin:0; font-size:0.95rem; color: #7f1d1d; font-style:italic; line-height: 1.6;">\${config.errors.replace(/\\n/g, '<br>')}</p>
                                         </div>
                                     \` : ''}
                                 </div>
@@ -1393,15 +1483,13 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
     }
 
     // 3. Main Render Template
-    mainColumn.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div class="back-btn" onclick="goBack()" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Volver</div>
-            <div class="share-btn" onclick="copyProtocolLink('${pId.replace(/'/g, "\\'")}')" style="cursor: pointer; font-size: 0.85rem; color: var(--accent-blue); font-weight: 600;">
-                <i class="fas fa-share-alt"></i> Compartir
-            </div>
-        </div>
-
-        <article class="protocol-full animate-fade-in" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    let headerHTML = '';
+    let articleStyle = 'background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);';
+    
+    if (isChannelProtocol) {
+        articleStyle = 'background: transparent; padding: 0; box-shadow: none;';
+    } else {
+        headerHTML = `
             <header style="text-align: center; margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem;">
                 ${p.isCritical ? `
                     <div class="critical-alert-banner">
@@ -1431,8 +1519,21 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                     ${p.section ? `<span style="color: #ddd;">|</span><span><i class="fas fa-folder"></i> Sección ${p.section}</span>` : ''}
                 </div>
             </header>
+        `;
+    }
 
-            <div class="protocol-full-body" style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+    mainColumn.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${isChannelProtocol ? '0.5rem' : '1.5rem'};">
+            <div class="back-btn" onclick="goBack()" style="margin-bottom: 0;"><i class="fas fa-arrow-left"></i> Volver</div>
+            <div class="share-btn" onclick="copyProtocolLink('${pId.replace(/'/g, "\\'")}')" style="cursor: pointer; font-size: 0.85rem; color: var(--accent-blue); font-weight: 600;">
+                <i class="fas fa-share-alt"></i> Compartir
+            </div>
+        </div>
+
+        <article class="protocol-full animate-fade-in" style="${articleStyle}">
+            ${headerHTML}
+
+            <div class="protocol-full-body" style="${isChannelProtocol ? '' : 'font-size: 1.05rem; line-height: 1.7; color: #333;'}">
                 ${content}
                 ${videoSection}
 
@@ -2019,14 +2120,6 @@ function renderAlertsList(type) {
         const itemEl = document.createElement('div');
         itemEl.className = 'post-item alert-item premium-shadow';
         
-        // Determinate hotel by text or ID (heuristic)
-        let hotelTag = '';
-        if (item.title.includes('Guadiana') || (item.id && item.id.startsWith('G'))) {
-            hotelTag = '<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">Guadiana</span>';
-        } else if (item.title.includes('Cumbria') || (item.id && item.id.startsWith('C'))) {
-            hotelTag = '<span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">Cumbria</span>';
-        }
-
         itemEl.style = `
             background: white; 
             padding: 1.5rem; 
@@ -2047,7 +2140,6 @@ function renderAlertsList(type) {
                     <span><i class="far fa-calendar-alt"></i> ${item.date}</span>
                     ${item.id ? `<span style="color: #e2e8f0;">|</span><span><i class="fas fa-hashtag"></i> ID ${item.id}</span>` : ''}
                 </div>
-                ${hotelTag}
             </div>
             <h3 style="margin: 0; font-size: 1.15rem; color: #1e293b; font-weight: 700; line-height: 1.4;">${item.title}</h3>
             <div style="margin-top: 4px; display: flex; align-items: center; color: ${accentColor}; font-size: 0.8rem; font-weight: 700; gap: 6px;">
@@ -2097,33 +2189,10 @@ function formatDate(dateStr) {
     if (isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 }
-const SECTION_REDIRECT_MAP = {
-    // Operativa Diaria a Turnos
-    "9.1": "1.6", "9.2": "1.7",
-    // Estancia/Caja a Flujo
-    "3.2": "2.1.1", "3.3": "2.1.2", "3.4": "2.1.3", "5.4": "2.1.4", "3.5": "2.2.1", "7.4": "2.2.2",
-    // Incidencias a Flujo
-    "5.2": "2.3.1", "5.3": "2.3.3",
-    // Reservas/Cancelaciones a Reservas y Sistemas
-    "2.5": "3.1.1", "5.1": "3.1.2", "2.4": "3.2.1", "7.3": "3.2.3", "7.6": "3.3.4", "7.5": "3.4.3", "3.1": "2.1.5",
-    // Grupos a Eventos y Grupos
-    "4.4": "4.1.1", "4.2": "4.1.2", "4.3": "4.1.3", "4.1": "4.1.4", "4.5": "4.1.6",
-    // Restaurante a Eventos y Grupos (Menús)
-    "12.1": "4.2.1", "12.2": "4.2.2", "12.3": "4.2.3",
-    // Seguridad a Seguridad y Bienestar (Emergencias)
-    "6.1": "5.1.1", "6.3": "5.1.2", "6.4": "5.1.3", "6.2": "5.1.4", "6.5": "5.1.5",
-    // Spa a Seguridad y Bienestar (Spa)
-    "10.4": "5.2.1", "10.3": "5.2.2", "10.1": "5.2.3", "10.2": "5.2.4",
-    // Noticias y Biblioteca a Biblioteca y Enlaces
-    "11.1": "6.1.1", "11.2": "6.1.3", "8.1": "6.2.1", "14.1": "6.3.1", "14.2": "6.3.2", "14.3": "6.3.3"
-};
+const SECTION_REDIRECT_MAP = {};
 
 function getRedirectedSection(sectionId) {
-    if (sectionId === "11.1") {
-        const hotel = safeStorage.getItem('selectedHotel') || 'Ambos hoteles';
-        return hotel === "Sercotel Guadiana" ? "6.1.2" : "6.1.1";
-    }
-    return SECTION_REDIRECT_MAP[sectionId] || sectionId;
+    return sectionId;
 }
 
 // Helper for Hash-based routing
@@ -2627,10 +2696,6 @@ async function generateBotResponse(userInput) {
             if (infoHtml.includes(term)) score += 10;
         });
 
-        // Filter by hotel context
-        const isMatchHotel = currentHotel === 'Ambos hoteles' || !p.source || p.source === 'Ambos hoteles' || p.source === 'General' || p.source === currentHotel;
-        if (!isMatchHotel) score = 0;
-
         return { protocol: p, score, source: 'protocol' };
     }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
 
@@ -2652,7 +2717,6 @@ async function generateBotResponse(userInput) {
             if (htmlContent.includes(term)) score += 10;
         });
 
-        // Filter by hotel context
         const isMatchHotel = currentHotel === 'Ambos hoteles' || ch.hotel === 'Ambos hoteles' || ch.hotel === currentHotel;
         if (!isMatchHotel) score = 0;
 

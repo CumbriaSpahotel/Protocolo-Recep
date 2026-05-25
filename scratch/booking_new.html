@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo de Booking.com — Recepción</title>
+    <!-- Tailwind CSS para diseño fluido y escalable -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Outfit para un look corporativo moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+        }
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .print-full-width {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .page-break {
+                page-break-inside: avoid;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen p-4 sm:p-8 lg:p-12 flex items-center justify-center">
+
+    <!-- CONTENEDOR ANCHO / PANTALLA COMPLETA MEJORADA -->
+    <div id="iframe-content-wrapper" class="w-full max-w-[95%] xl:max-w-[1400px] bg-white border border-slate-200/90 rounded-3xl shadow-md p-8 sm:p-12 lg:p-16 print-full-width transition-all">
+        
+        <!-- CABECERA DE OPERACIONES CON BOTONES INTERACTIVOS -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-8 border-b border-slate-100 no-print mb-8">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span>2. Protocolo de Booking.com</span>
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Manual interactivo de operaciones y gestión de cobros VCC.</p>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <!-- Estado Interactivo -->
+                <button onclick="toggleStatus()" id="statusBadge" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 hover:bg-emerald-100">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" id="statusDot"></span>
+                    <span id="statusText">Canal Activo (RoomCloud / SiteMinder)</span>
+                </button>
+                <!-- Botón Imprimir -->
+                <button onclick="window.print()" class="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition-colors border border-slate-200 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" title="Imprimir protocolo">
+                    🖨️ Imprimir
+                </button>
+            </div>
+        </div>
+
+        <!-- CONTENEDOR CON LÍNEA DE ACENTO VERTICAL GRIS Y ESPACIADO EXPANSIVO -->
+        <div class="border-l-4 border-slate-200 pl-8 sm:pl-12 lg:pl-16 space-y-16 relative pt-4">
+
+            <!-- a) ¿CÓMO ENTRA? -->
+            <div class="relative">
+                <!-- Indicador de sección grande -->
+                <div class="absolute -left-[42px] sm:-left-[60px] lg:-left-[76px] top-1 w-5 h-5 rounded-full border-4 border-white bg-sky-600 shadow-sm"></div>
+                
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-sm font-bold tracking-wider">A / 01</span>
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-sky-900 uppercase tracking-wider">a) ¿Cómo entra la reserva?</h2>
+                </div>
+                
+                <div class="space-y-5">
+                    <p class="text-base sm:text-lg lg:text-xl text-slate-700 leading-relaxed">
+                        Las reservas de Booking.com entran de manera automática al <strong class="text-slate-900 font-bold">Log Channel</strong> bajo la figura del intermediario <strong class="text-slate-900">BOOKINGS EUROPE BV</strong>.
+                    </p>
+                    
+                    <!-- Grid de Metadatos Expansivo y de Gran Legibilidad -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                        <div class="p-5 sm:p-6 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-xs">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Conectividad de canal</span>
+                            <span class="text-base sm:text-lg font-bold text-slate-800">RoomCloud / SiteMinder</span>
+                        </div>
+                        <div class="p-5 sm:p-6 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-xs">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Descarga en PMS</span>
+                            <span class="text-base sm:text-lg font-bold text-slate-800">Importe Bruto</span>
+                        </div>
+                        <div class="p-5 sm:p-6 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-xs">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Criterio de Facturación</span>
+                            <span class="text-base sm:text-lg font-bold text-slate-800">Importe Bruto</span>
+                        </div>
+                    </div>
+
+                    <!-- Alertas del Log Mejorada -->
+                    <div class="p-5 bg-amber-50 border border-amber-200/60 rounded-2xl flex items-start gap-3 text-sm sm:text-base text-amber-900">
+                        <span class="text-lg leading-none mt-0.5">⚠️</span>
+                        <div>
+                            <span class="font-bold block mb-0.5">Control de errores en el volcado:</span> 
+                            Revisar siempre la bandeja de mensajes de la reserva en la extranet del canal y el correo electrónico de recepción. En ocasiones <strong class="font-bold text-amber-950">falta el número de teléfono</strong> o el motor vuelca erróneamente el segundo apellido del cliente.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- b) PROCEDIMIENTOS -->
+            <div class="relative">
+                <!-- Indicador de sección grande -->
+                <div class="absolute -left-[42px] sm:-left-[60px] lg:-left-[76px] top-1 w-5 h-5 rounded-full border-4 border-white bg-sky-600 shadow-sm"></div>
+                
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-sm font-bold tracking-wider">B / 02</span>
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-sky-900 uppercase tracking-wider">b) Procedimientos de Recepción</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Procedimiento de cobro — Reservas Booking.com (100% Tarjetas Virtuales VCC)
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Tarjeta NRF -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-xs">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="px-2.5 py-1 bg-red-100 text-red-800 border border-red-200 text-xs font-extrabold rounded-lg">TARIFAS NRF</span>
+                                    <span class="text-slate-400 font-bold text-xs uppercase">Inmediato</span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-2">No Reembolsable (NRF)</h4>
+                                <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                                    Realizar el cargo completo a la tarjeta virtual (VCC) exactamente <strong class="text-slate-950 font-semibold">1 hora después</strong> de que la reserva ingrese en el sistema.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-200/60 text-xs font-bold text-red-700 uppercase tracking-wider">
+                                ⏱️ Respetar período de gracia
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta EBI -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-xs">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-extrabold rounded-lg">TARIFAS EBI</span>
+                                    <span class="text-slate-400 font-bold text-xs uppercase">Filtro de Días</span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-2">Early Booking Incluido (7 días)</h4>
+                                <ul class="text-sm text-slate-600 space-y-2.5">
+                                    <li class="flex items-start gap-1.5">
+                                        <span class="text-indigo-500 font-bold mt-0.5">•</span>
+                                        <span><strong class="text-slate-900">Si faltan ≥ 7 días:</strong> Programar cobro en VCC para 7 días antes de la llegada.</span>
+                                    </li>
+                                    <li class="flex items-start gap-1.5">
+                                        <span class="text-indigo-500 font-bold mt-0.5">•</span>
+                                        <span><strong class="text-slate-900">Si faltan &lt; 7 días:</strong> Procesar de inmediato como tarifa NRF.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-200/60 text-xs font-bold text-indigo-700 uppercase tracking-wider">
+                                📆 Controlar fecha de llegada
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta BAR -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-xs">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="px-2.5 py-1 bg-sky-100 text-sky-800 border border-sky-200 text-xs font-extrabold rounded-lg">TARIFAS BAR</span>
+                                    <span class="text-slate-400 font-bold text-xs uppercase">Día de entrada</span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-slate-900 mb-2">Agencia (BAR/AGWEB)</h4>
+                                <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                                    Procesar el cargo total a la VCC <strong class="text-slate-950 font-semibold">el mismo día de la llegada por la mañana</strong>.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-200/60 text-xs font-bold text-sky-700 uppercase tracking-wider">
+                                🚫 Pago directo en hotel eliminado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asistente de Operaciones VCC Interactivo -->
+                    <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 no-print page-break">
+                        <div class="border-b border-slate-200 pb-3">
+                            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <span class="text-sky-600">⚙️</span>
+                                Asistente de Operaciones VCC
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Calcula la acción y directiva de cobro inmediata para el PMS</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Tipo de Tarifa</label>
+                                <select id="calcTarifa" onchange="calcularOperativa()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                                    <option value="NRF">No Reembolsable (NRF)</option>
+                                    <option value="EBI">Early Booking Incluido (EBI)</option>
+                                    <option value="BAR">Agencia (BAR / AGWEB)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Fecha de Reserva</label>
+                                <input type="date" id="fechaReserva" onchange="calcularOperativa()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Fecha de Llegada</label>
+                                <input type="date" id="fechaLlegada" onchange="calcularOperativa()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                        </div>
+
+                        <!-- Resultado dinámico -->
+                        <div id="calcResultado" class="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase block">Instrucción de Cobro a Registrar en PMS:</span>
+                            <div id="calcOutputText" class="text-sm text-slate-800 leading-relaxed font-semibold">
+                                Introduce las fechas para calcular la directiva.
+                            </div>
+                            <button onclick="copiarDirectivaCalculada()" id="btnCopiarDirectiva" class="hidden w-full py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                                📋 Copiar Directiva al Portapapeles
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Directivas Adicionales de Recepción en dos columnas amplias -->
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div class="p-5 sm:p-6 bg-slate-50/60 border border-slate-200 rounded-2xl space-y-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Datos del Cliente y Preferencias</span>
+                            <div class="space-y-3">
+                                <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-white/50 transition-colors cursor-pointer group">
+                                    <input type="checkbox" class="w-4 h-4 rounded text-sky-600 border-slate-300 bg-white focus:ring-sky-500 mt-0.5">
+                                    <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                                        En caso de <strong class="text-slate-900 font-semibold">no contar con el número telefónico</strong> del huésped en el PMS, solicitarlo de manera obligatoria durante el proceso de check-in.
+                                    </span>
+                                </label>
+                                <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-white/50 transition-colors cursor-pointer group">
+                                    <input type="checkbox" class="w-4 h-4 rounded text-sky-600 border-slate-300 bg-white focus:ring-sky-500 mt-0.5">
+                                    <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                                        Revisar y registrar todas las observaciones y peticiones especiales en la ficha de la reserva.
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="p-5 sm:p-6 bg-red-50/30 border border-red-200 rounded-2xl">
+                            <span class="text-xs font-bold text-red-800 uppercase tracking-widest block mb-2">Política de No-Show</span>
+                            <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                                Al estar garantizadas al 100% por VCC, si se genera un No-Show y la tarjeta virtual arroja algún tipo de rechazo o saldo insuficiente, debe gestionarse de forma inmediata la solicitud de cobro de penalización directamente en la extranet de Booking.com.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2) AJUSTE DE GARANTÍAS Y 3) APLICACIÓN DE CONDICIONES -->
+            <div class="relative page-break">
+                <!-- Indicador de sección grande -->
+                <div class="absolute -left-[42px] sm:-left-[60px] lg:-left-[76px] top-1 w-5 h-5 rounded-full border-4 border-white bg-sky-600 shadow-sm"></div>
+                
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-sm font-bold tracking-wider">C / 03</span>
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-sky-900 uppercase tracking-wider">2) Matriz de garantías por tipo de tarifa</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Tabla Corporativa Rediseñada en Pantalla Completa -->
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-xs">
+                        <table class="w-full text-left border-collapse text-sm sm:text-base">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs font-extrabold tracking-wider">
+                                    <th class="p-4 sm:p-5">Nombre de la Tarifa</th>
+                                    <th class="p-4 sm:p-5">Garantía</th>
+                                    <th class="p-4 sm:p-5">Release</th>
+                                    <th class="p-4 sm:p-5">Procedimiento Operativo de Cobro</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-150 text-slate-600">
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 sm:p-5 font-bold text-slate-900 text-base">AGENCIA (BAR)</td>
+                                    <td class="p-4 sm:p-5">Flexible</td>
+                                    <td class="p-4 sm:p-5">0 días</td>
+                                    <td class="p-4 sm:p-5 text-sky-700 font-semibold">El cargo total se efectuará en la VCC el mismo día de llegada por la mañana.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 sm:p-5 font-bold text-slate-900 text-base">EBI</td>
+                                    <td class="p-4 sm:p-5">Flexible</td>
+                                    <td class="p-4 sm:p-5">7 días</td>
+                                    <td class="p-4 sm:p-5 text-indigo-700 font-semibold">Cargo correspondiente a la VCC 7 días antes de la fecha de entrada.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-4 sm:p-5 font-bold text-slate-900 text-base">NO REEMBOLSABLE (NRF)</td>
+                                    <td class="p-4 sm:p-5">No reembolsable 100%</td>
+                                    <td class="p-4 sm:p-5">0 días</td>
+                                    <td class="p-4 sm:p-5 text-red-700 font-semibold">Cargo inmediato a la VCC 1 hora posterior a la recepción de la reserva.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 3) Aplicación de condiciones -->
+                    <div class="p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <h4 class="text-sm sm:text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                            3) Aplicación de condiciones operativas
+                        </h4>
+                        <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                            Estas directrices de cobros regulan exclusivamente la operativa del canal de Booking.com en vigor. Aquellas reservas que hayan sido formalizadas antes del cambio de política general a cobros con VCC conservarán invariables las condiciones pactadas en origen.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- c) FACTURACIÓN -->
+            <div class="relative page-break">
+                <!-- Indicador de sección grande -->
+                <div class="absolute -left-[42px] sm:-left-[60px] lg:-left-[76px] top-1 w-5 h-5 rounded-full border-4 border-white bg-sky-600 shadow-sm"></div>
+                
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-sm font-bold tracking-wider">D / 04</span>
+                    <h2 class="text-lg sm:text-xl lg:text-2xl font-extrabold text-sky-900 uppercase tracking-wider">c) Criterios de Facturación</h2>
+                </div>
+
+                <div class="space-y-6 text-sm sm:text-base text-slate-600 leading-relaxed">
+                    <p class="text-base sm:text-lg">
+                        A pesar de que el cobro es procesado y liquidado a través de las tarjetas virtuales (VCC) de Booking, <strong class="text-slate-900 font-semibold">la factura debe emitirse de forma obligatoria por el importe bruto total de la reserva</strong>.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Particular vs Empresa -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 shadow-xs">
+                            <strong class="text-slate-900 text-base sm:text-lg font-bold block flex items-center gap-2">
+                                🏢 Datos Fiscales en PMS
+                            </strong>
+                            <ul class="space-y-2.5 pl-1 text-sm sm:text-base">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-sky-500 font-bold">•</span>
+                                    <span>Se emitirá siempre a nombre del cliente particular o de la empresa según determine su preferencia.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-sky-500 font-bold">•</span>
+                                    <span>Para personas jurídicas, solicitar obligatoriamente la <strong class="text-slate-900">Razón social, CIF/NIF y Dirección fiscal completa</strong>.</span>
+                                </li>
+                                <li class="flex items-start gap-2 text-amber-800 font-medium">
+                                    <span class="text-amber-600 font-bold">⚠️</span>
+                                    <span>Verificar de forma exhaustiva en el buscador del PMS si la ficha corporativa de la empresa ya existe antes de generar una nueva.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Entrega -->
+                        <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between shadow-xs">
+                            <div>
+                                <strong class="text-slate-900 text-base sm:text-lg font-bold block mb-2 flex items-center gap-2">
+                                    ✉️ Vía de Entrega de Documento
+                                </strong>
+                                <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                                    La entrega de la factura se realiza directamente en mano en formato físico impreso o se envía vía email de manera inmediata, de acuerdo con la vía que el cliente escoja al momento del Check-out.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-200/60 text-xs sm:text-sm text-slate-400 font-extrabold uppercase tracking-widest text-right">
+                                v3.1 Pantalla Completa / Alta Legibilidad
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PIE DE DOCUMENTO CORPORATIVO -->
+        <div class="mt-16 pt-8 border-t border-slate-150 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-widest">
+            <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                Uso Confidencial Exclusivo Front-Desk
+            </span>
+            <span>© 2026 Booking.com Operativas</span>
+        </div>
+
+    </div>
+
+    <!-- Contenedor de Notificaciones Flotantes (Toasts) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+    <!-- SCRIPT DE INTERACTIVIDAD -->
+    <script>
+        // Inicializar fechas por defecto al cargar el sitio
+        window.onload = function () {
+            const hoy = new Date();
+            const mañana = new Date();
+            mañana.setDate(hoy.getDate() + 8); // Poner llegada por defecto 8 días después para que se calcule release cómodo
+
+            document.getElementById('fechaReserva').value = hoy.toISOString().substring(0, 10);
+            document.getElementById('fechaLlegada').value = mañana.toISOString().substring(0, 10);
+            
+            calcularOperativa();
+        }
+
+        // Sistema dinámico de Notificación Toast (Evitando alerts)
+        function showNotification(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            toast.className = `p-4 rounded-xl border shadow-xl flex items-start gap-3 transition-all duration-300 translate-y-5 opacity-0 pointer-events-auto max-w-sm ${
+                type === 'success' 
+                    ? 'bg-white border-emerald-100 text-emerald-800 shadow-emerald-100/40' 
+                    : 'bg-white border-amber-100 text-amber-800 shadow-amber-100/40'
+            }`;
+
+            toast.innerHTML = `
+                <span class="text-base">${type === 'success' ? '✅' : 'ℹ️'}</span>
+                <div>
+                    <strong class="font-bold text-xs text-slate-900 block">${title}</strong>
+                    <p class="text-[11px] text-slate-500 mt-0.5">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            
+            // Forzar reflow para la animación
+            setTimeout(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            }, 10);
+
+            // Eliminar después de 4 segundos
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        // Toggle del estado de conexión del canal
+        function toggleStatus() {
+            const badge = document.getElementById('statusBadge');
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            if (!badge || !dot || !text) return;
+
+            if (text.innerText.toUpperCase().includes("ROOMCLOUD") || text.innerText.toUpperCase().includes("SITEMINDER")) {
+                badge.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 hover:bg-red-100";
+                dot.className = "w-2.5 h-2.5 bg-red-500 rounded-full animate-ping";
+                text.innerText = "Error Sincronización";
+                showNotification("Fallo de Canal", "Se ha simulado un fallo de RoomCloud / SiteMinder. Revisar la cola del log channel manualmente.", "warning");
+            } else {
+                badge.className = "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 hover:bg-emerald-100";
+                dot.className = "w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse";
+                text.innerText = "Canal Activo (RoomCloud / SiteMinder)";
+                showNotification("Canal Activo", "Conectividad de RoomCloud / SiteMinder re-establecida y monitorizada.", "success");
+            }
+        }
+
+        // Lógica de cálculo interactivo para el Recepcionista
+        let ultimaDirectivaCalculada = "";
+
+        function calcularOperativa() {
+            const tarifa = document.getElementById('calcTarifa').value;
+            const fReservaVal = document.getElementById('fechaReserva').value;
+            const fLlegadaVal = document.getElementById('fechaLlegada').value;
+
+            if (!fReservaVal || !fLlegadaVal) return;
+
+            const fReserva = new Date(fReservaVal);
+            const fLlegada = new Date(fLlegadaVal);
+            
+            // Resetear horas para comparación exacta de días completos
+            fReserva.setHours(0,0,0,0);
+            fLlegada.setHours(0,0,0,0);
+
+            const diferenciaMilisegundos = fLlegada.getTime() - fReserva.getTime();
+            const diferenciaDias = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+
+            let directiva = "";
+            let errorCoherencia = false;
+
+            if (diferenciaDias < 0) {
+                directiva = "⚠️ La fecha de llegada no puede ser anterior a la de reserva.";
+                errorCoherencia = true;
+            } else {
+                if (tarifa === 'NRF') {
+                    directiva = "Tarifa NO REEMBOLSABLE: Realizar el cargo a la Tarjeta Virtual (VCC) exactamente 1 hora después de haber recibido la reserva.";
+                } else if (tarifa === 'EBI') {
+                    if (diferenciaDias >= 7) {
+                        // Calcular fecha de cobro 7 días antes de la llegada
+                        const fCobro = new Date(fLlegada);
+                        fCobro.setDate(fCobro.getDate() - 7);
+                        const fechaFormateada = fCobro.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        directiva = `Tarifa EBI (Suficiente Release): Programar en el PMS el cargo automático de la VCC para el día ${fechaFormateada} (7 días antes de la llegada).`;
+                    } else {
+                        directiva = `Tarifa EBI con reserva de ÚLTIMA HORA (faltan solo ${diferenciaDias} días): Tratar operativamente como NRF. Realizar el cobro inmediatamente tras cumplirse la 1 hora de gracia.`;
+                    }
+                } else if (tarifa === 'BAR') {
+                    const llegadaFormateada = fLlegada.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    directiva = `Tarifa AGENCIA (BAR): El cobro se debe programar para la mañana del día de llegada (${llegadaFormateada}). No cobrar nunca físicamente al cliente.`;
+                }
+            }
+
+            const btnCopiar = document.getElementById('btnCopiarDirectiva');
+            if (!btnCopiar) return;
+            document.getElementById('calcOutputText').innerText = directiva;
+            
+            if (errorCoherencia) {
+                btnCopiar.classList.add('hidden');
+                ultimaDirectivaCalculada = "";
+            } else {
+                btnCopiar.classList.remove('hidden');
+                ultimaDirectivaCalculada = directiva;
+            }
+        }
+
+        // Copiar instrucción calculada al portapapeles
+        function copiarDirectivaCalculada() {
+            if (!ultimaDirectivaCalculada) return;
+            
+            const el = document.createElement('textarea');
+            el.value = ultimaDirectivaCalculada;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            showNotification("Copiado con Éxito", "Directiva de cobro guardada en el portapapeles. Pégala en las notas de tu PMS.", "success");
+        }
+    </script>
+</body>
+</html>

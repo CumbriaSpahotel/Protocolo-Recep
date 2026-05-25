@@ -3791,17 +3791,45 @@ function renderCanales() {
         <div class="channel-row" draggable="true" data-index="${idx}" style="display:flex; align-items:center; gap: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: grab; margin-bottom: 15px;">
             <div style="color: #ccc; cursor: grab;"><i class="fas fa-grip-lines"></i></div>
             <div style="font-size: 1.5rem; width: 40px; text-align: center;">${c.icon || '🌍'}</div>
-            <div style="flex: 1;">
-                <h4 style="margin: 0 0 5px 0; color:var(--accent);">${c.name || 'Sin nombre'}</h4>
+            <div style="flex: 1; ${c.isHidden ? 'opacity: 0.7;' : ''}">
+                <h4 style="margin: 0 0 5px 0; color:var(--accent); display:flex; align-items:center;">
+                    ${c.name || 'Sin nombre'}
+                    ${c.isHidden ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#ffecec;color:#c0392b;border:1px solid #f5c6cb;border-radius:12px;font-size:0.65rem;font-weight:700;padding:2px 8px;margin-left:8px;"><i class="fas fa-eye-slash"></i> OCULTO</span>' : ''}
+                </h4>
                 <div style="font-size: 0.8rem; color: #666;"><i class="fas fa-hotel"></i> ${c.hotel || 'Ambos'} | ${c.summary || ''}</div>
             </div>
-            <div style="display:flex; gap: 10px;">
-                <button type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="openChannelModal(${idx})"><i class="fas fa-edit"></i> Editar</button>
-                <button type="button" class="btn-secondary" style="background:#fff2f2; color:#e74c3c; border:1px solid #ffcfca; padding: 6px 12px; font-size: 0.85rem;" onclick="removeChannel(${idx})"><i class="fas fa-trash"></i></button>
+            <div style="display:flex; gap: 6px; padding-left: 10px; border-left: 1px solid #eee;">
+                <button class="btn-icon" onclick="toggleChannelVisibility(${idx})" title="${c.isHidden ? 'Hacer visible' : 'Ocultar de la web'}" style="color: ${c.isHidden ? '#c0392b' : '#27ae60'};"><i class="fas ${c.isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                <button class="btn-icon" onclick="exportChannelToWord(${idx})" title="Descargar Word" style="color: #2980b9;"><i class="fas fa-file-word"></i></button>
+                <button class="btn-icon" onclick="openChannelModal(${idx})" title="Editar"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon btn-delete" onclick="removeChannel(${idx})" title="Eliminar" style="color: #e67e22;"><i class="fas fa-ban"></i></button>
             </div>
         </div>
         `;
     }).join('');
+}
+
+function toggleChannelVisibility(index) {
+    const c = window.channels_config[index];
+    if (!c) return;
+    
+    c.isHidden = !c.isHidden;
+    renderCanales();
+    showToast(c.isHidden ? 'Canal ocultado (debes guardar)' : 'Canal visible (debes guardar)');
+}
+
+function exportChannelToWord(index) {
+    const c = window.channels_config[index];
+    if (!c) return;
+    
+    let fullContent = '';
+    if (c.summary) fullContent += `<p><strong>Resumen:</strong> ${c.summary}</p>`;
+    if (c.content) fullContent += `<div><strong>Contenido:</strong><br>${c.content.replace(/\n/g, '<br>')}</div>`;
+    if (c.notes) fullContent += `<br><div style="background:#fffcf0; padding:10px;"><strong>Notas:</strong><br>${c.notes.replace(/\n/g, '<br>')}</div>`;
+    if (c.errors) fullContent += `<br><div style="background:#fff2f2; padding:10px;"><strong>Errores Frecuentes:</strong><br>${c.errors.replace(/\n/g, '<br>')}</div>`;
+    if (c.htmlContent) fullContent += `<br><div><strong>Multimedia / HTML:</strong><br>${c.htmlContent}</div>`;
+    
+    downloadHtmlAsWord(`Canal: ${c.name}`, 'Canales Online', c.hotel || 'Ambos hoteles', fullContent);
 }
 
 let currentEditingChannelIndex = -1;
@@ -3820,6 +3848,7 @@ function openChannelModal(index) {
         document.getElementById('modal-channel-summary').value = '';
         document.getElementById('modal-channel-content').value = '';
         document.getElementById('modal-channel-notes').value = '';
+        document.getElementById('modal-channel-errors').value = '';
         document.getElementById('modal-channel-html').value = '';
     } else {
         const c = window.channels_config[index];
@@ -3831,6 +3860,7 @@ function openChannelModal(index) {
         document.getElementById('modal-channel-summary').value = c.summary || '';
         document.getElementById('modal-channel-content').value = c.content || '';
         document.getElementById('modal-channel-notes').value = c.notes || '';
+        document.getElementById('modal-channel-errors').value = c.errors || '';
         document.getElementById('modal-channel-html').value = c.htmlContent || '';
     }
     
@@ -3856,6 +3886,7 @@ function saveChannelFromModal() {
         summary: document.getElementById('modal-channel-summary').value,
         content: document.getElementById('modal-channel-content').value,
         notes: document.getElementById('modal-channel-notes').value,
+        errors: document.getElementById('modal-channel-errors').value,
         htmlContent: document.getElementById('modal-channel-html').value
     };
     
