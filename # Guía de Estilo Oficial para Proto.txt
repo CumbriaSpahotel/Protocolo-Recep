@@ -1,0 +1,215 @@
+# Guía de Estilo Oficial para Protocolos y Comunicados
+`Mínimos Recepción - Sercotel Guadiana & Cumbria Spa & Hotel`
+
+Esta guía establece las directrices técnicas y estéticas para redactar, estructurar e insertar nuevos comunicados o protocolos en el sistema de recepción. El objetivo es mantener una experiencia de usuario premium, homogénea, responsiva y totalmente compatible con el **Modo Oscuro**.
+
+---
+
+## 🛠️ Reglas Técnicas Fundamentales
+
+Para asegurar que los protocolos se integren perfectamente en la base de datos ([data.js](file:///c:/Users/comun/Documents/GitHub/Protocolo-Recep/data.js)) y sean renderizados correctamente por el frontal ([app.js](file:///c:/Users/comun/Documents/GitHub/Protocolo-Recep/app.js)), debes seguir estas directrices técnicas:
+
+1. **Fragmento HTML Puro**: 
+   * **NUNCA** incluyas etiquetas de estructura global: `<!DOCTYPE html>`, `<html>`, `<head>`, `<body>` ni `<main>`.
+   * El código debe comenzar directamente con un contenedor principal: `<div class="main-container" style="...">`.
+
+2. **Uso Exclusivo de Variables Semánticas (Modo Oscuro)**:
+   * Para los colores de fondo, texto y bordes, **siempre** utiliza las variables CSS del sistema en lugar de colores fijos. Esto garantiza que el diseño se adapte automáticamente cuando el usuario cambie al modo oscuro.
+   * *Ejemplo correcto:* `background: var(--white); color: var(--text-dark);`
+   * *Ejemplo incorrecto:* `background: #ffffff; color: #1e293b;`
+
+3. **Estilos Inline (Atributo `style`)**:
+   * Define todos los estilos de diseño utilizando atributos `style="..."` inline en los elementos HTML. 
+   * Evita el uso de bloques `<style>` locales, ya que pueden colisionar con otros protocolos o ser eliminados por los editores de texto del panel de administración.
+
+4. **Clases de Iconografía y Grid**:
+   * Usa clases globales del sistema para elementos interactivos como rejillas responsivas: `dashboard-grid`, `grid-2`, `premium-shadow`.
+   * Para los iconos, utiliza FontAwesome (ej: `<i class="fas fa-check-circle"></i>`).
+
+---
+
+## 🎨 Paleta de Colores y Variables de Diseño
+
+Utiliza las siguientes variables CSS globales para asegurar la consistencia cromática de la marca:
+
+| Variable CSS | Color Equivalente (Modo Claro) | Propósito |
+| :--- | :--- | :--- |
+| `var(--accent-blue)` | `#0a6aa1` (Azul corporativo) | Títulos, enlaces premium, acentos principales de recepción. |
+| `var(--accent-red)` | `#b22222` (Rojo intenso) | Alertas críticas, errores operativos graves, prohibiciones. |
+| `var(--accent-green)` | `#27ae60` (Verde esmeralda) | Pasos correctos obligatorios, datos requeridos, éxitos. |
+| `#a58c5f` / `#c5a87f` | Dorado / Arena | Elementos de marca premium de Cumbria Hotel. |
+| `var(--white)` | `#ffffff` | Fondo de tarjetas principales (se vuelve oscuro en modo noche). |
+| `var(--bg-light)` | `#f8fafc` | Fondos de cajas secundarias o rutas locales. |
+| `var(--border)` | `#e2e8f0` | Bordes de separación y bordes de tarjetas. |
+| `var(--text-dark)` | `#0f172a` | Texto de lectura principal (se vuelve blanco en modo noche). |
+| `var(--text-muted)` | `#475569` | Descripciones secundarias, notas al pie y fechas. |
+| `var(--shadow)` | Sombra sutil | Sombra premium para elevar elementos visualmente. |
+
+---
+
+## 📐 Estructura Visual de un Protocolo Premium
+
+Un protocolo espectacular debe seguir esta estructura jerárquica de elementos:
+
+```mermaid
+graph TD
+    A[Borde de Gradiente Superior] --> B[Cabecera Principal con Icono & Badges]
+    B --> C[Banner Destacado: Filosofía/Resumen]
+    C --> D[Alerta de Auditoría / Caso de Control]
+    D --> E[Contenido en Rejilla Grid de Columnas]
+    E --> F[Footer: Mensaje de Cierre / Motivación]
+```
+
+### 1. Borde de Gradiente Superior
+Un detalle decorativo que da identidad al manual:
+```html
+<div style="height: 6px; background: linear-gradient(90deg, var(--accent-blue) 0%, #a58c5f 50%, var(--accent-green) 100%); border-radius: 16px 16px 0 0; width: 100%;"></div>
+```
+
+### 2. Cabecera (Header)
+Debe incluir:
+* Un icono relevante de FontAwesome dentro de una caja translúcida con sombra.
+* Un **Badge** de categoría o prioridad (ej. "Obligatorio" en rojo o "Calidad" en dorado).
+* Título grande con letra gruesa (`font-size: 2.2rem; font-weight: 800;`).
+* Logotipo de texto del hotel o sección a la derecha.
+
+### 3. Banner Introductorio (Filosofía de Trabajo)
+Una caja con borde izquierdo grueso de acento (`border-left: 6px solid var(--accent-blue)`) y un fondo translúcido que resuma el objetivo principal del protocolo de una forma inspiradora.
+
+### 4. Alerta de Auditoría / Control Crítico
+Si el protocolo responde a un error del equipo o a un caso real detectado en auditoría:
+* Utilizar una alerta con fondo ámbar (`#fffdf5`) o rojo suave (`#fff5f5`).
+* Incluir un icono de advertencia (`fas fa-exclamation-circle` o `fas fa-radiation`).
+* Añadir texto descriptivo y una conclusión clara sobre cómo evitar el error.
+
+### 5. Contenido en Grid de Dos Columnas
+Para organizar la información de forma moderna en pantallas grandes sin que se desordene en dispositivos móviles:
+```html
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 2.5rem; width: 100%; box-sizing: border-box;">
+  <!-- Columna 1 -->
+  <!-- Columna 2 -->
+</div>
+```
+* **Dentro de las columnas**: Se recomienda estructurar la información usando tarjetas (`background: var(--white)`) con bordes redondeados y una cabecera de sección.
+
+### 6. Enlaces y Rutas de Carpeta Premium
+* **Botones de enlace externos**: Nunca uses enlaces de texto plano azul. Diséñalos como botones con degradado azul-celeste, texto en negrita y un icono de enlace externo:
+  ```html
+  <a href="URL" target="_blank" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, var(--accent-blue) 0%, #1783bc 100%); color: white; padding: 1.1rem 1.4rem; border-radius: 12px; text-decoration: none; font-weight: 700; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.25);">
+     <span>Título del Formulario</span>
+     <i class="fas fa-external-link-alt"></i>
+  </a>
+  ```
+* **Rutas locales (puesto de trabajo)**: Utiliza un diseño de carpeta física con fondo claro:
+  ```html
+  <div style="background: var(--bg-light); border: 1px solid var(--border); padding: 1rem; border-radius: 12px;">
+     <i class="fas fa-folder-open" style="color: var(--accent-blue);"></i> Carpeta <strong>"Nombre"</strong>
+  </div>
+  ```
+
+### 7. Listas Numéricas con Burbujas de Color
+En lugar de viñetas simples, utiliza números dentro de círculos de color para guiar secuencialmente al lector:
+```html
+<div style="display: flex; align-items: center; gap: 12px; background: var(--bg-light); padding: 0.75rem 1rem; border-radius: 10px;">
+  <div style="background: var(--accent-green); color: white; width: 1.8rem; height: 1.8rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800;">1</div>
+  <span style="font-weight: 700;">Texto del paso obligatorio</span>
+</div>
+```
+
+---
+
+## 📝 Plantilla Base Oficial (Esqueleto HTML)
+
+Puedes copiar este esqueleto de código para maquetar cualquier nuevo protocolo que necesites insertar en el sistema:
+
+```html
+<!-- CONTENEDOR MAESTRO -->
+<div class="main-container" style="width: 100%; max-width: 100%; margin: 0; font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif; box-sizing: border-box; color: var(--text-dark); background: transparent; padding: 0;">
+  
+  <!-- Borde con degradado superior corporativo -->
+  <div style="height: 6px; background: linear-gradient(90deg, var(--accent-blue) 0%, #a58c5f 50%, var(--accent-green, #27ae60) 100%); border-radius: 16px 16px 0 0; width: 100%;"></div>
+  
+  <!-- Cuerpo de la Tarjeta del Protocolo -->
+  <div class="wrap" style="background: var(--white); border: 1px solid var(--border); border-top: none; padding: 3rem; border-radius: 0 0 16px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 3rem; width: 100%; box-sizing: border-box;">
+    
+    <!-- CABECERA -->
+    <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 2rem; width: 100%; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+        <div style="background: linear-gradient(135deg, rgba(10, 106, 161, 0.1) 0%, rgba(39, 174, 96, 0.05) 100%); border: 1.5px solid var(--accent-blue); padding: 1rem; border-radius: 16px; display: flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; box-sizing: border-box; flex-shrink: 0;">
+          <i class="fas fa-concierge-bell" style="font-size: 1.8rem; color: var(--accent-blue);"></i>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+            <span style="background: var(--accent-blue); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">Procedimiento</span>
+          </div>
+          <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-dark); margin: 0; line-height: 1.2;">Título del Protocolo</h1>
+        </div>
+      </div>
+      <div style="text-align: right; display: flex; flex-direction: column; gap: 4px;" class="hidden sm:block">
+        <span style="font-size: 0.8rem; color: #a58c5f; margin: 0; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;">Manual Operativo</span>
+        <p style="font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin: 0;">Sercotel Guadiana · Cumbria</p>
+      </div>
+    </header>
+
+    <!-- INTRODUCCIÓN / BANNER -->
+    <div style="background: linear-gradient(135deg, var(--bg-light) 0%, rgba(10, 106, 161, 0.03) 100%); border-radius: 16px; border: 1px solid var(--border); border-left: 6px solid var(--accent-blue); padding: 2rem; display: flex; align-items: flex-start; gap: 1.5rem; width: 100%; box-sizing: border-box;">
+      <i class="fas fa-quote-left" style="color: var(--accent-blue); font-size: 2.2rem; opacity: 0.3; flex-shrink: 0; margin-top: -5px;"></i>
+      <div style="flex: 1;">
+        <p style="color: var(--text-dark); font-size: 1.15rem; line-height: 1.7; margin: 0; font-weight: 500;">
+          Escribe aquí una breve introducción que resuma la importancia de este protocolo. Mantenlo inspirador y enfocado en la calidad del servicio al cliente.
+        </p>
+      </div>
+    </div>
+
+    <!-- CONTENIDO EN REJILLA DE DOS COLUMNAS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 2.5rem; width: 100%; box-sizing: border-box;">
+      
+      <!-- Columna Izquierda (Instrucciones o Enlaces) -->
+      <div style="background: var(--white); border: 1px solid var(--border); padding: 2.2rem; border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.5rem; box-sizing: border-box; border-top: 4px solid var(--accent-blue);">
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <i class="fas fa-info-circle" style="color: var(--accent-blue); font-size: 1.3rem;"></i> Sección A
+        </div>
+        <p style="font-size: 1.05rem; color: var(--text-muted); margin: 0; line-height: 1.6;">
+          Agrega explicaciones breves aquí. Utiliza iconos consistentes.
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Ejemplo de enlace -->
+          <a href="#" target="_blank" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, var(--accent-blue) 0%, #1783bc 100%); color: white; padding: 1.1rem 1.4rem; border-radius: 12px; text-decoration: none; font-weight: 700; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.25);">
+            <span>Enlace de interés</span>
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Columna Derecha (Lista Ordenada / Pasos) -->
+      <div style="background: var(--white); border: 1px solid var(--border); padding: 2.2rem; border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 1.5rem; box-sizing: border-box; border-top: 4px solid var(--accent-green, #27ae60);">
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <i class="fas fa-list-ol" style="color: var(--accent-green, #27ae60); font-size: 1.3rem;"></i> Pasos Clave
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <div style="display: flex; align-items: center; gap: 12px; background: var(--bg-light); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 10px;">
+            <div style="background: var(--accent-green, #27ae60); color: white; width: 1.8rem; height: 1.8rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; flex-shrink: 0;">1</div>
+            <span style="font-size: 1.05rem; font-weight: 700; color: var(--text-dark);">Primer paso operativo</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; background: var(--bg-light); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 10px;">
+            <div style="background: var(--accent-green, #27ae60); color: white; width: 1.8rem; height: 1.8rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; flex-shrink: 0;">2</div>
+            <span style="font-size: 1.05rem; font-weight: 700; color: var(--text-dark);">Segundo paso operativo</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NOTA DE SOPORTE -->
+    <div style="background: linear-gradient(90deg, rgba(165,140,95,0.08) 0%, rgba(10, 106, 161, 0.05) 100%); border: 1px dashed #a58c5f; padding: 2rem; border-radius: 16px; width: 100%; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; gap: 8px; justify-content: center; align-items: center;">
+      <i class="fas fa-hand-holding-heart" style="color: #a58c5f; font-size: 1.6rem; margin-bottom: 4px;"></i>
+      <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-dark); font-weight: 600; margin: 0; max-width: 800px;">
+        Nota de conclusión importante para motivar al equipo de recepción.
+      </p>
+    </div>
+
+  </div>
+</div>
+```
