@@ -2287,7 +2287,7 @@ function renderComments(pId) {
         const authorStr = c.author || 'Usuario';
         const textStr = c.text || '';
         
-        html += '<div class="comment-item" style="background: #ffffff; padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); animation: fadeIn 0.4s ease; transition: transform 0.2s; position: relative; overflow: hidden;" onmouseover="this.style.transform=\\'translateY(-2px)\\'" onmouseout="this.style.transform=\\'translateY(0)\\'">';
+        html += '<div class="comment-item" style="background: #ffffff; padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); animation: fadeIn 0.4s ease; transition: transform 0.2s; position: relative; overflow: hidden;">';
         html += '<div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-blue, #3b82f6);"></div>';
         html += '<div style="display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">';
         html += '<div style="display: flex; align-items: center; gap: 0.75rem;">';
