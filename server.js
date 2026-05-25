@@ -63,7 +63,12 @@ app.post('/api/save', (req, res) => {
         const dataFilePath = path.join(__dirname, 'data.js');
         if (fs.existsSync(dataFilePath)) {
             try {
-                const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+                // CRITICAL: Strip UTF-8 BOM if present to avoid JSON.parse failures
+                let fileContent = fs.readFileSync(dataFilePath, 'utf-8');
+                if (fileContent.charCodeAt(0) === 0xFEFF) {
+                    fileContent = fileContent.slice(1);
+                    console.warn('⚠️ BOM detectado en data.js y eliminado para lectura correcta');
+                }
                 const extractVar = (varName) => {
                     const regex = new RegExp(`(?:var|const|let)\\s+${varName}\\s*=\\s*([\\s\\S]*?);\\s*(?:(?:var|const|let)\\s|$)`, 'm');
                     const match = fileContent.match(regex);
@@ -135,7 +140,8 @@ app.post('/api/save', (req, res) => {
         jsContent += 'var cloud_config = ' + JSON.stringify(cloud, null, 2) + ';\n\n';
         jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
 
-        fs.writeFileSync(dataFilePath, jsContent, 'utf-8');
+        // Write without BOM - always use plain UTF-8
+        fs.writeFileSync(dataFilePath, jsContent, { encoding: 'utf8' });
         res.json({ success: true, message: 'Datos guardados correctamente (Secrets en .env)' });
     } catch (e) {
         console.error('❌ Error al guardar:', e);

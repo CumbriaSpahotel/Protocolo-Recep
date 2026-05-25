@@ -261,7 +261,7 @@ function init() {
     updateHotelButtons();
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
-        protocols = protocols_data.filter(p => p.title && p.title !== "No Title");
+        protocols = protocols_data.filter(p => p.title && p.title !== "No Title" && !p.hidden);
         window.protocols = protocols; // Make protocols globally accessible
         
         // If geminiApiKey is empty (e.g. on GitHub Pages), try to load it from localStorage

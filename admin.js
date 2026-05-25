@@ -1516,6 +1516,13 @@ function renderAdminTable(data) {
         const actualIndex = adminProtocols.indexOf(p);
         
         const tr = document.createElement('tr');
+        const isHidden = p.hidden === true;
+        
+        // Visual style for hidden protocols
+        if (isHidden) {
+            tr.style.opacity = '0.45';
+            tr.style.background = '#f8f8f8';
+        }
         
         const secVal = p.section || 'N/A';
         const dateVal = formatAdminDate(p.updated || p.published);
@@ -1587,11 +1594,18 @@ function renderAdminTable(data) {
         else if (p.status === 'En proceso') statusIcon = '<span style="color: #dc3545; margin-right: 5px;" title="En proceso"><i class="fas fa-spinner fa-spin"></i></span>';
         else if (p.title && p.title.includes('🟢')) statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
 
+        // Visibility badge
+        const visibilityBadge = isHidden
+            ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#ffecec;color:#c0392b;border:1px solid #f5c6cb;border-radius:12px;font-size:0.7rem;font-weight:700;padding:2px 8px;margin-left:8px;"><i class="fas fa-eye-slash"></i> OCULTO</span>'
+            : '';
+
+        const titleStyle = isHidden ? 'text-decoration: line-through; color: #aaa;' : 'color: #333;';
+
         tr.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span class="section-number">${secVal}</span>
-                    <strong style="font-size: 1rem; color: #333; display: flex; align-items: center;">${statusIcon} ${p.title || 'Sin Título'}</strong>
+                    <strong style="font-size: 1rem; ${titleStyle} display: flex; align-items: center; flex-wrap:wrap; gap:4px;">${statusIcon} ${p.title || 'Sin Título'}${visibilityBadge}</strong>
                 </div>
             </td>
             <td>
@@ -1604,6 +1618,7 @@ function renderAdminTable(data) {
             </td>
             <td style="color: #6c757d; font-size: 0.85rem; font-weight: 500;">${dateVal}</td>
             <td class="actions-cell">
+                <button class="btn-icon" onclick="toggleVisibility(${actualIndex})" title="${isHidden ? 'Hacer visible' : 'Ocultar de la web'}" style="color: ${isHidden ? '#c0392b' : '#27ae60'};"><i class="fas ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
                 <button class="btn-icon" onclick="exportProtocolToWord(${actualIndex})" title="Descargar Word" style="color: #2980b9;"><i class="fas fa-file-word"></i></button>
                 <button class="btn-icon" onclick="openEditor(${actualIndex})" title="Editar"><i class="fas fa-edit"></i></button>
                 <button class="btn-icon btn-delete" onclick="deleteProtocol(${actualIndex})" title="Eliminar"><i class="fas fa-trash"></i></button>
@@ -1612,6 +1627,31 @@ function renderAdminTable(data) {
         tbody.appendChild(tr);
     });
 
+}
+
+function toggleVisibility(index) {
+    const p = adminProtocols[index];
+    if (!p) return;
+    
+    const newState = !p.hidden;
+    p.hidden = newState;
+    
+    // Save to server immediately
+    saveToServer(adminProtocols);
+    
+    // Re-render the table
+    const searchVal = document.getElementById('admin-search')?.value || '';
+    if (searchVal) {
+        const filtered = adminProtocols.filter(pr =>
+            (pr.title || '').toLowerCase().includes(searchVal.toLowerCase()) ||
+            (pr.section || '').toLowerCase().includes(searchVal.toLowerCase())
+        );
+        renderAdminTable(filtered);
+    } else {
+        renderAdminTable(adminProtocols);
+    }
+    
+    showToast(newState ? '🙈 Protocolo ocultado de la web pública' : '👁️ Protocolo visible en la web pública');
 }
 
 function populateCategories() {
