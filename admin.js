@@ -1917,19 +1917,93 @@ function openEditor(index = -1) {
 
 function initSettingsEditors() {
     const defaultNav = {
-        '1': { name: 'Operativa Diaria', icon: 'fa-calendar-check' },
-        '2': { name: 'Reservas y Tarifas', icon: 'fa-file-invoice-dollar' },
-        '3': { name: 'Estancia, Caja y Salidas', icon: 'fa-walking' },
-        '4': { name: 'Gestión de Grupos', icon: 'fa-users-cog' },
-        '5': { name: 'Coordinación Interna', icon: 'fa-sync-alt' },
-        '6': { name: 'Seguridad y Emergencias', icon: 'fa-shield-alt' },
-        '7': { name: 'Sistemas y Plataformas', icon: 'fa-desktop' },
-        '8': { name: 'Manuales Básicos', icon: 'fa-book' },
-        '9': { name: 'Gestión de Personal', icon: 'fa-user-tie' },
-        '10': { name: 'Spa y Piscina', icon: 'fa-swimming-pool' },
-        '11': { name: 'Noticias', icon: 'fa-newspaper' },
-        '12': { name: 'Restaurante', icon: 'fa-utensils' },
-        '13': { name: 'Otros', icon: 'fa-plus' }
+        '1': {
+            name: 'Turnos y Personal',
+            description: 'Operativa diaria y turnos',
+            icon: 'fa-calendar-check',
+            subsections: {
+                '1.1': '📅 Operativa Diaria',
+                '1.2': '🌅 Turno de Mañana',
+                '1.3': '🌇 Turno de Tarde',
+                '1.4': '🌙 Turno de Noche',
+                '1.5': '👋 Bienvenida y Adaptación',
+                '1.6': '🕗 Gestión de Personal'
+            },
+            links: [
+                { icon: 'fa-cloud', text: 'Cuadrante Online', url: 'https://cumbriaspahotel.github.io/Turnos-new/' },
+                { icon: 'fa-umbrella-beach', text: 'Vacaciones del Personal', url: 'https://1drv.ms/x/c/7cdc5f6b199a606e/EWBW8z40KJtLlTyY-y6rLzUBLMk2FZGVYBhZlDpC04lFCQ?e=dZ7txS' },
+                { icon: 'fa-lock', text: 'Selección de Personal', url: 'https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?usp=sharing' }
+            ]
+        },
+        '2': {
+            name: 'Flujo de Recepción',
+            description: 'Estancias, caja y calidad',
+            icon: 'fa-walking',
+            subsections: {
+                '2.1': '🔑 El Ciclo del Huésped',
+                '2.2': '💵 Finanzas y Caja',
+                '2.3': '⭐ Calidad e Incidencias'
+            },
+            links: []
+        },
+        '3': {
+            name: 'Reservas y Sistemas',
+            description: 'PMS, channel y conectividad',
+            icon: 'fa-desktop',
+            subsections: {
+                '3.1': '🏷️ Tarifas y Políticas',
+                '3.2': '📋 Auditoría y Control',
+                '3.3': '🔄 Conectividad',
+                '3.4': '🖥️ Software PMS',
+                '3.5': '📡 Canales Online',
+                '3.6': '👤 Gestión Individual'
+            },
+            links: []
+        },
+        '4': {
+            name: 'Eventos y Grupos',
+            description: 'Operativa de eventos y F&B',
+            icon: 'fa-users-cog',
+            subsections: {
+                '4.1': '👥 Operativa de Grupos',
+                '4.2': '🍽️ Coordinación y Menús'
+            },
+            links: [
+                { icon: 'fa-download', text: 'Descarga Menús', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/EspwQwoBy05Fu9q4XbKzGUsBNVdzDdnFam7JpqtDB7h1dg?e=we0DeU' },
+                { icon: 'fa-file-invoice', text: 'Presupuesto Menú Eventos', url: 'https://nataliogc.github.io/menus-eventos/l' },
+                { icon: 'fa-glass-martini-alt', text: 'Menú Cóctel', url: 'https://nataliogc.github.io/menus-cocteles/' }
+            ]
+        },
+        '5': {
+            name: 'Seguridad y Bienestar',
+            description: 'Emergencias, Spa y wellness',
+            icon: 'fa-shield-alt',
+            subsections: {
+                '5.1': '🚨 Autoprotección y Emergencias',
+                '5.2': '💧 Cumbria Bienestar (Spa)'
+            },
+            links: []
+        },
+        '6': {
+            name: 'Biblioteca y Enlaces',
+            description: 'Comunicados, manuales y nubes',
+            icon: 'fa-book-reader',
+            subsections: {
+                '6.1': '📢 Comunicados y Noticias',
+                '6.2': '📖 Manuales Oficiales',
+                '6.3': '🏆 Reportes de Calidad',
+                '6.4': '☁️ Enlaces Útiles (Nubes)'
+            },
+            links: [
+                { icon: 'fa-link', text: '🗂️Archivos Guadiana →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&resid=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&ithint=folder&e=edtxgO&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsV3NERWhMU1YxRWpMVDRlXzhyTEJZQkdheERuNmNuRVZWRXM1QWdRSUZTdXc_ZT1lZHR4Z08=' },
+                { icon: 'fa-link', text: '🗂️Archivos Cumbria →☁️', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/IgC2zNimWu27R5bEXKYkEjr1ARJwRIHuHL7FFZQO-EpPXBw?e=i9MRJB' },
+                { icon: 'fa-link', text: '🗂️Procedimientos Sercotel →☁️', url: 'https://drive.google.com/drive/folders/1KETvtJnPCuXuguPc6EP3WGNl5MYhJZn5' },
+                { icon: 'fa-link', text: '📷 Guadiana →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&resid=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&ithint=folder&e=HHXrIF&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VtMG5nQXZjZ3I5R3VhZTBfUVNyYzFnQkFJQ2dXZnM4UVYyR0RmdTYzNzBDTWc_ZT1ISFhySUY=' },
+                { icon: 'fa-link', text: '📷 Cumbria →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&resid=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&ithint=folder&e=9yGzl6&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsOGFNalB2cVNaTXZNd1ZFZGhSYUswQlhQRXBPZ1ZmWmpZMV9oQk1YSFlRRHc_ZT05eUd6bDY&v=validatepermission' },
+                { icon: 'fa-link', text: '🎥 Video manuales y tutoriales→☁️', url: 'https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VoYlBLUm5XXzlSUHZCSDMyY3ZUZXRrQkgyYmpmYWZseTVaUXcyY2x2R3Z6WkE%5FZT1DTWdyYm4&id=7CDC5F6B199A606E%21s1929cf16ffd64fd4bc11f7d9cbd37ad9&cid=7CDC5F6B199A606E' },
+                { icon: 'fa-lock', text: 'Acceso Restringido (Menú Cóctel)', url: 'https://nataliogc.github.io/menus-cocteles/' }
+            ]
+        }
     };
 
     const defaultHome = {

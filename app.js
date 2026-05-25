@@ -140,47 +140,90 @@ let viewHistory = [{ type: 'home' }];
 
 // Fallback configuration if not found in data.js
 const DEFAULT_CAT_MAP = {
-    '1': { name: 'Operativa Diaria', icon: 'fa-calendar-check', subsections: {} },
-    '2': { name: 'Reservas y Tarifas', icon: 'fa-file-invoice-dollar', subsections: {} },
-    '3': { name: 'Estancia, Caja y Salidas', icon: 'fa-walking', subsections: {} },
-    '4': { name: 'Gestión de Grupos', icon: 'fa-users-cog', subsections: {} },
-    '5': { name: 'Coordinación Interna', icon: 'fa-sync-alt', subsections: {} },
-    '6': { name: 'Seguridad y Emergencias', icon: 'fa-shield-alt', subsections: {} },
-    '7': { name: 'Sistemas y Plataformas', icon: 'fa-desktop', subsections: {} },
-    '8': { name: 'Manuales Básicos', icon: 'fa-book', subsections: {} },
-    '9': { 
-        name: 'Gestión de Personal', icon: 'fa-user-tie', 
-        subsections: {},
+    '1': {
+        name: 'Turnos y Personal',
+        description: 'Operativa diaria y turnos',
+        icon: 'fa-calendar-check',
+        subsections: {
+            '1.1': '📅 Operativa Diaria',
+            '1.2': '🌅 Turno de Mañana',
+            '1.3': '🌇 Turno de Tarde',
+            '1.4': '🌙 Turno de Noche',
+            '1.5': '👋 Bienvenida y Adaptación',
+            '1.6': '🕗 Gestión de Personal'
+        },
         links: [
-            { icon: 'fa-cloud', text: 'Cuadrante Online', url: 'https://nataliogc.github.io/turnosweb/live.html' },
-            { icon: 'fa-exchange-alt', text: 'Solicitud de Camb Turno', url: 'https://procedimientoshotelguadiana.blogspot.com/2025/11/112-solicitu-de-cambio-de-turnos.html' },
+            { icon: 'fa-cloud', text: 'Cuadrante Online', url: 'https://cumbriaspahotel.github.io/Turnos-new/' },
             { icon: 'fa-umbrella-beach', text: 'Vacaciones del Personal', url: 'https://1drv.ms/x/c/7cdc5f6b199a606e/EWBW8z40KJtLlTyY-y6rLzUBLMk2FZGVYBhZlDpC04lFCQ?e=dZ7txS' },
-            { icon: 'far fa-clock', text: 'Cuadrante Original', url: 'https://procedimientoshotelguadiana.blogspot.com/2025/08/111-gestion-cuadrantes-de-turnos.html' },
             { icon: 'fa-lock', text: 'Selección de Personal', url: 'https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?usp=sharing' }
         ]
     },
-    '10': { name: 'Spa y Piscina', icon: 'fa-swimming-pool', subsections: {} },
-    '11': { 
-        name: 'Noticias', icon: 'fa-newspaper', 
-        subsections: { 'Comunicados': 'Comunicados' },
-        links: [
-            { icon: 'fa-newspaper', text: 'Noticias', url: 'https://nataliogc.github.io/Noticias/' }
-        ]
+    '2': {
+        name: 'Flujo de Recepción',
+        description: 'Estancias, caja y calidad',
+        icon: 'fa-walking',
+        subsections: {
+            '2.1': '🔑 El Ciclo del Huésped',
+            '2.2': '💵 Finanzas y Caja',
+            '2.3': '⭐ Calidad e Incidencias'
+        },
+        links: []
     },
-    '12': { 
-        name: 'Restaurante', icon: 'fa-utensils', 
-        subsections: { 'Catálogo de Menús': 'Catálogo de Menús' },
+    '3': {
+        name: 'Reservas y Sistemas',
+        description: 'PMS, channel y conectividad',
+        icon: 'fa-desktop',
+        subsections: {
+            '3.1': '🏷️ Tarifas y Políticas',
+            '3.2': '📋 Auditoría y Control',
+            '3.3': '🔄 Conectividad',
+            '3.4': '🖥️ Software PMS',
+            '3.5': '📡 Canales Online',
+            '3.6': '👤 Gestión Individual'
+        },
+        links: []
+    },
+    '4': {
+        name: 'Eventos y Grupos',
+        description: 'Operativa de eventos y F&B',
+        icon: 'fa-users-cog',
+        subsections: {
+            '4.1': '👥 Operativa de Grupos',
+            '4.2': '🍽️ Coordinación y Menús'
+        },
         links: [
             { icon: 'fa-download', text: 'Descarga Menús', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/EspwQwoBy05Fu9q4XbKzGUsBNVdzDdnFam7JpqtDB7h1dg?e=we0DeU' },
             { icon: 'fa-file-invoice', text: 'Presupuesto Menú Eventos', url: 'https://nataliogc.github.io/menus-eventos/l' },
             { icon: 'fa-glass-martini-alt', text: 'Menú Cóctel', url: 'https://nataliogc.github.io/menus-cocteles/' }
         ]
     },
-    '13': { name: 'Otros', icon: 'fa-plus', subsections: {} },
-    '15': { 
-        name: 'Calidad', icon: 'fa-trophy', 
-        subsections: { 'calidad en destino': 'Calidad en destino' },
+    '5': {
+        name: 'Seguridad y Bienestar',
+        description: 'Emergencias, Spa y wellness',
+        icon: 'fa-shield-alt',
+        subsections: {
+            '5.1': '🚨 Autoprotección y Emergencias',
+            '5.2': '💧 Cumbria Bienestar (Spa)'
+        },
+        links: []
+    },
+    '6': {
+        name: 'Biblioteca y Enlaces',
+        description: 'Comunicados, manuales y nubes',
+        icon: 'fa-book-reader',
+        subsections: {
+            '6.1': '📢 Comunicados y Noticias',
+            '6.2': '📖 Manuales Oficiales',
+            '6.3': '🏆 Reportes de Calidad',
+            '6.4': '☁️ Enlaces Útiles (Nubes)'
+        },
         links: [
+            { icon: 'fa-link', text: '🗂️Archivos Guadiana →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&resid=7CDC5F6B199A606E!s480cac55494b445d8cb4f87bff2b2c16&ithint=folder&e=edtxgO&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsV3NERWhMU1YxRWpMVDRlXzhyTEJZQkdheERuNmNuRVZWRXM1QWdRSUZTdXc_ZT1lZHR4Z08=' },
+            { icon: 'fa-link', text: '🗂️Archivos Cumbria →☁️', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/IgC2zNimWu27R5bEXKYkEjr1ARJwRIHuHL7FFZQO-EpPXBw?e=i9MRJB' },
+            { icon: 'fa-link', text: '🗂️Procedimientos Sercotel →☁️', url: 'https://drive.google.com/drive/folders/1KETvtJnPCuXuguPc6EP3WGNl5MYhJZn5' },
+            { icon: 'fa-link', text: '📷 Guadiana →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&resid=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&ithint=folder&e=HHXrIF&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VtMG5nQXZjZ3I5R3VhZTBfUVNyYzFnQkFJQ2dXZnM4UVYyR0RmdTYzNzBDTWc_ZT1ISFhySUY=' },
+            { icon: 'fa-link', text: '📷 Cumbria →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&resid=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&ithint=folder&e=9yGzl6&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsOGFNalB2cVNaTXZNd1ZFZGhSYUswQlhQRXBPZ1ZmWmpZMV9oQk1YSFlRRHc_ZT05eUd6bDY&v=validatepermission' },
+            { icon: 'fa-link', text: '🎥 Video manuales y tutoriales→☁️', url: 'https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VoYlBLUm5XXzlSUHZCSDMyY3ZUZXRrQkgyYmpmYWZseTVaUXcyY2x2R3Z6WkE%5FZT1DTWdyYm4&id=7CDC5F6B199A606E%21s1929cf16ffd64fd4bc11f7d9cbd37ad9&cid=7CDC5F6B199A606E' },
             { icon: 'fa-lock', text: 'Acceso Restringido (Menú Cóctel)', url: 'https://nataliogc.github.io/menus-cocteles/' }
         ]
     }
@@ -777,7 +820,7 @@ function renderHome() {
         <div class="quick-access-section">
             <h2 class="section-title"><i class="fas fa-rocket"></i> Accesos Rápidos</h2>
             <div class="quick-access-grid">
-                ${['1', '3', '4', '5'].map(id => {
+                ${Object.keys(getCatMap()).sort((a, b) => parseInt(a) - parseInt(b)).map(id => {
                     const cat = getCatMap()[id];
                     if (!cat) return '';
                     
@@ -795,7 +838,7 @@ function renderHome() {
                                 <div class="quick-icon">${iconHtml}</div>
                                 <div class="quick-info">
                                     <h3>${cat.name.replace('Estancia, ', '').replace(' y Salidas', '')}</h3>
-                                    <p>${id === '1' ? 'Gestión de cuadrantes' : id === '3' ? 'Control de tarifas' : id === '4' ? 'Facturación y cierre' : 'Eventos y grupos'}</p>
+                                    <p>${cat.description || ''}</p>
                                 </div>
                                 ${hasProtocols ? '<i class="fas fa-chevron-right quick-arrow"></i>' : ''}
                             </div>
@@ -810,7 +853,7 @@ function renderHome() {
                                             const pIcon = pEmojiMatch ? pEmojiMatch[1] : '📄';
                                             const pTitle = p.title.replace(/\{.*?\}/, '').trim();
                                             return `
-                                                <a href="#" class="quick-drop-item" onclick="event.preventDefault(); event.stopPropagation(); viewHistory.push({ type: 'protocol', payload: ${JSON.stringify(p).replace(/"/g, '&quot;')} }); loadProtocol(window.protocols.find(pr => pr.title === '${p.title.replace(/'/g, "\\'")}'))">
+                                                <a href="#protocol/${encodeURIComponent(p.section || p.title)}" class="quick-drop-item">
                                                     <span class="q-icon">${pIcon}</span>
                                                     <span class="q-text">${pTitle}</span>
                                                 </a>
@@ -1762,7 +1805,8 @@ function renderOperationalGuide() {
 
     // Handle clicks to open protocols
     window.loadProtocolById = (sectionId) => {
-        const p = protocols.find(item => item.section === sectionId);
+        const targetId = getRedirectedSection(sectionId);
+        const p = protocols.find(item => item.section === targetId);
         if (p) {
             viewHistory.push({ type: 'protocol', payload: p });
             loadProtocol(p);
@@ -1991,7 +2035,8 @@ function renderAlertsList(type) {
 
         itemEl.addEventListener('click', () => {
             if (item.id) {
-                const protocol = protocols.find(p => String(p.section) === String(item.id));
+                const targetId = getRedirectedSection(item.id);
+                const protocol = protocols.find(p => String(p.section) === String(targetId));
                 if (protocol) {
                     viewHistory.push({ type: 'protocol', payload: protocol });
                     loadProtocol(protocol);
@@ -2016,6 +2061,35 @@ function formatDate(dateStr) {
     if (isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 }
+const SECTION_REDIRECT_MAP = {
+    // Operativa Diaria a Turnos
+    "9.1": "1.6", "9.2": "1.7",
+    // Estancia/Caja a Flujo
+    "3.2": "2.1.1", "3.3": "2.1.2", "3.4": "2.1.3", "5.4": "2.1.4", "3.5": "2.2.1", "7.4": "2.2.2",
+    // Incidencias a Flujo
+    "5.2": "2.3.1", "5.3": "2.3.3",
+    // Reservas/Cancelaciones a Reservas y Sistemas
+    "2.5": "3.1.1", "5.1": "3.1.2", "2.4": "3.2.1", "7.3": "3.2.3", "7.6": "3.3.4", "7.5": "3.4.3", "3.1": "2.1.5",
+    // Grupos a Eventos y Grupos
+    "4.4": "4.1.1", "4.2": "4.1.2", "4.3": "4.1.3", "4.1": "4.1.4", "4.5": "4.1.6",
+    // Restaurante a Eventos y Grupos (Menús)
+    "12.1": "4.2.1", "12.2": "4.2.2", "12.3": "4.2.3",
+    // Seguridad a Seguridad y Bienestar (Emergencias)
+    "6.1": "5.1.1", "6.3": "5.1.2", "6.4": "5.1.3", "6.2": "5.1.4", "6.5": "5.1.5",
+    // Spa a Seguridad y Bienestar (Spa)
+    "10.4": "5.2.1", "10.3": "5.2.2", "10.1": "5.2.3", "10.2": "5.2.4",
+    // Noticias y Biblioteca a Biblioteca y Enlaces
+    "11.1": "6.1.1", "11.2": "6.1.3", "8.1": "6.2.1", "14.1": "6.3.1", "14.2": "6.3.2", "14.3": "6.3.3"
+};
+
+function getRedirectedSection(sectionId) {
+    if (sectionId === "11.1") {
+        const hotel = safeStorage.getItem('selectedHotel') || 'Ambos hoteles';
+        return hotel === "Sercotel Guadiana" ? "6.1.2" : "6.1.1";
+    }
+    return SECTION_REDIRECT_MAP[sectionId] || sectionId;
+}
+
 // Helper for Hash-based routing
 function handleHashRouting() {
     const hash = window.location.hash.slice(1);
@@ -2029,7 +2103,8 @@ function handleHashRouting() {
 
     if (hash.startsWith('protocol/')) {
         const pId = decodeURIComponent(hash.replace('protocol/', ''));
-        const p = protocols.find(item => item.section === pId || item.title === pId);
+        const targetId = getRedirectedSection(pId);
+        const p = protocols.find(item => item.section === targetId || item.title === pId || item.title === targetId);
         if (p) {
             viewHistory.push({ type: 'protocol', payload: p });
             loadProtocol(p);
