@@ -261,7 +261,7 @@ function init() {
     updateHotelButtons();
 
     if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
-        protocols = protocols_data.filter(p => p.title && p.title !== "No Title" && !p.hidden);
+        protocols = protocols_data.filter(p => p.title && p.title !== "No Title" && !p.hidden && !p.anulado);
         window.protocols = protocols; // Make protocols globally accessible
         
         // If geminiApiKey is empty (e.g. on GitHub Pages), try to load it from localStorage
@@ -1474,7 +1474,26 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
             </footer>
         </article>
         
-        <div id="comments-section-container"></div>
+        <div id="comments-section-container" style="margin-top: 3rem; border-top: 2px dashed #eee; padding-top: 2rem;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.2rem;"><i class="fas fa-comments"></i> Comentarios y Notas del Equipo</h3>
+            
+            <div id="comments-container-${pId}" class="comments-list" style="margin-bottom: 2rem;">
+                <div style="text-align: center; color: #999; padding: 1rem; font-style: italic; border: 1px dashed #ddd; border-radius: 8px;">
+                    Cargando comentarios...
+                </div>
+            </div>
+            
+            <div class="comment-form" style="display: flex; flex-direction: column; gap: 1rem; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                <h4 style="margin: 0; color: #495057; font-size: 1rem;">Añadir un nuevo comentario</h4>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="comment-author" placeholder="Tu nombre (Ej: Juan - Recepción)" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-family: inherit;">
+                </div>
+                <textarea id="comment-text" placeholder="Escribe tu comentario, duda o sugerencia aquí..." style="width: 100%; min-height: 100px; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: vertical; outline: none;"></textarea>
+                <button onclick="submitComment('${pId.replace(/'/g, "\\'")}')" style="align-self: flex-start; padding: 12px 24px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s;">
+                    <i class="fas fa-paper-plane"></i> Enviar Comentario
+                </button>
+            </div>
+        </div>
     `;
 
     // 4. Cleanup & Interactive Elements

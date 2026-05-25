@@ -782,6 +782,11 @@ function initAdmin() {
     };
 
     document.getElementById('admin-search').addEventListener('input', applySearchAndSort);
+    
+    const showAnnulledCheckbox = document.getElementById('show-annulled');
+    if (showAnnulledCheckbox) {
+        showAnnulledCheckbox.addEventListener('change', applySearchAndSort);
+    }
 
     // Sorting Headers
     document.querySelectorAll('.sort-header').forEach(th => {
@@ -1518,11 +1523,9 @@ function renderAdminTable(data) {
         const tr = document.createElement('tr');
         const isHidden = p.hidden === true;
         
-        // Visual style for hidden protocols
-        if (isHidden) {
-            tr.style.opacity = '0.45';
-            tr.style.background = '#f8f8f8';
-        }
+        // Skip rendering annulled protocols unless "Show Annulled" is checked
+        const showAnnulled = document.getElementById('show-annulled')?.checked;
+        if (p.anulado && !showAnnulled) return;
         
         const secVal = p.section || 'N/A';
         const dateVal = formatAdminDate(p.updated || p.published);
@@ -1594,12 +1597,21 @@ function renderAdminTable(data) {
         else if (p.status === 'En proceso') statusIcon = '<span style="color: #dc3545; margin-right: 5px;" title="En proceso"><i class="fas fa-spinner fa-spin"></i></span>';
         else if (p.title && p.title.includes('🟢')) statusIcon = '<span style="color: #28a745; margin-right: 5px;" title="Activo"><i class="fas fa-check-circle"></i></span>';
 
-        // Visibility badge
-        const visibilityBadge = isHidden
-            ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#ffecec;color:#c0392b;border:1px solid #f5c6cb;border-radius:12px;font-size:0.7rem;font-weight:700;padding:2px 8px;margin-left:8px;"><i class="fas fa-eye-slash"></i> OCULTO</span>'
-            : '';
+        // Visibility and Annulled badges
+        let badges = [];
+        if (isHidden) badges.push('<span style="display:inline-flex;align-items:center;gap:4px;background:#ffecec;color:#c0392b;border:1px solid #f5c6cb;border-radius:12px;font-size:0.7rem;font-weight:700;padding:2px 8px;margin-left:8px;"><i class="fas fa-eye-slash"></i> OCULTO</span>');
+        if (p.anulado) badges.push('<span style="display:inline-flex;align-items:center;gap:4px;background:#fff3cd;color:#856404;border:1px solid #ffeeba;border-radius:12px;font-size:0.7rem;font-weight:700;padding:2px 8px;margin-left:8px;"><i class="fas fa-ban"></i> ANULADO</span>');
+        
+        const visibilityBadge = badges.join('');
 
-        const titleStyle = isHidden ? 'text-decoration: line-through; color: #aaa;' : 'color: #333;';
+        const titleStyle = (isHidden || p.anulado) ? 'text-decoration: line-through; color: #aaa;' : 'color: #333;';
+        const rowOpacity = p.anulado ? '0.45' : (isHidden ? '0.6' : '1');
+        const rowBackground = p.anulado ? '#fff9f9' : (isHidden ? '#f8f8f8' : 'transparent');
+        const rowBorder = p.anulado ? 'border-left: 4px solid #e67e22;' : '';
+        
+        tr.style.opacity = rowOpacity;
+        tr.style.background = rowBackground;
+        tr.style.cssText += rowBorder;
 
         tr.innerHTML = `
             <td>
@@ -1620,8 +1632,11 @@ function renderAdminTable(data) {
             <td class="actions-cell">
                 <button class="btn-icon" onclick="toggleVisibility(${actualIndex})" title="${isHidden ? 'Hacer visible' : 'Ocultar de la web'}" style="color: ${isHidden ? '#c0392b' : '#27ae60'};"><i class="fas ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
                 <button class="btn-icon" onclick="exportProtocolToWord(${actualIndex})" title="Descargar Word" style="color: #2980b9;"><i class="fas fa-file-word"></i></button>
-                <button class="btn-icon" onclick="openEditor(${actualIndex})" title="Editar"><i class="fas fa-edit"></i></button>
-                <button class="btn-icon btn-delete" onclick="deleteProtocol(${actualIndex})" title="Eliminar"><i class="fas fa-trash"></i></button>
+                ${p.anulado 
+                    ? `<button class="btn-icon btn-reactivate" onclick="anularProtocol(${actualIndex})" title="Reactivar protocolo" style="color: #27ae60;"><i class="fas fa-undo"></i></button>`
+                    : `<button class="btn-icon" onclick="openEditor(${actualIndex})" title="Editar"><i class="fas fa-edit"></i></button>
+                       <button class="btn-icon btn-delete" onclick="anularProtocol(${actualIndex})" title="Anular" style="color: #e67e22;"><i class="fas fa-ban"></i></button>`
+                }
             </td>
         `;
         tbody.appendChild(tr);
@@ -2616,13 +2631,20 @@ function collectInicio() {
 
 
 
-function deleteProtocol(index) {
-    if (confirm('¿Estás seguro de que deseas eliminar este protocolo?')) {
-        const p = adminProtocols[index];
+function anularProtocol(index) {
+    const p = adminProtocols[index];
+    if (!p) return;
+    
+    const accion = p.anulado ? 'reactivar' : 'anular';
+    const mensaje = p.anulado 
+        ? '¿Estás seguro de que deseas reactivar este protocolo?' 
+        : '¿Estás seguro de que deseas anular este protocolo?\n\nEl protocolo dejará de ser visible en la web, pero se conservará en la base de datos de forma permanente.';
+        
+    if (confirm(mensaje)) {
         const protocolId = p.section;
         
-        // Remove from alerts in home_config if present
-        if (typeof home_config !== 'undefined' && home_config.alerts) {
+        // Remove from alerts in home_config if present (when anulling)
+        if (!p.anulado && typeof home_config !== 'undefined' && home_config.alerts) {
             if (home_config.alerts.critical_errors?.items) {
                 home_config.alerts.critical_errors.items = home_config.alerts.critical_errors.items.filter(i => i.id !== protocolId);
             }
@@ -2633,11 +2655,18 @@ function deleteProtocol(index) {
             document.getElementById('edit-home-json').value = JSON.stringify(home_config, null, 2);
         }
 
-        adminProtocols.splice(index, 1);
+        // Toggle anular state
+        p.anulado = !p.anulado;
+        if (p.anulado) {
+            p.anulado_fecha = new Date().toISOString();
+        } else {
+            delete p.anulado_fecha;
+        }
+
         renderAdminTable(adminProtocols);
         updateCounters();
-        showToast('Protocolo eliminado permanentemente.');
-        // Save deletion to server
+        showToast(p.anulado ? '⛔ Protocolo anulado (permanece en la BD).' : '✅ Protocolo reactivado.');
+        // Save to server
         saveToServer(adminProtocols, undefined, typeof home_config !== 'undefined' ? home_config : undefined);
     }
 }
@@ -2828,7 +2857,9 @@ function showToast(msg) {
 }
 
 function updateCounters() {
-    document.getElementById('protocol-count').textContent = adminProtocols.length;
+    const activeCount = adminProtocols.filter(p => !p.anulado).length;
+    const annulledCount = adminProtocols.filter(p => p.anulado).length;
+    document.getElementById('protocol-count').textContent = `${activeCount} activos` + (annulledCount > 0 ? ` | ${annulledCount} anulados` : '');
 }
 
 function formatAdminDate(dateStr) {
@@ -2839,7 +2870,7 @@ function formatAdminDate(dateStr) {
 }
 
 window.openEditor = openEditor;
-window.deleteProtocol = deleteProtocol;
+window.anularProtocol = anularProtocol;
 
 function downloadHtmlAsWord(title, section, source, contentHtml) {
     try {
