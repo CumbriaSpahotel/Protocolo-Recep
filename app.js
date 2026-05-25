@@ -150,7 +150,8 @@ const DEFAULT_CAT_MAP = {
             '1.3': '🌇 Turno de Tarde',
             '1.4': '🌙 Turno de Noche',
             '1.5': '👋 Bienvenida y Adaptación',
-            '1.6': '🕗 Gestión de Personal'
+            '1.6': '🕗 Gestión de Personal',
+            '1.7': '📅 Cuadrante de Turnos'
         },
         links: [
             { icon: 'fa-cloud', text: 'Cuadrante Online', url: 'https://cumbriaspahotel.github.io/Turnos-new/' },
