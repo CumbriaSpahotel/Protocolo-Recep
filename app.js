@@ -326,11 +326,7 @@ function initApp() {
     // Logo click
     document.querySelector('.main-header h1').style.cursor = 'pointer';
     document.querySelector('.main-header h1').addEventListener('click', () => {
-        viewHistory = [{ type: 'home' }];
-        renderHome();
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.querySelector('.nav-link[data-cat="inicio"]').classList.add('active');
-        document.querySelector('.app-wrapper').classList.remove('reading-mode');
+        window.location.hash = 'protocol/1.7';
     });
 
     // Inicio link click
@@ -338,9 +334,7 @@ function initApp() {
     if (inicioLink) {
         inicioLink.addEventListener('click', (e) => {
             e.preventDefault();
-            viewHistory = [{ type: 'home' }];
-            renderHome();
-            setActiveNav(inicioLink);
+            window.location.hash = 'protocol/1.7';
         });
     }
 
@@ -454,9 +448,7 @@ function renderNavigation() {
     inicioItem.innerHTML = '<i class="fas fa-th-large"></i> Inicio <i class="fas fa-caret-down"></i>';
     inicioItem.onclick = (e) => {
         e.preventDefault();
-        viewHistory = [{ type: 'home' }];
-        renderHome();
-        setActiveNav(inicioItem);
+        window.location.hash = 'protocol/1.7';
     };
     
     const inicioDropdown = document.createElement('div');
@@ -704,6 +696,8 @@ function toggleHomeComponents(isHome) {
 }
 
 function renderHome() {
+    window.location.hash = 'protocol/1.7';
+    return;
     toggleHomeComponents(true);
     document.querySelector('.app-wrapper').classList.add('reading-mode');
     
@@ -2093,11 +2087,8 @@ function getRedirectedSection(sectionId) {
 // Helper for Hash-based routing
 function handleHashRouting() {
     const hash = window.location.hash.slice(1);
-    if (!hash) {
-        if (viewHistory.length > 1 && viewHistory[viewHistory.length - 1].type !== 'home') {
-            viewHistory = [{ type: 'home' }];
-            renderHome();
-        }
+    if (!hash || hash === 'inicio') {
+        window.location.hash = 'protocol/1.7';
         return;
     }
 
@@ -2108,6 +2099,17 @@ function handleHashRouting() {
         if (p) {
             viewHistory.push({ type: 'protocol', payload: p });
             loadProtocol(p);
+            
+            // Highlight navigation tab
+            const sectionStr = String(p.section || '');
+            if (sectionStr === '1.7') {
+                const inicioLink = document.querySelector('.nav-link[data-cat="inicio"]');
+                if (inicioLink) setActiveNav(inicioLink);
+            } else {
+                const catId = sectionStr.split('.')[0];
+                const link = document.querySelector(`.nav-link[data-cat="${catId}"]`);
+                if (link) setActiveNav(link);
+            }
         }
     } else if (hash.startsWith('category/')) {
         const id = hash.replace('category/', '');
@@ -2709,18 +2711,14 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
                     throw new Error('FALLBACK_TRIGGERED');
                 }
 
+                if (response.status !== 200) {
+                    throw new Error('FALLBACK_TRIGGERED');
+                }
                 const text = await response.text();
                 try {
                     rawData = JSON.parse(text);
                 } catch (e) {
                     console.error('[Chatbot] Servidor no devolvió JSON:', text.substring(0, 100));
-                    if (response.status === 405 || response.status === 404) {
-                        throw new Error('FALLBACK_TRIGGERED');
-                    }
-                    throw new Error('El servidor respondió con un error no válido.');
-                }
-                // Also trigger fallback if server returned 405/404
-                if (response.status === 405 || response.status === 404) {
                     throw new Error('FALLBACK_TRIGGERED');
                 }
             } catch (err) {
