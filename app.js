@@ -2288,25 +2288,25 @@ function renderComments(pId) {
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <div style="width: 32px; height: 32px; background: #eff6ff; color: var(--accent-blue, #3b82f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
-                        \${c.author.charAt(0).toUpperCase()}
+                        ${c.author.charAt(0).toUpperCase()}
                     </div>
-                    <strong style="color: #1e293b; font-size: 1.05rem; font-weight: 700;">\${c.author}</strong>
+                    <strong style="color: #1e293b; font-size: 1.05rem; font-weight: 700;">${c.author}</strong>
                 </div>
                 <span style="font-size: 0.75rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
-                    <i class="far fa-clock" style="margin-right: 4px;"></i> \${new Date(c.date).toLocaleString()}
+                    <i class="far fa-clock" style="margin-right: 4px;"></i> ${new Date(c.date).toLocaleString()}
                 </span>
             </div>
-            <div style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin-left: 2.75rem;">\${c.text}</div>
+            <div style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin-left: 2.75rem;">${c.text}</div>
             
-            \${c.reply ? `
+            ` + (c.reply ? `
                 <div class="admin-reply" style="margin-top: 1.25rem; margin-left: 2.75rem; padding: 1rem 1.25rem; background: #f0fdf4; border-radius: 12px; font-size: 0.9rem; position: relative;">
                     <div style="position: absolute; left: -8px; top: 1.5rem; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 8px solid #f0fdf4;"></div>
                     <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 800; color: #166534; margin-bottom: 0.5rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
                         <i class="fas fa-check-circle"></i> Respuesta de Administración
                     </div>
-                    <div style="color: #15803d; line-height: 1.5;">\${c.reply}</div>
+                    <div style="color: #15803d; line-height: 1.5;">${c.reply}</div>
                 </div>
-            ` : ''}
+            ` : '') + `
         </div>
     `).join('');
 }
