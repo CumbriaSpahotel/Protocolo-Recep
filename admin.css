@@ -533,6 +533,70 @@ body {
     box-shadow: 0 0 0 3px rgba(10, 106, 161, 0.1);
 }
 
+/* Color Coding for Channel Sections (Procedimiento, Notas, Errores) */
+.group-procedimiento label {
+    color: #0284c7 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.group-procedimiento label i {
+    color: #0284c7;
+    font-size: 0.85rem;
+}
+.group-procedimiento .channel-input {
+    background-color: #f0f9ff;
+    border-color: #bae6fd;
+    color: #0369a1;
+}
+.group-procedimiento .channel-input:focus {
+    background-color: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.group-notas label {
+    color: #b45309 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.group-notas label i {
+    color: #b45309;
+    font-size: 0.85rem;
+}
+.group-notas .channel-input {
+    background-color: #fefce8;
+    border-color: #fef08a;
+    color: #713f12;
+}
+.group-notas .channel-input:focus {
+    background-color: #ffffff;
+    border-color: #d97706;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.group-errores label {
+    color: #b91c1c !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.group-errores label i {
+    color: #b91c1c;
+    font-size: 0.85rem;
+}
+.group-errores .channel-input {
+    background-color: #fff2f2;
+    border-color: #fca5a5;
+    color: #7f1d1d;
+}
+.group-errores .channel-input:focus {
+    background-color: #ffffff;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
 .channel-html-area {
     background: #fdfdfd;
     border: 1px dashed #0a6aa1;

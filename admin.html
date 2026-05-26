@@ -188,19 +188,15 @@
                     </div>
                 </div>
 
-                <!-- VIDEO SECTION (NEW) -->
-                <div style="background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 1.5rem; border-left: 5px solid #0a6aa1; margin-bottom: 2rem;">
-                    <label style="margin-bottom: 12px; display: block; font-weight: 600; color: #555;"><i class="fas fa-video"></i> Vídeo Principal del Protocolo (Sección Aparte)</label>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div class="form-group">
-                            <span style="font-size: 0.7rem; color: #666; font-weight: 700; text-transform: uppercase;">URL del Vídeo (Google Drive / YouTube / Directo)</span>
-                            <input type="text" id="edit-video-url" placeholder="https://drive.google.com/file/d/..." style="width: 100%; margin-top: 5px; border-color: #0a6aa120;">
-                        </div>
-                        <div class="form-group">
-                            <span style="font-size: 0.7rem; color: #666; font-weight: 700; text-transform: uppercase;">Título / Pie de Vídeo</span>
-                            <input type="text" id="edit-video-caption" placeholder="Escribe un título o descripción del vídeo..." style="width: 100%; margin-top: 5px; border-color: #0a6aa120;">
-                        </div>
+                <!-- MULTIMEDIA SECTION (DYNAMIC LIST) -->
+                <div style="background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 1.5rem; border-left: 5px solid #9b59b6; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <label style="font-weight: 600; color: #555; margin: 0;"><i class="fas fa-photo-video"></i> Archivos Multimedia (Imágenes y Vídeos en Secciones Aparte)</label>
                     </div>
+                    <div id="media-list-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
+                        <!-- Entries added by JS -->
+                    </div>
+                    <button type="button" id="btn-add-media" class="btn-secondary" style="background: #9b59b6 !important; color: white; font-size: 0.85rem; padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer;"><i class="fas fa-plus"></i> Añadir Imagen / Vídeo</button>
                 </div>
                 
                 <div class="editor-body">
@@ -595,28 +591,33 @@
                 </div>
             </div>
 
-            <div class="channel-form-group" style="margin-bottom:15px;">
-                <label>Contenido Principal (Procedimiento)</label>
-                <textarea id="modal-channel-content" class="channel-input" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Escribe aquí el procedimiento estándar para este canal..."></textarea>
+            <div class="channel-form-group group-procedimiento" style="margin-bottom:15px;">
+                <label><i class="fas fa-tasks"></i> Contenido Principal (Procedimiento)</label>
+                <textarea id="modal-channel-content" class="channel-input" rows="3" placeholder="Escribe aquí el procedimiento estándar para este canal..."></textarea>
             </div>
             
-            <div class="channel-form-group" style="margin-bottom:15px;">
-                <label>Notas Adicionales / Peculiaridades</label>
-                <textarea id="modal-channel-notes" class="channel-input" rows="2" style="background:#f9f9f9; width: 100%; font-size: 0.85rem; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Notas internas o avisos..."></textarea>
+            <div class="channel-form-group group-notas" style="margin-bottom:15px;">
+                <label><i class="fas fa-info-circle"></i> Notas Adicionales / Peculiaridades</label>
+                <textarea id="modal-channel-notes" class="channel-input" rows="2" placeholder="Notas internas o avisos..."></textarea>
             </div>
 
-            <div class="channel-form-group" style="margin-bottom:15px;">
-                <label><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Errores Frecuentes</label>
-                <textarea id="modal-channel-errors" class="channel-input" rows="2" style="background:#fff2f2; width: 100%; font-size: 0.85rem; padding: 8px; border: 1px solid #f5c6cb; border-radius: 4px;" placeholder="Errores comunes a evitar en este canal..."></textarea>
+            <div class="channel-form-group group-errores" style="margin-bottom:15px;">
+                <label><i class="fas fa-exclamation-triangle"></i> Errores Frecuentes</label>
+                <textarea id="modal-channel-errors" class="channel-input" rows="2" placeholder="Errores comunes a evitar en este canal..."></textarea>
+            </div>
+
+            <!-- MULTIMEDIA SECTION (DYNAMIC LIST) -->
+            <div class="channel-form-group" style="margin-bottom:15px; border-left: 4px solid #9b59b6; padding-left: 10px;">
+                <label style="color: #9b59b6; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px; display: block;"><i class="fas fa-photo-video"></i> Archivos Multimedia (Imágenes y Vídeos)</label>
+                <div id="channel-media-list-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                    <!-- Entries added by JS -->
+                </div>
+                <button type="button" id="btn-add-channel-media" class="btn-secondary" style="background: #9b59b6 !important; color: white; font-size: 0.75rem; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;"><i class="fas fa-plus"></i> Añadir Imagen/Vídeo</button>
             </div>
 
             <div class="channel-html-area" style="margin-top: 15px;">
                 <div class="channel-html-label" style="display:flex; justify-content:space-between; margin-bottom:5px; align-items: center;">
-                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado / Multimedia</label>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" onclick="window.selectChannelMedia('image')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #27ae60 !important; border-radius: 20px;"><i class="fas fa-image"></i> + Imagen</button>
-                        <button type="button" onclick="window.selectChannelMedia('video')" class="btn-primary" style="font-size: 0.7rem; padding: 4px 10px; background: #f39c12 !important; border-radius: 20px;"><i class="fas fa-video"></i> + Video</button>
-                    </div>
+                    <label style="margin:0; font-size:0.75rem; font-weight:700; color:#0a6aa1;"><i class="fas fa-code"></i> HTML Personalizado</label>
                 </div>
                 
                 <!-- Media Manager List for Channels -->

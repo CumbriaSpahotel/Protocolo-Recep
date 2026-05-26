@@ -1145,6 +1145,247 @@ function renderCategory(name, id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── Channel Explorer Global Functions ────────────────────────────────────────
+window.setChannelHotelFilter = function(val) {
+    const filterEl = document.getElementById('channel-hotel-filter');
+    if (filterEl) filterEl.value = val;
+    document.querySelectorAll('.hotel-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-hotel') === val) {
+            btn.style.background = '#0ea5e9';
+            btn.style.color = 'white';
+            btn.style.border = 'none';
+            btn.style.boxShadow = '0 4px 10px rgba(14, 165, 233, 0.2)';
+        } else {
+            btn.style.background = '#f8fafc';
+            btn.style.color = '#64748b';
+            btn.style.border = '1px solid #e2e8f0';
+            btn.style.boxShadow = 'none';
+        }
+    });
+    window.filterChannelsGrid();
+};
+
+window.filterChannelsGrid = function() {
+    const searchInput = document.getElementById('channel-search');
+    const hotelFilter = document.getElementById('channel-hotel-filter');
+    const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const h = hotelFilter ? hotelFilter.value : 'all';
+    const cards = document.querySelectorAll('.channel-card-mini');
+    const detailView = document.getElementById('channel-detail-view');
+    if (detailView && detailView.style.display === 'block') {
+        window.hideChannelDetail();
+    }
+    cards.forEach(card => {
+        const name = card.getAttribute('data-name');
+        const hotel = card.getAttribute('data-hotel');
+        const matchName = name.includes(q);
+        const matchHotel = h === 'all' || hotel === h || hotel === 'Ambos hoteles';
+        card.style.display = (matchName && matchHotel) ? 'flex' : 'none';
+    });
+};
+
+window.hideChannelDetail = function() {
+    const grid = document.getElementById('channels-grid-view');
+    const detail = document.getElementById('channel-detail-view');
+    if (grid) grid.style.display = 'grid';
+    if (detail) detail.style.display = 'none';
+};
+
+window.showChannelDetail = function(id) {
+    const grid = document.getElementById('channels-grid-view');
+    const detail = document.getElementById('channel-detail-view');
+    const contentEl = document.getElementById('channel-detail-content');
+    const config = typeof channels_config !== 'undefined' ? channels_config.find(c => c.id === id) : null;
+    if (!config || !contentEl) return;
+
+    // Build safeHtmlContent from htmlContent field
+    let safeHtmlContent = '';
+    if (config.htmlContent && config.htmlContent.trim()) {
+        if (config.htmlContent.toLowerCase().includes('<!doctype') || config.htmlContent.toLowerCase().includes('<html')) {
+            let escaped = config.htmlContent;
+            escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0;padding:0;background:transparent;font-family:Outfit,sans-serif;">');
+            escaped = escaped.replace(/"/g, '&quot;');
+            safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;"><iframe srcdoc="${escaped}" style="width:100%;height:800px;border:none;background:transparent;border-radius:12px;" scrolling="auto"></iframe></div>`;
+        } else {
+            safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;border-top:1px solid #f1f5f9;padding-top:20px;">${config.htmlContent}</div>`;
+        }
+    }
+
+    // Build media items list
+    const cMedia = Array.isArray(config.media) ? [...config.media] : [];
+    if (cMedia.length === 0) {
+        if (config.image_url) cMedia.push({ type: 'image', url: config.image_url, caption: config.image_caption || '' });
+        if (config.video_url) cMedia.push({ type: 'video', url: config.video_url, caption: config.video_caption || '' });
+    }
+    const imageItems = cMedia.filter(m => m.type === 'image' && m.url);
+    const videoItems = cMedia.filter(m => m.type === 'video' && m.url);
+
+    // ── Text first (full width, prominent) ──────────────────────────────────
+    let textHtml = '';
+    if (config.summary) textHtml += `<p style="margin:0 0 18px;color:#334155;font-size:1rem;line-height:1.75;font-weight:500;">${config.summary}</p>`;
+    if (config.content) textHtml += `
+        <div style="padding:20px 24px;background:#f0f9ff;border-left:5px solid #0ea5e9;border-radius:12px;margin-bottom:16px;">
+            <h4 style="margin:0 0 10px;font-size:0.7rem;color:#0369a1;text-transform:uppercase;letter-spacing:1.5px;font-weight:900;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-tasks"></i> Procedimiento
+            </h4>
+            <p style="margin:0;font-size:0.93rem;color:#0c4a6e;line-height:1.8;">${config.content.replace(/\n/g,'<br>')}</p>
+        </div>`;
+
+    // ── Media at the bottom (compact thumbnails + lightbox) ──────────────────
+    let mediaFooterHtml = '';
+    if (imageItems.length > 0 || videoItems.length > 0) {
+        let galleryItems = '';
+
+        imageItems.forEach((m, idx) => {
+            let thumbUrl = m.url;
+            let fullUrl  = m.url;
+            let originalUrl = m.url;
+            if (m.url.includes('drive.google.com')) {
+                const match = m.url.match(/\/d\/([^\/\?&]+)/);
+                if (match && match[1]) {
+                    thumbUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
+                    fullUrl  = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
+                }
+            }
+            const safeCaption = (m.caption || '').replace(/'/g, "\\'");
+            galleryItems += `
+                <div style="flex:0 0 auto;">
+                    <div style="width:120px;height:90px;border-radius:8px;overflow:hidden;
+                                box-shadow:0 3px 10px rgba(0,0,0,0.15);border:2px solid transparent;
+                                transition:all 0.2s;position:relative;"
+                         onmouseover="this.style.borderColor='#0ea5e9';this.style.transform='scale(1.05)'"
+                         onmouseout="this.style.borderColor='transparent';this.style.transform='scale(1)'">
+                        <img src="${thumbUrl}" alt="${safeCaption}"
+                             style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;"
+                             onclick="window.openChannelLightbox('${fullUrl}','${safeCaption}','${originalUrl}')"
+                             onerror="this.onerror=null;this.parentElement.style.background='#e2e8f0';">
+                        <div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.5);color:white;border-radius:4px;padding:2px 5px;font-size:0.6rem;pointer-events:none;">
+                            <i class="fas fa-expand"></i>
+                        </div>
+                    </div>
+                    ${m.caption ? `<p style="margin:6px 0 0;font-size:0.65rem;color:#64748b;text-align:center;max-width:120px;line-height:1.2;">${m.caption}</p>` : ''}
+                </div>`;
+        });
+
+        videoItems.forEach(m => {
+            let vUrl = m.url;
+            if (vUrl.includes('drive.google.com') && vUrl.includes('/view')) vUrl = vUrl.replace(/\/view.*$/, '/preview');
+            const isEmbeddable = vUrl.includes('drive.google.com') || vUrl.includes('youtube.com') || vUrl.includes('youtu.be');
+            galleryItems += `
+                <div style="flex:0 0 auto;width:240px;">
+                    ${isEmbeddable
+                        ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.12);"><iframe src="${vUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>`
+                        : `<a href="${vUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;height:80px;background:#0a6aa1;color:white;border-radius:10px;text-decoration:none;font-weight:700;gap:8px;font-size:0.85rem;"><i class="fas fa-play-circle" style="font-size:1.3rem;"></i> Ver Vídeo</a>`
+                    }
+                    ${m.caption ? `<p style="margin:5px 0 0;font-size:0.65rem;color:#94a3b8;text-align:center;">${m.caption}</p>` : ''}
+                </div>`;
+        });
+
+        mediaFooterHtml = `
+            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #f1f5f9;">
+                <h4 style="margin:0 0 12px;font-size:0.65rem;color:#cbd5e1;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;display:flex;align-items:center;gap:6px;">
+                    <i class="fas fa-images"></i> Referencia Visual
+                </h4>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;">
+                    ${galleryItems}
+                </div>
+            </div>`;
+    }
+
+    // ── Additional Notes & Errors at the very bottom ─────────────────────────
+    let footerTextHtml = '';
+    if (config.notes) footerTextHtml += `
+        <div style="padding:18px 22px;background:#fefce8;border-left:5px solid #fbbf24;border-radius:12px;margin-top:24px;">
+            <h4 style="margin:0 0 8px;font-size:0.7rem;color:#854d0e;text-transform:uppercase;letter-spacing:1.5px;font-weight:900;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-lightbulb"></i> Notas
+            </h4>
+            <p style="margin:0;font-size:0.9rem;color:#713f12;line-height:1.75;font-style:italic;">${config.notes.replace(/\n/g,'<br>')}</p>
+        </div>`;
+    if (config.errors) footerTextHtml += `
+        <div style="padding:18px 22px;background:#fff2f2;border-left:5px solid #ef4444;border-radius:12px;margin-top:16px;">
+            <h4 style="margin:0 0 8px;font-size:0.7rem;color:#b91c1c;text-transform:uppercase;letter-spacing:1.5px;font-weight:900;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-exclamation-triangle"></i> Errores Frecuentes
+            </h4>
+            <p style="margin:0;font-size:0.9rem;color:#7f1d1d;line-height:1.75;font-style:italic;">${config.errors.replace(/\n/g,'<br>')}</p>
+        </div>`;
+
+    contentEl.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:32px;border:1px solid #e2e8f0;box-shadow:0 10px 40px rgba(0,0,0,0.03);position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#0369a1,#fbbf24);"></div>
+            <h3 style="margin:0 0 22px;color:#0f172a;font-size:1.5rem;font-weight:800;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:1.8rem;">${config.icon || ''}</span> ${config.name || ''}
+            </h3>
+            ${textHtml}
+            ${safeHtmlContent}
+            ${footerTextHtml}
+            ${mediaFooterHtml}
+        </div>`;
+
+    if (grid) grid.style.display = 'none';
+    if (detail) detail.style.display = 'block';
+    const container = document.querySelector('.channel-explorer-container');
+    if (container) window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' });
+};
+
+// ── Lightbox global ──────────────────────────────────────────────────────────
+window.openChannelLightbox = function(src, caption, originalUrl) {
+    let lb = document.getElementById('channel-lightbox');
+    if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'channel-lightbox';
+        lb.style.cssText = `
+            position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.88);
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            cursor:zoom-out;padding:20px;box-sizing:border-box;
+            animation:lbFadeIn 0.2s ease;`;
+        lb.innerHTML = `
+            <style>@keyframes lbFadeIn{from{opacity:0}to{opacity:1}}</style>
+            <button onclick="window.closeChannelLightbox()" style="
+                position:absolute;top:16px;right:20px;background:rgba(255,255,255,0.15);
+                border:none;color:white;width:38px;height:38px;border-radius:50%;
+                font-size:1.2rem;cursor:pointer;display:flex;align-items:center;
+                justify-content:center;transition:background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+            <img id="lb-img" src="" alt="" style="
+                max-width:90vw;max-height:82vh;border-radius:12px;
+                box-shadow:0 25px 80px rgba(0,0,0,0.6);object-fit:contain;display:block;"
+                onerror="this.style.display='none'; document.getElementById('lb-error').style.display='flex';">
+            <a id="lb-error" href="#" target="_blank" style="display:none; padding:12px 24px; background:#0ea5e9; color:white; border-radius:8px; text-decoration:none; font-weight:bold; margin-top:20px; align-items:center; gap:8px;">
+                <i class="fas fa-external-link-alt"></i> Abrir imagen original
+            </a>
+            <p id="lb-caption" style="
+                margin:16px 0 0;color:rgba(255,255,255,0.75);font-size:0.85rem;
+                font-style:italic;text-align:center;max-width:600px;"></p>`;
+        lb.addEventListener('click', e => { if (e.target === lb) window.closeChannelLightbox(); });
+        document.body.appendChild(lb);
+        document.addEventListener('keydown', window._lbKeyHandler = e => {
+            if (e.key === 'Escape') window.closeChannelLightbox();
+        });
+    }
+    const imgEl = document.getElementById('lb-img');
+    const errEl = document.getElementById('lb-error');
+    imgEl.style.display = 'block';
+    errEl.style.display = 'none';
+    imgEl.src = src;
+    
+    if (originalUrl) {
+        errEl.href = originalUrl;
+    }
+    
+    document.getElementById('lb-caption').textContent = caption || '';
+    lb.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeChannelLightbox = function() {
+    const lb = document.getElementById('channel-lightbox');
+    if (lb) lb.style.display = 'none';
+    document.body.style.overflow = '';
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 function loadProtocol(p, highlightText = '', skipScroll = false) {
     const pId = p.section || p.title;
     location.hash = `protocol/${encodeURIComponent(pId)}`;
@@ -1171,79 +1412,116 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         content = doc.body.innerHTML;
     }
     
-    // Sección de video independiente (completamente fuera del HTML del protocolo)
-    let videoSection = '';
-    if (p.video_url) {
-        let finalVideoUrl = p.video_url;
-        let isDrive = false;
-        let isYouTube = false;
-        let driveId = '';
+    // Recopilar media
+    const mediaItems = p.media || [];
+    if (mediaItems.length === 0) {
+        if (p.image_url) mediaItems.push({ type: 'image', url: p.image_url, caption: p.image_caption || '' });
+        if (p.video_url) mediaItems.push({ type: 'video', url: p.video_url, caption: p.video_caption || '' });
+    }
 
-        // Formateo inteligente para Google Drive
-        if (finalVideoUrl.includes('drive.google.com')) {
-            isDrive = true;
-            if (finalVideoUrl.includes('/view')) {
-                finalVideoUrl = finalVideoUrl.replace(/\/view.*$/, '/preview');
-            } else if (finalVideoUrl.includes('?id=')) {
-                const id = finalVideoUrl.split('id=')[1].split('&')[0];
-                finalVideoUrl = `https://drive.google.com/file/d/${id}/preview`;
-            } else if (!finalVideoUrl.endsWith('/preview')) {
-                const match = finalVideoUrl.match(/\/d\/([^\/]+)/);
-                if (match) finalVideoUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+    let mediaSections = '';
+    
+    mediaItems.forEach(item => {
+        if (!item.url) return;
+        
+        if (item.type === 'image') {
+            let finalImgUrl = item.url;
+            if (item.url.includes('drive.google.com')) {
+                const match = item.url.match(/\/d\/([^\/\?&]+)/);
+                if (match && match[1]) finalImgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
             }
-            const driveMatch = finalVideoUrl.match(/\/d\/([^\/\?&]+)/);
-            if (driveMatch && driveMatch[1]) driveId = driveMatch[1];
-        }
 
-        const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        if (ytMatch && ytMatch[1]) {
-            isYouTube = true;
-            finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
-        }
-        const isMp4 = finalVideoUrl.toLowerCase().endsWith('.mp4') || finalVideoUrl.toLowerCase().endsWith('.webm');
-        const driveOpenUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : p.video_url;
+            const innerMediaHtml = `<img src="${finalImgUrl}" alt="${item.caption || 'Imagen adjunta'}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" onerror="this.onerror=null;this.parentElement.innerHTML='<a href=\'${item.url}\' target=\'_blank\' style=\'display:inline-block;padding:10px 20px;background:#0a6aa1;color:white;border-radius:8px;text-decoration:none;font-weight:bold;\'>Ver imagen en Drive</a>'">`;
 
-        videoSection = `
-            <div class="video-wrapper" style="margin-top: 4rem; padding: 2.5rem; border-radius: 22px; background: linear-gradient(165deg, #f8fcff 0%, #eef4fb 100%); border: 1px solid #d7e4f3; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <span style="background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 0.65rem 1.25rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.28);">
-                        <i class="fas fa-play-circle" style="margin-right: 6px;"></i> CONTENIDO MULTIMEDIA RELACIONADO
-                    </span>
-                    ${p.video_caption ? `<h3 style="margin-top: 1rem; color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing:0.01em;">${p.video_caption}</h3>` : ''}
+            mediaSections += `
+                <div class="image-wrapper" style="margin-top: 4rem; padding: 2.5rem; border-radius: 22px; background: linear-gradient(165deg, #f8fcff 0%, #eef4fb 100%); border: 1px solid #d7e4f3; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: white; width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(10, 106, 161, 0.12); color: #0a6aa1; font-size: 1.5rem;">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div>
+                            <span style="text-transform: uppercase; font-size: 0.75rem; font-weight: 800; color: #0a6aa1; letter-spacing: 1px;">Material Visual Adicional</span>
+                            ${item.caption ? `<h3 style="margin-top: 2px; margin-bottom:0; color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing:0.01em;">${item.caption}</h3>` : ''}
+                        </div>
+                    </div>
+                    <div class="image-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #fff; text-align: center;">
+                        ${innerMediaHtml}
+                    </div>
                 </div>
+            `;
+        } else if (item.type === 'video') {
+            let finalVideoUrl = item.url;
+            let isDrive = false;
+            let isYouTube = false;
+            let driveId = '';
 
-                ${isDrive ? `
-                    <div class="video-container" style="max-width: 980px; margin: 0 auto; padding-bottom: 75%; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
-                        <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
+            if (finalVideoUrl.includes('drive.google.com')) {
+                isDrive = true;
+                if (finalVideoUrl.includes('/view')) {
+                    finalVideoUrl = finalVideoUrl.replace(/\/view.*$/, '/preview');
+                } else if (finalVideoUrl.includes('?id=')) {
+                    const id = finalVideoUrl.split('id=')[1].split('&')[0];
+                    finalVideoUrl = `https://drive.google.com/file/d/${id}/preview`;
+                } else if (!finalVideoUrl.endsWith('/preview')) {
+                    const match = finalVideoUrl.match(/\/d\/([^\/]+)/);
+                    if (match) finalVideoUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+                }
+                const driveMatch = finalVideoUrl.match(/\/d\/([^\/\?&]+)/);
+                if (driveMatch && driveMatch[1]) driveId = driveMatch[1];
+            }
+
+            const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytMatch && ytMatch[1]) {
+                isYouTube = true;
+                finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+            }
+            const isMp4 = finalVideoUrl.toLowerCase().endsWith('.mp4') || finalVideoUrl.toLowerCase().endsWith('.webm');
+            const driveOpenUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : item.url;
+
+            let innerVideoHtml = '';
+            if (isDrive) {
+                innerVideoHtml = `<div class="video-container" style="max-width: 980px; margin: 0 auto; padding-bottom: 75%; position:relative; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                        <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="position:absolute;top:0;left:0;width: 100%; height: 100%; border: none;"></iframe>
                     </div>
                     <div style="max-width:980px; margin:12px auto 0; text-align:right;">
                         <a href="${driveOpenUrl}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 11px 16px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 800; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.26);">
                             <span>Abrir en Drive</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
-                    </div>
-                ` : isYouTube ? `
-                    <div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                    </div>`;
+            } else if (isYouTube) {
+                innerVideoHtml = `<div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
                         <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
-                    </div>
-                ` : isMp4 ? `
-                    <div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
+                    </div>`;
+            } else if (isMp4) {
+                innerVideoHtml = `<div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
                         <video controls style="width: 100%; height: 100%; border: none; display: block;">
                             <source src="${finalVideoUrl}" type="video/mp4">
                         </video>
-                    </div>
-                ` : `
-                    <div class="drive-access-card" style="background: white; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                    </div>`;
+            } else {
+                innerVideoHtml = `<div class="drive-access-card" style="background: white; padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
                         <p style="margin:0 0 12px; color:#475569; font-weight:600;">Este proveedor bloquea la carga embebida por seguridad (CSP).</p>
-                        <a href="${p.video_url}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: #0a6aa1; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 700;">
+                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: #0a6aa1; color: white; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 700;">
                             <span>Abrir video en pestaña nueva</span>
                             <i class="fas fa-external-link-alt"></i>
                         </a>
+                    </div>`;
+            }
+
+            mediaSections += `
+                <div class="video-wrapper" style="margin-top: 4rem; padding: 2.5rem; border-radius: 22px; background: linear-gradient(165deg, #f8fcff 0%, #eef4fb 100%); border: 1px solid #d7e4f3; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <span style="background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 0.65rem 1.25rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.28);">
+                            <i class="fas fa-play-circle" style="margin-right: 6px;"></i> CONTENIDO MULTIMEDIA RELACIONADO
+                        </span>
+                        ${item.caption ? `<h3 style="margin-top: 1rem; color: #0f172a; font-size: 1.25rem; font-weight: 800; letter-spacing:0.01em;">${item.caption}</h3>` : ''}
                     </div>
-                `}
-            </div>
-        `;
-    }
+                    ${innerVideoHtml}
+                </div>
+            `;
+        }
+    });
 
 
     const isChannelProtocol = p.section === '3.5' || p.section === '2.1.0' || p.section === '2.1' || (p.title && p.title.includes('Canales de venta'));
@@ -1255,6 +1533,22 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         const relevantChannels = channels_config.filter(c => 
             !c.isHidden && (currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel)
         );
+
+        // Pre-process: Fix any channel htmlContent where media was placed after </html>
+        relevantChannels.forEach(c => {
+            if (c.htmlContent && (c.htmlContent.toLowerCase().includes('<!doctype html>') || c.htmlContent.toLowerCase().includes('<html'))) {
+                const htmlEndMatch = c.htmlContent.match(/<\/html\s*>([\s\S]*?)$/i);
+                if (htmlEndMatch && htmlEndMatch[1] && htmlEndMatch[1].trim()) {
+                    const trailingContent = htmlEndMatch[1].trim();
+                    if (c.htmlContent.toLowerCase().includes('</body>')) {
+                        // Move trailing content inside body
+                        c.htmlContent = c.htmlContent.replace(/<\/body>/i, '\n' + trailingContent + '\n</body>');
+                        // Clean trailing content after </html>
+                        c.htmlContent = c.htmlContent.replace(/<\/html\s*>[\s\S]*$/i, '</html>');
+                    }
+                }
+            }
+        });
 
         // Define the dynamic part (the explorer itself)
         const dynamicExplorer = `
@@ -1290,18 +1584,15 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 </div>
 
                 <!-- Channel Grid View (Ultra-Compact List) -->
-                <div id="channels-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 25px;">
+                <div id="channels-grid-view" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 25px;">
                     ${relevantChannels.map((c, idx) => `
                         <div class="channel-card-mini" onclick="showChannelDetail('${c.id}')" data-name="${c.name.toLowerCase()}" data-hotel="${c.hotel || 'Ambos hoteles'}" style="background: white; padding: 10px 12px; border-radius: 12px; border: 1px solid #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; position: relative;">
                             <div style="flex-shrink: 0; width: 38px; height: 38px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; position: relative; border: 1px solid #e2e8f0;">
                                 ${c.icon}
                                 ${c.isGift ? '<span style="position: absolute; top: -5px; right: -5px; background: #a855f7; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; border: 2px solid white; box-shadow: 0 2px 4px rgba(168,85,247,0.3);">🎁</span>' : ''}
                             </div>
-                            <div style="overflow: hidden; text-align: left; flex: 1;">
-                                <h4 style="margin: 0 0 3px 0; color: #0f172a; font-size: 0.8rem; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${c.name}</h4>
-                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${c.hotel === 'Ambos hoteles' ? '#8b5cf6' : c.hotel === 'Sercotel Guadiana' ? '#0ea5e9' : '#10b981'}; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
-                                    ${c.hotel === 'Ambos hoteles' ? 'Ambos Hoteles' : c.hotel === 'Sercotel Guadiana' ? 'Guadiana' : 'Cumbria'}
-                                </div>
+                            <div style="text-align: left; flex: 1;">
+                                <h4 style="margin: 0 0 3px 0; color: #0f172a; font-size: 0.8rem; font-weight: 800; word-break: break-word; line-height: 1.3;">${c.name}</h4>
                             </div>
                         </div>
                     `).join('')}
@@ -1316,139 +1607,8 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                     <div id="channel-detail-content"></div>
                 </div>
 
-                <!-- Logic Injection -->
-                <script>
-                    window.setChannelHotelFilter = function(val) {
-                        document.getElementById('channel-hotel-filter').value = val;
-                        
-                        document.querySelectorAll('.hotel-filter-btn').forEach(btn => {
-                            if (btn.getAttribute('data-hotel') === val) {
-                                btn.style.background = '#0ea5e9';
-                                btn.style.color = 'white';
-                                btn.style.border = 'none';
-                                btn.style.boxShadow = '0 4px 10px rgba(14, 165, 233, 0.2)';
-                            } else {
-                                btn.style.background = '#f8fafc';
-                                btn.style.color = '#64748b';
-                                btn.style.border = '1px solid #e2e8f0';
-                                btn.style.boxShadow = 'none';
-                            }
-                        });
-                        
-                        filterChannelsGrid();
-                    };
-
-                    window.filterChannelsGrid = function() {
-                        const searchInput = document.getElementById('channel-search');
-                        const hotelFilter = document.getElementById('channel-hotel-filter');
-                        
-                        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
-                        const h = hotelFilter ? hotelFilter.value : 'all';
-                        
-                        const cards = document.querySelectorAll('.channel-card-mini');
-                        const detailView = document.getElementById('channel-detail-view');
-                        
-                        if (detailView.style.display === 'block') {
-                            hideChannelDetail();
-                        }
-
-                        cards.forEach(card => {
-                            const name = card.getAttribute('data-name');
-                            const hotel = card.getAttribute('data-hotel');
-                            
-                            const matchName = name.includes(q);
-                            const matchHotel = h === 'all' || hotel === h || hotel === 'Ambos hoteles';
-                            
-                            card.style.display = (matchName && matchHotel) ? 'flex' : 'none';
-                        });
-                    };
-
-                    window.showChannelDetail = function(id) {
-                        const grid = document.getElementById('channels-grid-view');
-                        const detail = document.getElementById('channel-detail-view');
-                        const content = document.getElementById('channel-detail-content');
-                        
-                        // Find data in global config
-                        const config = typeof channels_config !== 'undefined' ? channels_config.find(c => c.id === id) : null;
-                        if (!config) return;
-
-                        // Prepare HTML Content intelligently
-                        let safeHtmlContent = '';
-                        if (config.htmlContent) {
-                            if (config.htmlContent.toLowerCase().includes('<!doctype html>') || config.htmlContent.toLowerCase().includes('<html')) {
-                                let escaped = config.htmlContent;
-                                
-                                // HACK: Remove the dark full-screen body from the pasted HTML so it blends perfectly
-                                escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0; padding:0; background: transparent; font-family: Outfit, sans-serif;">');
-                                escaped = escaped.replace(/class="print-card[^"]*"/i, 'class="" style="width: 100%; border: none; box-shadow: none; background: transparent;"');
-                                
-                                // Auto-resize script to make it seamless
-                                const resizeScript = \`
-                                &lt;script&gt;
-                                    function sendHeight() {
-                                        const wrapper = document.getElementById('iframe-content-wrapper') || document.body.firstElementChild || document.body;
-                                        const height = wrapper.offsetHeight || wrapper.scrollHeight || document.documentElement.scrollHeight;
-                                        window.parent.postMessage({ type: 'resize-iframe', id: '\${config.id}', height: height }, '*');
-                                    }
-                                    window.addEventListener('load', sendHeight);
-                                    window.addEventListener('resize', sendHeight);
-                                    new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true });
-                                &lt;/script&gt;
-                                </body>
-                                \`;
-                                escaped = escaped.replace(new RegExp('</body>', 'i'), resizeScript);
-                                escaped = escaped.replace(/"/g, '&quot;');
-                                
-                                safeHtmlContent = '<div class="channel-custom-html" style="margin-top:30px;"><iframe id="iframe-' + config.id + '" srcdoc="' + escaped + '" style="width:100%; height:1000px; border:none; background: transparent; overflow: hidden;" scrolling="no"></iframe></div>';
-                            } else {
-                                safeHtmlContent = '<div class="channel-custom-html" style="margin-top:30px; border-top: 1px solid #f1f5f9; padding-top: 30px;">' + config.htmlContent + '</div>';
-                            }
-                        }
-
-                        // Render detail content
-                        content.innerHTML = \`
-                            <div class="channel-pane animate-in" style="animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 25px;">
-                                    <h2 style="border:none; margin:0; color: #0f172a; font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 15px; letter-spacing: -0.5px;">
-                                        <span style="background: #f1f5f9; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">\${config.icon}</span>
-                                        \${config.name}
-                                        \${config.isGift ? '<span style="background: #f3e8ff; color: #7e22ce; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; border: 1px solid #e9d5ff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Bono Regalo</span>' : ''}
-                                    </h2>
-                                </div>
-                                <div class="channel-card" style="background: white; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
-                                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #0369a1, #fbbf24);"></div>
-                                    <h3 style="margin-top:0; color: #0f172a; font-size: 1.4rem; font-weight: 800; margin-bottom: 20px;">\${config.summary || 'Resumen Operativo'}</h3>
-                                    <div style="color: #334155; line-height: 1.8; font-size: 1rem; font-weight: 500;">
-                                        \${config.content ? '<p>' + config.content.replace(/\\n/g, '<br>') + '</p>' : ''}
-                                    </div>
-                                    \${safeHtmlContent}
-                                    \${config.notes ? \`
-                                        <div style="margin-top:35px; padding:25px; background: #fffcf0; border-left: 6px solid #fbbf24; border-radius: 16px;">
-                                            <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#854d0e; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-lightbulb"></i> Notas de Importancia</h4>
-                                            <p style="margin:0; font-size:0.95rem; color: #713f12; font-style:italic; line-height: 1.6;">\${config.notes.replace(/\\n/g, '<br>')}</p>
-                                        </div>
-                                    \` : ''}
-                                    \${config.errors ? \`
-                                        <div style="margin-top:25px; padding:25px; background: #fff2f2; border-left: 6px solid #ef4444; border-radius: 16px;">
-                                            <h4 style="margin:0 0 12px 0; font-size:0.8rem; color:#b91c1c; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; display: flex; align-items: center; gap: 8px;"><i class="fas fa-exclamation-triangle"></i> Errores Frecuentes</h4>
-                                            <p style="margin:0; font-size:0.95rem; color: #7f1d1d; font-style:italic; line-height: 1.6;">\${config.errors.replace(/\\n/g, '<br>')}</p>
-                                        </div>
-                                    \` : ''}
-                                </div>
-                            </div>
-                        \`;
-
-                        grid.style.display = 'none';
-                        detail.style.display = 'block';
-                        window.scrollTo({ top: document.querySelector('.channel-explorer-container').offsetTop - 20, behavior: 'smooth' });
-                    };
-
-                    window.hideChannelDetail = function() {
-                        document.getElementById('channels-grid-view').style.display = 'grid';
-                        document.getElementById('channel-detail-view').style.display = 'none';
-                    };
-                </script>
             </div>
+
 
             <style>
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -1535,7 +1695,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
 
             <div class="protocol-full-body" style="${isChannelProtocol ? '' : 'font-size: 1.05rem; line-height: 1.7; color: #333;'}">
                 ${content}
-                ${videoSection}
+                ${mediaSections}
 
                 ${p.commonErrors && p.commonErrors.length > 0 ? `
                     <section class="common-errors-box" style="margin-top: 2rem;">
@@ -1620,7 +1780,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
             const newScript = document.createElement('script');
             Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
             // Use an IIFE and a generic block scope to isolate constants/lets
-            newScript.textContent = `(function(){\n try {\n${oldScript.textContent}\n} catch(e) { console.warn("Error ejecutando script del protocolo:", e); }\n})();`;
+            newScript.textContent = '(function(){\n try {\n' + oldScript.textContent + '\n} catch(e) { console.warn("Error ejecutando script del protocolo:", e); }\n})();';
             oldScript.parentNode.replaceChild(newScript, oldScript);
         } catch(err) {
             console.error("Error al procesar script:", err);

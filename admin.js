@@ -6,6 +6,9 @@ let editingIndex = -1;
 let quill;
 let isHtmlMode = false;
 
+let currentProtocolMedia = [];
+let currentChannelMedia = [];
+
 // --- Detección de Servidor Local ---
 const IS_LOCAL_SERVER = window.location.protocol !== 'file:' && (
     window.location.hostname === 'localhost' || 
@@ -1390,6 +1393,20 @@ function initAdmin() {
         });
     }
 
+    const btnAddMedia = document.getElementById('btn-add-media');
+    if (btnAddMedia) {
+        btnAddMedia.addEventListener('click', () => {
+            renderMediaItem({ type: 'image', url: '', caption: '' }, 'media-list-container');
+        });
+    }
+
+    const btnAddChannelMedia = document.getElementById('btn-add-channel-media');
+    if (btnAddChannelMedia) {
+        btnAddChannelMedia.addEventListener('click', () => {
+            renderMediaItem({ type: 'image', url: '', caption: '' }, 'channel-media-list-container');
+        });
+    }
+
     const iconSearch = document.getElementById('icon-search');
     if (iconSearch) {
         iconSearch.addEventListener('input', (e) => {
@@ -1836,6 +1853,31 @@ function renderCommonErrorItem(errorData = { error: '', solution: '' }) {
     container.appendChild(item);
 }
 
+function renderMediaItem(mediaData = { type: 'image', url: '', caption: '' }, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const item = document.createElement('div');
+    item.className = 'media-list-item';
+    item.style = "display: flex; flex-direction: column; gap: 10px; background: #f9f0fd; padding: 12px; border: 1px solid #e1bee7; border-radius: 8px; margin-bottom: 8px;";
+    
+    const safeUrl = (mediaData.url || '').replace(/"/g, '&quot;');
+    const safeCaption = (mediaData.caption || '').replace(/"/g, '&quot;');
+    
+    item.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <select class="media-type" style="padding: 6px; border-radius: 6px; border: 1px solid #ce93d8; font-weight: 600; color: #6a1b9a; background: #f3e5f5; outline: none;">
+                <option value="image" ${mediaData.type === 'image' ? 'selected' : ''}>🖼️ Imagen</option>
+                <option value="video" ${mediaData.type === 'video' ? 'selected' : ''}>🎥 Vídeo (MP4/Youtube/Drive)</option>
+            </select>
+            <button type="button" onclick="this.closest('.media-list-item').remove()" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.1rem; padding: 5px;" title="Eliminar multimedia"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <input type="text" class="media-url" placeholder="URL (ej: https://...)" value="${safeUrl}" style="width: 100%; border: 1px solid #ce93d8; border-radius: 6px; padding: 8px; font-size: 0.85rem;">
+        <input type="text" class="media-caption" placeholder="Título o Pie de foto..." value="${safeCaption}" style="width: 100%; border: 1px solid #ce93d8; border-radius: 6px; padding: 8px; font-size: 0.85rem;">
+    `;
+    container.appendChild(item);
+}
+
 function openEditor(index = -1) {
     editingIndex = index;
     const form = document.getElementById('protocol-form');
@@ -1953,6 +1995,18 @@ function openEditor(index = -1) {
         document.getElementById('edit-is-critical').checked = isCritical;
         document.getElementById('edit-is-announcement').checked = isAnnouncement;
 
+        // Media Load
+        currentProtocolMedia = p.media || [];
+        const mediaContainer = document.getElementById('media-list-container');
+        if (mediaContainer) mediaContainer.innerHTML = '';
+        
+        if (currentProtocolMedia.length === 0) {
+            if (p.image_url) currentProtocolMedia.push({ type: 'image', url: p.image_url, caption: p.image_caption || '' });
+            if (p.video_url) currentProtocolMedia.push({ type: 'video', url: p.video_url, caption: p.video_caption || '' });
+        }
+        
+        currentProtocolMedia.forEach(m => renderMediaItem(m, 'media-list-container'));
+
         // Errores Comunes Load
         const commonErrors = p.commonErrors || [];
         const cbHasErrors = document.getElementById('edit-has-common-errors');
@@ -1968,9 +2022,7 @@ function openEditor(index = -1) {
             document.getElementById('common-errors-list-container').style.display = 'none';
         }
 
-        // CARGAR DATOS DE VÍDEO PRINCIPAL
-        document.getElementById('edit-video-url').value = p.video_url || '';
-        document.getElementById('edit-video-caption').value = p.video_caption || '';
+        // Elementos de video principal eliminados, usamos media list en su lugar
         
         // Preserve raw HTML to avoid stripping
         const rawContent = p.content || '';
@@ -2741,8 +2793,13 @@ function saveProtocol() {
         });
     }
 
-    const videoUrl = document.getElementById('edit-video-url').value.trim();
-    const videoCaption = document.getElementById('edit-video-caption').value.trim();
+    const currentMedia = [];
+    document.querySelectorAll('#media-list-container .media-list-item').forEach(item => {
+        const type = item.querySelector('.media-type').value;
+        const url = item.querySelector('.media-url').value.trim();
+        const caption = item.querySelector('.media-caption').value.trim();
+        if (url) currentMedia.push({ type, url, caption });
+    });
 
     const p = {
         title: title,
@@ -2752,8 +2809,7 @@ function saveProtocol() {
         published: publishedDate,
         updated: updatedDate,
         content: content,
-        video_url: videoUrl || undefined,
-        video_caption: videoCaption || undefined,
+        media: currentMedia.length > 0 ? currentMedia : undefined,
         isCritical: isCritical,
         isAnnouncement: isAnnouncement,
         commonErrors: currentCommonErrors.length > 0 ? currentCommonErrors : undefined,
@@ -3850,6 +3906,10 @@ function openChannelModal(index) {
         document.getElementById('modal-channel-notes').value = '';
         document.getElementById('modal-channel-errors').value = '';
         document.getElementById('modal-channel-html').value = '';
+        
+        currentChannelMedia = [];
+        const mediaContainer = document.getElementById('channel-media-list-container');
+        if (mediaContainer) mediaContainer.innerHTML = '';
     } else {
         const c = window.channels_config[index];
         title.innerHTML = '<i class="fas fa-edit" style="color:#0a6aa1;"></i> Editar Canal: ' + (c.name || '');
@@ -3862,6 +3922,17 @@ function openChannelModal(index) {
         document.getElementById('modal-channel-notes').value = c.notes || '';
         document.getElementById('modal-channel-errors').value = c.errors || '';
         document.getElementById('modal-channel-html').value = c.htmlContent || '';
+        
+        currentChannelMedia = c.media || [];
+        const mediaContainer = document.getElementById('channel-media-list-container');
+        if (mediaContainer) mediaContainer.innerHTML = '';
+        
+        if (currentChannelMedia.length === 0) {
+            if (c.image_url) currentChannelMedia.push({ type: 'image', url: c.image_url, caption: c.image_caption || '' });
+            if (c.video_url) currentChannelMedia.push({ type: 'video', url: c.video_url, caption: c.video_caption || '' });
+        }
+        
+        currentChannelMedia.forEach(m => renderMediaItem(m, 'channel-media-list-container'));
     }
     
     modal.style.display = 'flex';
@@ -3878,6 +3949,14 @@ function saveChannelFromModal() {
         return;
     }
     
+    const currentMedia = [];
+    document.querySelectorAll('#channel-media-list-container .media-list-item').forEach(item => {
+        const type = item.querySelector('.media-type').value;
+        const url = item.querySelector('.media-url').value.trim();
+        const caption = item.querySelector('.media-caption').value.trim();
+        if (url) currentMedia.push({ type, url, caption });
+    });
+    
     const c = {
         name: name,
         isGift: document.getElementById('modal-channel-is-gift').checked,
@@ -3887,7 +3966,8 @@ function saveChannelFromModal() {
         content: document.getElementById('modal-channel-content').value,
         notes: document.getElementById('modal-channel-notes').value,
         errors: document.getElementById('modal-channel-errors').value,
-        htmlContent: document.getElementById('modal-channel-html').value
+        htmlContent: document.getElementById('modal-channel-html').value,
+        media: currentMedia.length > 0 ? currentMedia : undefined
     };
     
     if (currentEditingChannelIndex === -1) {
@@ -4019,8 +4099,18 @@ async function uploadChannelMedia(file, type) {
             
             const textarea = document.getElementById(`modal-channel-html`);
             if (textarea) {
-                textarea.value += mediaHtml;
+                const currentVal = textarea.value;
+                // If the content is a full HTML document, insert media before </body> so it renders inside the iframe
+                if (currentVal.toLowerCase().includes('</body>')) {
+                    textarea.value = currentVal.replace(/<\/body>/i, mediaHtml + '\n</body>');
+                } else if (currentVal.toLowerCase().includes('</html>')) {
+                    textarea.value = currentVal.replace(/<\/html>/i, mediaHtml + '\n</html>');
+                } else {
+                    textarea.value += mediaHtml;
+                }
                 showToast('✅ Media insertado correctamente con su texto');
+                // Refresh the media manager list
+                if (typeof window.scanChannelHtml === 'function') window.scanChannelHtml();
             }
         } else {
             alert('Error al subir: ' + result.message);
