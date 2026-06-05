@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Operativa - Versión para Imprimir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="Imagenes/Logo.png" type="image/png">
+    <style>
+        :root {
+            --accent-blue: #0a6aa1;
+            --accent-gold: #a58c5f;
+            --accent-red: #c0392b;
+            --accent-green: #27ae60;
+            --text-dark: #1a1a2e;
+            --text-muted: #6c757d;
+            --border: #e8ecf1;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #f4f6f9;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .print-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .print-header {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #0a6aa1 0%, #003049 100%);
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .print-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .print-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .print-header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .print-header .hotel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .print-date {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Controls */
+        .print-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #0a6aa1 0%, #004a66 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 4px 15px rgba(10,106,161,0.35);
+            transition: all 0.3s;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(10,106,161,0.45);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: white;
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Guide sections */
+        .guide-section {
+            background: white;
+            border-radius: 12px;
+            border-left: 5px solid var(--accent-blue);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .guide-section:nth-child(even) {
+            border-left-color: var(--accent-gold);
+        }
+
+        .guide-section-header {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, rgba(10,106,161,0.04) 0%, rgba(10,106,161,0.01) 100%);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .guide-section:nth-child(even) .guide-section-header {
+            background: linear-gradient(135deg, rgba(165,140,95,0.04) 0%, rgba(165,140,95,0.01) 100%);
+        }
+
+        .guide-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .guide-section-title i {
+            color: var(--accent-blue);
+            font-size: 1rem;
+        }
+
+        .guide-section:nth-child(even) .guide-section-title i {
+            color: var(--accent-gold);
+        }
+
+        .guide-desc {
+            padding: 1rem 1.25rem;
+            background: var(--bg-light);
+            margin: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .guide-section:nth-child(even) .guide-desc {
+            border-left-color: var(--accent-gold);
+        }
+
+        .guide-items {
+            padding: 0.5rem 1.25rem 1.25rem;
+        }
+
+        .guide-item {
+            padding: 0.6rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px dotted #e2e8f0;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .guide-item:last-child {
+            border-bottom: none;
+        }
+
+        .guide-item-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .guide-num {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+            min-width: 42px;
+            flex-shrink: 0;
+        }
+
+        .guide-title-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .guide-item.sub-item {
+            margin-left: 1.5rem;
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .guide-item.sub-item .guide-num {
+            font-size: 0.8rem;
+        }
+
+        .guide-item.sub-item .guide-title-text {
+            font-size: 0.82rem;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-active { background: rgba(39,174,96,0.1); color: #27ae60; }
+        .status-draft { background: rgba(243,156,18,0.1); color: #e67e22; }
+        .status-process { background: rgba(231,76,60,0.1); color: #c0392b; }
+
+        /* Source badges */
+        .source-badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        .source-guadiana { background: #fdf2e9; color: #c0392b; border: 1px solid rgba(192,57,43,0.25); }
+        .source-cumbria { background: #e9f7ef; color: #0b6623; border: 1px solid rgba(11,102,35,0.25); }
+        .source-ambos { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+
+        /* Footer */
+        .print-footer {
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .print-footer i {
+            margin-right: 6px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            display: block;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ---- Print-specific overrides ---- */
+        @media print {
+            body {
+                background: white !important;
+            }
+
+            .print-wrapper {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .print-controls {
+                display: none !important;
+            }
+
+            .print-header {
+                background: white !important;
+                color: #0a6aa1 !important;
+                border: 2px solid #0a6aa1 !important;
+                border-radius: 0 !important;
+                padding: 1rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+
+            .print-header h1 {
+                font-size: 1.4rem !important;
+                color: #0a6aa1 !important;
+            }
+
+            .print-header p {
+                color: #333 !important;
+            }
+
+            .print-header .hotel-badge {
+                background: transparent !important;
+                border: 1px solid #0a6aa1 !important;
+                color: #0a6aa1 !important;
+            }
+
+            .print-header::before {
+                display: none;
+            }
+
+            .stats-bar {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 0.75rem !important;
+            }
+
+            .stat-item {
+                padding: 0.5rem !important;
+                border-radius: 4px !important;
+                box-shadow: none !important;
+            }
+
+            .stat-number {
+                font-size: 1.2rem !important;
+            }
+
+            .stat-label {
+                font-size: 0.65rem !important;
+            }
+
+            .guide-section {
+                box-shadow: none !important;
+                margin-bottom: 0.4rem !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .guide-section-header {
+                padding: 0.5rem 0.75rem !important;
+                background: #f0f4f8 !important;
+            }
+
+            .guide-section-title {
+                font-size: 0.9rem !important;
+            }
+
+            .guide-desc {
+                padding: 0.5rem 0.75rem !important;
+                margin: 0.3rem 0.75rem !important;
+                font-size: 0.75rem !important;
+            }
+
+            .guide-items {
+                padding: 0.25rem 0.75rem 0.5rem !important;
+            }
+
+            .guide-item {
+                padding: 0.3rem 0.5rem !important;
+            }
+
+            .guide-num {
+                font-size: 0.75rem !important;
+                min-width: 30px !important;
+            }
+
+            .guide-title-text {
+                font-size: 0.75rem !important;
+            }
+
+            .guide-item.sub-item {
+                margin-left: 1rem !important;
+            }
+
+            .guide-item.sub-item .guide-num {
+                font-size: 0.7rem !important;
+            }
+
+            .guide-item.sub-item .guide-title-text {
+                font-size: 0.7rem !important;
+            }
+
+            .status-badge {
+                font-size: 0.6rem !important;
+                padding: 1px 4px !important;
+                border: 1px solid #ccc !important;
+            }
+
+            .source-badge {
+                font-size: 0.55rem !important;
+            }
+
+            .print-footer {
+                margin-top: 0.5rem !important;
+                padding: 0.5rem !important;
+                font-size: 0.65rem !important;
+            }
+
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-wrapper">
+        <!-- Header -->
+        <div class="print-header">
+            <h1><i class="fas fa-map-signs"></i> Esquema Interactivo — Guía Operativa</h1>
+            <p>Manual Operativo de Recepción · Mínimos y Procedimientos</p>
+            <div class="hotel-badge">
+                <i class="fas fa-hotel"></i> Sercotel Guadiana &amp; Cumbria Spa &amp; Hotel
+            </div>
+        </div>
+
+        <div class="print-date" id="print-date"></div>
+
+        <!-- Controls -->
+        <div class="print-controls">
+            <button class="btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir Documento
+            </button>
+            <a href="index.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver al Manual
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="stats-bar"></div>
+
+        <!-- Content -->
+        <div id="guide-content">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                Cargando guía operativa...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="print-footer">
+            <i class="fas fa-lock"></i> Documento confidencial · Uso exclusivo del personal de recepción · Sercotel Guadiana &amp; Cumbria Spa &amp; Hotel
+        </div>
+    </div>
+
+    <!-- Load data -->
+    <script src="data.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set date
+        var now = new Date();
+        document.getElementById('print-date').textContent =
+            'Documento generado el ' + now.toLocaleDateString('es-ES', {
+                day: 'numeric', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+        // Get config
+        var CAT_MAP = (typeof navigation_config !== 'undefined') ? navigation_config : {};
+
+        // Get protocols
+        var protocols = [];
+        if (typeof protocols_data !== 'undefined' && Array.isArray(protocols_data)) {
+            protocols = protocols_data.filter(function(p) {
+                return p.title && p.title !== 'No Title' && !p.hidden && !p.anulado;
+            });
+        }
+
+        // Section descriptions
+        var SECTION_DESCS = {
+            '1': 'Primeros pasos y acceso directo a los apartados esenciales del manual.',
+            '2': 'Turnos, tareas comunes y operativa del día a día en recepción.',
+            '3': 'Todo lo relacionado con la gestión de reservas, tarifas (individuales y grupos), canales online, revisión y control.',
+            '4': 'Procedimientos específicos para la gestión de reservas de grupos y eventos.',
+            '5': 'Protocolos de comunicación entre departamentos y coordinación interna.',
+            '6': 'Manuales de seguridad, emergencias y evacuación del hotel.',
+            '7': 'Guías de uso de sistemas, plataformas informáticas y herramientas digitales.',
+            '8': 'Manuales básicos de consulta rápida para operativa general.',
+            '9': 'Gestión de personal, cuadrantes, vacaciones y solicitudes.',
+            '10': 'Protocolos de servicios de Spa, Piscina y Bienestar.',
+            '11': 'Comunicados oficiales y noticias de interés para el equipo.',
+            '12': 'Coordinación con el Restaurante y gestión de consumos.'
+        };
+
+        var categories = Object.keys(CAT_MAP).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+        var container = document.getElementById('guide-content');
+        container.innerHTML = '';
+
+        var totalProtocols = 0;
+        var totalActive = 0;
+        var totalDraft = 0;
+        var totalSections = categories.length;
+
+        categories.forEach(function(catId) {
+            var cat = CAT_MAP[catId];
+            var sectionProtocols = protocols.filter(function(p) {
+                return p.section && p.section.startsWith(catId + '.');
+            });
+            sectionProtocols.sort(function(a, b) {
+                return a.section.localeCompare(b.section, undefined, { numeric: true });
+            });
+
+            totalProtocols += sectionProtocols.length;
+
+            var description = cat.description || SECTION_DESCS[catId] || 'Protocolos y procedimientos relativos a ' + cat.name + '.';
+
+            var iconClass = (cat.icon && !cat.icon.startsWith('http') && !cat.icon.startsWith('assets/'))
+                ? 'fas ' + cat.icon
+                : 'fas fa-folder';
+
+            var itemsHtml = '';
+            sectionProtocols.forEach(function(p) {
+                var isSubItem = p.section.split('.').length > 2;
+                var cleanTitle = p.title.replace(/\{.*?\}/, '').trim();
+
+                // Status
+                var statusHtml = '';
+                var emoji = '🟢';
+                var statusClass = 'status-active';
+                var statusText = 'Activo';
+
+                if (p.status) {
+                    statusText = p.status;
+                    if (statusText === 'En redacción') { statusClass = 'status-draft'; emoji = '🟠'; totalDraft++; }
+                    else if (statusText === 'En proceso') { statusClass = 'status-process'; emoji = '🔴'; totalDraft++; }
+                    else { totalActive++; }
+                    statusHtml = '<span class="status-badge ' + statusClass + '">' + emoji + ' ' + statusText + '</span>';
+                } else {
+                    var statusMatch = p.title.match(/\{([\u0000-\uFFFF\uD800-\uDBFF\uDC00-\uDFFF]+?)\}/);
+                    if (statusMatch) {
+                        emoji = statusMatch[1];
+                        if (emoji === '🟠' || emoji === '🟡') { statusClass = 'status-draft'; statusText = 'En redacción'; totalDraft++; }
+                        else if (emoji === '🔴') { statusClass = 'status-process'; statusText = 'En proceso'; totalDraft++; }
+                        else { totalActive++; }
+                        statusHtml = '<span class="status-badge ' + statusClass + '">' + emoji + ' ' + statusText + '</span>';
+                    } else {
+                        totalActive++;
+                    }
+                }
+
+                // Source
+                var sourceHtml = '';
+                if (p.source && p.source !== 'General') {
+                    var sourceClass = 'source-ambos';
+                    if (p.source === 'Sercotel Guadiana') sourceClass = 'source-guadiana';
+                    else if (p.source && p.source.includes('Cumbria')) sourceClass = 'source-cumbria';
+
+                    sourceHtml = '<span class="source-badge ' + sourceClass + '"><i class="fas fa-building"></i> ' + p.source + '</span>';
+                }
+
+                itemsHtml += '<div class="guide-item ' + (isSubItem ? 'sub-item' : '') + '">' +
+                    '<div class="guide-item-left">' +
+                        '<span class="guide-num">' + p.section + '</span>' +
+                        '<span class="guide-title-text">' + cleanTitle + '</span>' +
+                        sourceHtml +
+                    '</div>' +
+                    (statusHtml ? '<div>' + statusHtml + '</div>' : '') +
+                '</div>';
+            });
+
+            var sectionHtml = '<div class="guide-section">' +
+                '<div class="guide-section-header">' +
+                    '<div class="guide-section-title">' +
+                        '<i class="' + iconClass + '"></i> ' +
+                        catId + '. ' + cat.name +
+                    '</div>' +
+                '</div>' +
+                '<div class="guide-desc">' + description + '</div>' +
+                '<div class="guide-items">' +
+                    (itemsHtml || '<div style="padding: 0.75rem; color: #999; font-style: italic; font-size: 0.85rem;">No hay protocolos registrados en esta sección.</div>') +
+                '</div>' +
+            '</div>';
+
+            container.innerHTML += sectionHtml;
+        });
+
+        // Stats
+        document.getElementById('stats-bar').innerHTML =
+            '<div class="stat-item"><span class="stat-number">' + totalSections + '</span><span class="stat-label">Secciones</span></div>' +
+            '<div class="stat-item"><span class="stat-number">' + totalProtocols + '</span><span class="stat-label">Protocolos</span></div>' +
+            '<div class="stat-item"><span class="stat-number">' + totalActive + '</span><span class="stat-label">Activos</span></div>' +
+            '<div class="stat-item"><span class="stat-number">' + totalDraft + '</span><span class="stat-label">En Redacción</span></div>';
+    });
+    </script>
+</body>
+</html>

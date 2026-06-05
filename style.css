@@ -2597,3 +2597,189 @@ video {
         flex-wrap: wrap;
     }
 }
+
+/* ============================== */
+/* PRINT STYLES - Guía Operativa  */
+/* ============================== */
+@media print {
+    /* Hide non-essential elements */
+    .main-header,
+    .top-nav,
+    .sidebar-col,
+    .chatbot-bubble,
+    .chatbot-window,
+    .back-btn,
+    .no-print,
+    #chatbot-trigger,
+    #chatbot-container,
+    .print-btn-container {
+        display: none !important;
+    }
+
+    /* Reset backgrounds and shadows */
+    body,
+    .app-wrapper,
+    .main-col {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    body.dark-mode {
+        background: white !important;
+        color: #1a1a1a !important;
+    }
+
+    body.dark-mode * {
+        color: #1a1a1a !important;
+        background: transparent !important;
+        border-color: #ccc !important;
+    }
+
+    .app-wrapper {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .main-col {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Guide section styles for print */
+    .guide-container {
+        gap: 0.5rem !important;
+    }
+
+    .guide-section {
+        border-left: 4px solid #0a6aa1 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 0.5rem;
+    }
+
+    .guide-section.collapsed .guide-content {
+        display: block !important;
+    }
+
+    .guide-section.collapsed .guide-chevron {
+        transform: rotate(0deg) !important;
+    }
+
+    .guide-section-header {
+        background: #f0f4f8 !important;
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    .guide-section-title {
+        font-size: 1rem !important;
+        color: #0a6aa1 !important;
+    }
+
+    .guide-chevron {
+        display: none !important;
+    }
+
+    .guide-section-desc {
+        padding: 0.75rem 1rem !important;
+        margin: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+        background: #f8f9fa !important;
+        border-left: 3px solid #0a6aa1 !important;
+        color: #333 !important;
+    }
+
+    .guide-items-list {
+        padding: 0.25rem 1rem 0.75rem !important;
+    }
+
+    .guide-item {
+        padding: 0.5rem 0.75rem !important;
+        margin-bottom: 0.15rem !important;
+        border: none !important;
+        border-bottom: 1px dotted #ddd !important;
+        border-radius: 0 !important;
+    }
+
+    .guide-item:hover {
+        transform: none !important;
+        background: transparent !important;
+    }
+
+    .guide-item-info {
+        gap: 0.5rem !important;
+    }
+
+    .guide-number {
+        font-size: 0.85rem !important;
+        min-width: 35px !important;
+        color: #0a6aa1 !important;
+    }
+
+    .guide-protocol-title {
+        font-size: 0.85rem !important;
+        color: #1a1a1a !important;
+    }
+
+    .guide-status-badge {
+        font-size: 0.65rem !important;
+        padding: 0.15rem 0.4rem !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .guide-item.sub-item {
+        margin-left: 1.5rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Section title for print header */
+    .section-title {
+        font-size: 1.4rem !important;
+        color: #0a6aa1 !important;
+        text-align: center !important;
+        border-bottom: 2px solid #0a6aa1 !important;
+        padding-bottom: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* Print date header */
+    .print-date-header {
+        display: block !important;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Hotel source badges in print */
+    .guide-item-info span[style*="border-radius: 6px"] {
+        font-size: 0.6rem !important;
+        padding: 1px 5px !important;
+        border: 1px solid #999 !important;
+        background: transparent !important;
+    }
+
+    /* Legal footer */
+    .protocol-legal-footer {
+        margin-top: 1rem !important;
+        padding-top: 0.5rem !important;
+        font-size: 0.7rem !important;
+        border-top: 1px solid #ccc !important;
+        text-align: center !important;
+        color: #999 !important;
+    }
+
+    /* Page setup */
+    @page {
+        margin: 1.5cm;
+        size: A4;
+    }
+}
+
+/* Print date header - hidden by default on screen */
+.print-date-header {
+    display: none;
+}

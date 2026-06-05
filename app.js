@@ -1987,10 +1987,24 @@ function renderOperationalGuide() {
     
     mainColumn.innerHTML = `
         <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Volver</div>
+        <div class="print-btn-container no-print" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap;">
+            <button onclick="window.print()" class="print-guide-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #0a6aa1 0%, #004a66 100%); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; font-family: 'Outfit', sans-serif; box-shadow: 0 4px 12px rgba(10,106,161,0.3); transition: all 0.3s;"
+                onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(10,106,161,0.4)'"
+                onmouseleave="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(10,106,161,0.3)'">
+                <i class="fas fa-print"></i> Imprimir Guía
+            </button>
+            <a href="print-guide.html" target="_blank" class="print-guide-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; font-family: 'Outfit', sans-serif; box-shadow: 0 4px 12px rgba(39,174,96,0.3); text-decoration: none; transition: all 0.3s;"
+                onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39,174,96,0.4)'"
+                onmouseleave="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(39,174,96,0.3)'">
+                <i class="fas fa-external-link-alt"></i> Versión para Imprimir
+            </a>
+        </div>
+        <div class="print-date-header">Impreso el: ${new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} — Documento interno: Sercotel Guadiana & Cumbria</div>
         <h2 class="section-title"><i class="fas fa-map-signs"></i> Esquema Interactivo - Guía Operativa</h2>
         <div class="guide-container" id="guide-container"></div>
         ${getLegalFooterHtml()}
     `;
+
 
     const container = document.getElementById('guide-container');
     const categories = Object.keys(CAT_MAP).sort((a, b) => parseInt(a) - parseInt(b));
