@@ -549,10 +549,13 @@
         </div>
     </div>
 
-    <!-- Load data -->
-    <script src="data.js"></script>
+    <!-- Load data dynamically to prevent cache and render -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+        var timestamp = Date.now();
+        var s = document.createElement('script');
+        s.src = 'data.js?t=' + timestamp;
+        s.onload = function() {
         // Set date
         var now = new Date();
         document.getElementById('print-date').textContent =
@@ -686,7 +689,9 @@
             '<div class="stat-item"><span class="stat-number">' + totalProtocols + '</span><span class="stat-label">Protocolos</span></div>' +
             '<div class="stat-item"><span class="stat-number">' + totalActive + '</span><span class="stat-label">Activos</span></div>' +
             '<div class="stat-item"><span class="stat-number">' + totalDraft + '</span><span class="stat-label">En Redacción</span></div>';
-    });
+        };
+        document.body.appendChild(s);
+    })();
     </script>
 </body>
 </html>

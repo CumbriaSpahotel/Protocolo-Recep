@@ -1162,6 +1162,14 @@ window.setChannelHotelFilter = function(val) {
             btn.style.boxShadow = 'none';
         }
     });
+    
+    // Update the print version link dynamically
+    const printLink = document.getElementById('btn-print-channels-link');
+    if (printLink) {
+        const hotelCode = val.includes('Cumbria') ? 'cumbria' : 'guadiana';
+        printLink.href = `print-channels.html?hotel=${hotelCode}`;
+    }
+    
     window.filterChannelsGrid();
 };
 
@@ -1530,9 +1538,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
     
     // 1. Prepare Content (Special Channel Case)
     if (isChannelProtocol && typeof channels_config !== 'undefined') {
-        const relevantChannels = channels_config.filter(c => 
-            !c.isHidden && (currentHotel === 'Ambos hoteles' || c.hotel === 'Ambos hoteles' || c.hotel === currentHotel)
-        );
+        const relevantChannels = channels_config.filter(c => !c.isHidden);
 
         // Pre-process: Fix any channel htmlContent where media was placed after </html>
         relevantChannels.forEach(c => {
@@ -1553,6 +1559,13 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         // Define the dynamic part (the explorer itself)
         const dynamicExplorer = `
             <div class="channel-explorer-container" style="position: relative; margin-top: 1rem;">
+                <div class="print-btn-container no-print" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <a id="btn-print-channels-link" href="print-channels.html?hotel=${currentHotel.includes('Cumbria') ? 'cumbria' : 'guadiana'}" target="_blank" class="print-guide-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; font-family: 'Outfit', sans-serif; box-shadow: 0 4px 12px rgba(39,174,96,0.3); text-decoration: none; transition: all 0.3s;"
+                        onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39,174,96,0.4)'"
+                        onmouseleave="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(39,174,96,0.3)'">
+                        <i class="fas fa-external-link-alt"></i> Versión para Imprimir
+                    </a>
+                </div>
                 <!-- Global Warning for Cancellations (Compact) -->
                 <div style="background: #fff5f5; border-left: 5px solid #ef4444; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); display: flex; gap: 15px; align-items: flex-start;">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 1.5rem; margin-top: 2px;"></i>
@@ -1574,11 +1587,13 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                             <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem;"></i>
                             <input type="text" id="channel-search" placeholder="Buscar por nombre o servicio..." oninput="filterChannelsGrid()" style="width: 100%; padding: 16px 20px 16px 52px; border-radius: 16px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 1rem; outline: none; transition: all 0.3s; font-weight: 500;" onfocus="this.style.borderColor='#0369a1'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(3,105,161,0.08)';" onblur="this.style.borderColor='#f1f5f9'; this.style.background='#f8fafc';">
                         </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <input type="hidden" id="channel-hotel-filter" value="all">
-                            <button class="hotel-filter-btn" data-hotel="all" onclick="setChannelHotelFilter('all')" style="padding: 12px 20px; border-radius: 14px; border: none; background: #0ea5e9; color: white; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);">🏨 Todos</button>
-                            <button class="hotel-filter-btn" data-hotel="Sercotel Guadiana" onclick="setChannelHotelFilter('Sercotel Guadiana')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🏨 Guadiana</button>
-                            <button class="hotel-filter-btn" data-hotel="Cumbria Spa & Hotel" onclick="setChannelHotelFilter('Cumbria Spa & Hotel')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">🏨 Cumbria</button>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-right: 8px; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-filter"></i> FILTRAR POR HOTEL:
+                            </span>
+                            <input type="hidden" id="channel-hotel-filter" value="">
+                            <button class="hotel-filter-btn" data-hotel="Sercotel Guadiana" onclick="setChannelHotelFilter('Sercotel Guadiana')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Guadiana</button>
+                            <button class="hotel-filter-btn" data-hotel="Cumbria Spa & Hotel" onclick="setChannelHotelFilter('Cumbria Spa & Hotel')" style="padding: 12px 20px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Cumbria</button>
                         </div>
                     </div>
                 </div>
@@ -1607,6 +1622,12 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                     <div id="channel-detail-content"></div>
                 </div>
 
+                <script>
+                    setTimeout(function() {
+                        const defaultHotel = '${currentHotel.includes('Cumbria') ? 'Cumbria Spa & Hotel' : 'Sercotel Guadiana'}';
+                        window.setChannelHotelFilter(defaultHotel);
+                    }, 50);
+                </script>
             </div>
 
 

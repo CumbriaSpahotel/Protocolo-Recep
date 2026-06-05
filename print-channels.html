@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canales de Venta - Versión para Imprimir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="Imagenes/Logo.png" type="image/png">
+    <style>
+        :root {
+            --accent-blue: #0a6aa1;
+            --accent-gold: #a58c5f;
+            --accent-red: #c0392b;
+            --accent-green: #27ae60;
+            --text-dark: #1a1a2e;
+            --text-muted: #6c757d;
+            --border: #e8ecf1;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #f4f6f9;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .print-wrapper {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .print-header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, #0a6aa1 0%, #003049 100%);
+            color: white;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .print-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .print-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .print-header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .print-header .hotel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .print-date {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Controls */
+        .print-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            width: 100%;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #0a6aa1 0%, #004a66 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 4px 15px rgba(10,106,161,0.35);
+            transition: all 0.3s;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(10,106,161,0.45);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: white;
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-filter {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-light);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-filter.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+            box-shadow: 0 2px 8px rgba(10,106,161,0.2);
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Hotel Groups */
+        .hotel-group {
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+            page-break-after: auto;
+        }
+
+        .hotel-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .hotel-group-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hotel-group.guadiana .hotel-group-title {
+            color: var(--accent-red);
+            border-bottom-color: var(--accent-red);
+        }
+
+        .hotel-group.cumbria .hotel-group-title {
+            color: var(--accent-gold);
+            border-bottom-color: var(--accent-gold);
+        }
+
+        .hotel-group.ambos .hotel-group-title {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        /* Channel Card */
+        .channel-card {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px dashed var(--border);
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .channel-card:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .channel-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .channel-title-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .channel-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .channel-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .channel-badge {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-gift {
+            background: #f3e8ff;
+            color: #a855f7;
+            border-color: rgba(168,85,247,0.2);
+        }
+
+        .badge-hotel-guadiana {
+            background: #fdf2e9;
+            color: #c0392b;
+            border-color: rgba(192,57,43,0.2);
+        }
+
+        .badge-hotel-cumbria {
+            background: #e9f7ef;
+            color: #0b6623;
+            border-color: rgba(11,102,35,0.2);
+        }
+
+        .badge-hotel-ambos {
+            background: #f3f4f6;
+            color: #4b5563;
+            border-color: #d1d5db;
+        }
+
+        .channel-summary {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .channel-block {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid transparent;
+        }
+
+        .channel-procedure {
+            background: #f0f9ff;
+            border-left-color: #0ea5e9;
+            border: 1px solid #e0f2fe;
+            border-left-width: 4px;
+        }
+
+        .channel-notes {
+            background: #fcf8f2;
+            border-left-color: var(--accent-gold);
+            border: 1px solid #fef3c7;
+            border-left-width: 4px;
+        }
+
+        .block-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .channel-procedure .block-title {
+            color: #0369a1;
+        }
+
+        .channel-notes .block-title {
+            color: #b45309;
+        }
+
+        .block-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #334155;
+            white-space: pre-line;
+        }
+
+        .channel-iframe-container {
+            margin-top: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .channel-iframe {
+            width: 100%;
+            border: none;
+            background: transparent;
+            overflow: hidden;
+            display: block;
+        }
+
+        /* Footer */
+        .print-footer {
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .print-footer i {
+            margin-right: 6px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            display: block;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ---- Print-specific overrides ---- */
+        @media print {
+            body {
+                background: white !important;
+                color: #1a1a2e !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .print-wrapper {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .print-controls {
+                display: none !important;
+            }
+
+            .print-header {
+                background: #f8fafc !important;
+                color: #003049 !important;
+                border: none !important;
+                border-top: 6px solid #0a6aa1 !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+                border-radius: 0 !important;
+                padding: 1.5rem !important;
+                margin-bottom: 1rem !important;
+                text-align: left !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+
+            .print-header h1 {
+                font-size: 1.5rem !important;
+                color: #003049 !important;
+                font-weight: 800 !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            .print-header p {
+                color: #64748b !important;
+                font-size: 0.9rem !important;
+                font-weight: 600 !important;
+                margin-bottom: 0.5rem !important;
+            }
+
+            .print-header .hotel-badge {
+                background: #eff6ff !important;
+                border: 1px solid #bfdbfe !important;
+                color: #1e40af !important;
+                padding: 4px 10px !important;
+                border-radius: 6px !important;
+                font-size: 0.75rem !important;
+                margin-top: 0 !important;
+            }
+
+            .print-header::before {
+                display: none;
+            }
+
+            .print-date {
+                text-align: right !important;
+                font-size: 0.75rem !important;
+                color: #64748b !important;
+                margin-bottom: 1rem !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                padding-bottom: 0.5rem !important;
+            }
+
+            .stats-bar {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .stat-item {
+                padding: 0.75rem !important;
+                border-radius: 8px !important;
+                border: 1px solid #e2e8f0 !important;
+                background: #f8fafc !important;
+                box-shadow: none !important;
+            }
+
+            .stat-number {
+                font-size: 1.4rem !important;
+                color: #0a6aa1 !important;
+            }
+
+            .stat-label {
+                font-size: 0.65rem !important;
+                color: #64748b !important;
+            }
+
+            .hotel-group {
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                border: none !important;
+                margin-bottom: 2rem !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .hotel-group-title {
+                font-size: 1.15rem !important;
+                margin-bottom: 1.25rem !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+                padding-bottom: 0.5rem !important;
+            }
+
+            .channel-card {
+                margin-bottom: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+                border-bottom: 1px dashed #cbd5e1 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .channel-name {
+                font-size: 1.05rem !important;
+            }
+
+            .channel-summary {
+                font-size: 0.85rem !important;
+                color: #334155 !important;
+            }
+
+            .channel-block {
+                padding: 0.75rem 1rem !important;
+                border-radius: 6px !important;
+                margin-bottom: 0.75rem !important;
+            }
+
+            .channel-procedure {
+                background: #f0f9ff !important;
+                border: 1px solid #bae6fd !important;
+                border-left-width: 4px !important;
+            }
+
+            .channel-notes {
+                background: #fcf8f2 !important;
+                border: 1px solid #fef3c7 !important;
+                border-left-width: 4px !important;
+            }
+
+            .block-title {
+                font-size: 0.7rem !important;
+            }
+
+            .block-text {
+                font-size: 0.8rem !important;
+                color: #334155 !important;
+            }
+
+            .print-footer {
+                margin-top: 1rem !important;
+                padding: 1rem !important;
+                font-size: 0.7rem !important;
+                border-top: 1px solid #e2e8f0 !important;
+            }
+
+            @page {
+                margin: 1.5cm;
+                size: A4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-wrapper">
+        <!-- Header -->
+        <div class="print-header">
+            <h1><i class="fas fa-network-wired"></i> Manual Operativo de Canales de Venta</h1>
+            <p>Procedimientos de Cobro, Garantías y Configuración PMS</p>
+            <div class="hotel-badge">
+                <i class="fas fa-hotel"></i> Sercotel Guadiana &amp; Cumbria Spa &amp; Hotel
+            </div>
+        </div>
+
+        <div class="print-date" id="print-date"></div>
+
+        <!-- Controls -->
+        <div class="print-controls">
+            <div class="controls-row">
+                <button class="btn-print" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimir Documento
+                </button>
+                <a href="index.html" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Volver al Manual
+                </a>
+            </div>
+            <div class="filter-row">
+                <span class="filter-label"><i class="fas fa-filter"></i> Hotel Activo:</span>
+                <button class="btn-filter active" onclick="filterByHotel('guadiana')" id="filter-guadiana">Guadiana</button>
+                <button class="btn-filter" onclick="filterByHotel('cumbria')" id="filter-cumbria">Cumbria</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="stats-bar"></div>
+
+        <!-- Content -->
+        <div id="channels-content">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                Cargando configuración de canales...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="print-footer">
+            <i class="fas fa-lock"></i> Documento confidencial · Uso exclusivo del personal de recepción · Sercotel Guadiana &amp; Cumbria Spa &amp; Hotel
+        </div>
+    </div>
+
+    <!-- Load data dynamically to prevent cache and render -->
+    <script>
+    (function() {
+        var timestamp = Date.now();
+        var s = document.createElement('script');
+        s.src = 'data.js?t=' + timestamp;
+        s.onload = function() {
+            // Set date
+            var now = new Date();
+            document.getElementById('print-date').textContent =
+                'Documento generado el ' + now.toLocaleDateString('es-ES', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+            // Get channels data
+            var channels = [];
+            if (typeof channels_config !== 'undefined' && Array.isArray(channels_config)) {
+                channels = channels_config.filter(function(c) {
+                    return c.name && !c.isHidden;
+                });
+            }
+
+            // Cache data globally for filtering
+            window.allChannels = channels;
+
+            // Detect hotel query parameter
+            var urlParams = new URLSearchParams(window.location.search);
+            var hotelParam = urlParams.get('hotel');
+            if (hotelParam === 'cumbria') {
+                filterByHotel('cumbria');
+            } else {
+                filterByHotel('guadiana');
+            }
+        };
+        document.body.appendChild(s);
+    })();
+
+    // Render channels
+    function renderChannelsList(channels, hotelFilter) {
+        var container = document.getElementById('channels-content');
+        container.innerHTML = '';
+
+        if (channels.length === 0) {
+            container.innerHTML = '<div style="padding: 3rem; text-align: center; color: #999; font-style: italic; background: white; border-radius: 12px;">No hay canales de venta registrados para este filtro.</div>';
+            updateStats(0, 0, 0, hotelFilter);
+            return;
+        }
+
+        // Group by Hotel
+        var groups = {
+            'Sercotel Guadiana': [],
+            'Cumbria Spa & Hotel': [],
+            'Ambos hoteles': []
+        };
+
+        channels.forEach(function(c) {
+            var hotelGroup = c.hotel || 'Ambos hoteles';
+            if (groups[hotelGroup]) {
+                groups[hotelGroup].push(c);
+            } else {
+                groups['Ambos hoteles'].push(c);
+            }
+        });
+
+        // Loop through the groups in order (Guadiana + Ambos, or Cumbria + Ambos)
+        var order = [];
+        if (hotelFilter === 'guadiana') {
+            order = [
+                { key: 'Sercotel Guadiana', name: 'Sercotel Guadiana (Únicos)', css: 'guadiana', icon: 'fa-building' },
+                { key: 'Ambos hoteles', name: 'Ambos Hoteles (Comunes)', css: 'ambos', icon: 'fa-hotel' }
+            ];
+        } else {
+            order = [
+                { key: 'Cumbria Spa & Hotel', name: 'Cumbria Spa & Hotel (Únicos)', css: 'cumbria', icon: 'fa-spa' },
+                { key: 'Ambos hoteles', name: 'Ambos Hoteles (Comunes)', css: 'ambos', icon: 'fa-hotel' }
+            ];
+        }
+
+        order.forEach(function(grp) {
+            var grpChannels = groups[grp.key] || [];
+            if (grpChannels.length === 0) return;
+
+            var groupEl = document.createElement('div');
+            groupEl.className = 'hotel-group ' + grp.css;
+
+            var groupTitle = document.createElement('h2');
+            groupTitle.className = 'hotel-group-title';
+            groupTitle.innerHTML = '<i class="fas ' + grp.icon + '"></i> ' + grp.name;
+            groupEl.appendChild(groupTitle);
+
+            grpChannels.forEach(function(c) {
+                var cardEl = document.createElement('div');
+                cardEl.className = 'channel-card';
+
+                // Badges
+                var hotelBadge = '';
+                if (c.hotel === 'Sercotel Guadiana') {
+                    hotelBadge = '<span class="channel-badge badge-hotel-guadiana"><i class="fas fa-building"></i> Guadiana</span>';
+                } else if (c.hotel === 'Cumbria Spa & Hotel') {
+                    hotelBadge = '<span class="channel-badge badge-hotel-cumbria"><i class="fas fa-spa"></i> Cumbria</span>';
+                } else {
+                    hotelBadge = '<span class="channel-badge badge-hotel-ambos"><i class="fas fa-city"></i> Ambos</span>';
+                }
+
+                var giftBadge = c.isGift ? '<span class="channel-badge badge-gift"><i class="fas fa-gift"></i> Cofre Regalo</span>' : '';
+
+                // Summary
+                var summaryHtml = c.summary ? '<div class="channel-summary">' + c.summary + '</div>' : '';
+
+                // Procedure
+                var procedureHtml = c.content ? 
+                    '<div class="channel-block channel-procedure">' +
+                        '<div class="block-title"><i class="fas fa-tasks"></i> Procedimiento Operativo</div>' +
+                        '<div class="block-text">' + c.content + '</div>' +
+                    '</div>' : '';
+
+                // Notes
+                var notesHtml = c.notes ? 
+                    '<div class="channel-block channel-notes">' +
+                        '<div class="block-title"><i class="fas fa-info-circle"></i> Notas Adicionales</div>' +
+                        '<div class="block-text"><em>' + c.notes + '</em></div>' +
+                    '</div>' : '';
+
+                // HTML Content (iframe)
+                var customHtml = '';
+                if (c.htmlContent && c.htmlContent.trim()) {
+                    if (c.htmlContent.toLowerCase().includes('<!doctype') || c.htmlContent.toLowerCase().includes('<html')) {
+                        var escaped = c.htmlContent;
+                        // Inject basic standard styles to iframe body for clear printing
+                        escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0;padding:15px;background:transparent;color:#1a1a2e;font-family:\'Outfit\',sans-serif;">');
+                        escaped = escaped.replace(/"/g, '&quot;');
+                        
+                        var iframeId = 'iframe-' + c.id;
+                        customHtml = '<div class="channel-iframe-container">' +
+                            '<iframe id="' + iframeId + '" class="channel-iframe" srcdoc="' + escaped + '" scrolling="no"></iframe>' +
+                        '</div>';
+                        
+                        // Setup dynamic iframe resizing
+                        setupIframeAutoResize(iframeId);
+                    } else {
+                        customHtml = '<div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;" class="channel-custom-html">' + c.htmlContent + '</div>';
+                    }
+                }
+
+                cardEl.innerHTML = 
+                    '<div class="channel-card-header">' +
+                        '<div class="channel-title-block">' +
+                            '<div class="channel-icon">' + c.icon + '</div>' +
+                            '<span class="channel-name">' + c.name + '</span>' +
+                        '</div>' +
+                        '<div style="display: flex; gap: 6px;">' + hotelBadge + giftBadge + '</div>' +
+                    '</div>' +
+                    summaryHtml +
+                    procedureHtml +
+                    notesHtml +
+                    customHtml;
+
+                groupEl.appendChild(cardEl);
+            });
+
+            container.appendChild(groupEl);
+        });
+
+        // Calculate counts
+        var total = channels.length;
+        var unique = 0;
+        var common = 0;
+        channels.forEach(function(c) {
+            if (c.hotel === 'Ambos hoteles' || !c.hotel) {
+                common++;
+            } else {
+                unique++;
+            }
+        });
+
+        // Update stats
+        updateStats(total, unique, common, hotelFilter);
+    }
+
+    // Dynamic iframe resizing to fit content (very critical for printing without truncation)
+    function setupIframeAutoResize(iframeId) {
+        // We poll a few times after load to make sure CSS/Fonts are applied and height is accurate
+        setTimeout(function() {
+            var iframe = document.getElementById(iframeId);
+            if (!iframe) return;
+
+            var adjustHeight = function() {
+                try {
+                    var doc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (doc) {
+                        var body = doc.body;
+                        var html = doc.documentElement;
+                        var height = Math.max(
+                            body.scrollHeight, body.offsetHeight, 
+                            html.clientHeight, html.scrollHeight, html.offsetHeight
+                        );
+                        if (height > 30) {
+                            iframe.style.height = (height + 25) + 'px';
+                        }
+                    }
+                } catch (e) {
+                    // Fallback to static tall height if cross-origin blocked (should not happen on srcdoc)
+                    iframe.style.height = '1200px';
+                }
+            };
+
+            iframe.onload = adjustHeight;
+            adjustHeight();
+            
+            // Repeat adjust height after 1 second for delayed assets
+            setTimeout(adjustHeight, 1000);
+            setTimeout(adjustHeight, 3000);
+        }, 100);
+    }
+
+    // Filter channels list
+    function filterByHotel(hotelFilter) {
+        // Update active class on buttons
+        var buttons = document.querySelectorAll('.btn-filter');
+        buttons.forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+
+        document.getElementById('filter-' + hotelFilter).classList.add('active');
+
+        var all = window.allChannels || [];
+        var filtered = [];
+
+        if (hotelFilter === 'guadiana') {
+            filtered = all.filter(function(c) {
+                return c.hotel === 'Sercotel Guadiana' || c.hotel === 'Ambos hoteles' || !c.hotel;
+            });
+        } else if (hotelFilter === 'cumbria') {
+            filtered = all.filter(function(c) {
+                return c.hotel === 'Cumbria Spa & Hotel' || c.hotel === 'Ambos hoteles' || !c.hotel;
+            });
+        }
+
+        renderChannelsList(filtered, hotelFilter);
+    }
+
+    // Update stats bar HTML
+    function updateStats(total, unique, common, hotelFilter) {
+        var statsEl = document.getElementById('stats-bar');
+        if (!statsEl) return;
+
+        var hotelNameText = hotelFilter === 'guadiana' ? 'Guadiana' : 'Cumbria';
+
+        statsEl.innerHTML = 
+            '<div class="stat-item"><span class="stat-number">' + total + '</span><span class="stat-label">Canales Asignados</span></div>' +
+            '<div class="stat-item"><span class="stat-number">' + unique + '</span><span class="stat-label">Únicos ' + hotelNameText + '</span></div>' +
+            '<div class="stat-item"><span class="stat-number">' + common + '</span><span class="stat-label">Comunes / Ambos</span></div>';
+    }
+    </script>
+</body>
+</html>

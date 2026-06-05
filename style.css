@@ -2772,6 +2772,16 @@ video {
         color: #999 !important;
     }
 
+    /* Channels print overrides */
+    .channel-header-premium,
+    #channel-detail-view > button {
+        display: none !important;
+    }
+
+    .channel-explorer-container {
+        margin-top: 0 !important;
+    }
+
     /* Page setup */
     @page {
         margin: 1.5cm;
