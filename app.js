@@ -50,20 +50,12 @@ function replaceGoogleDriveIframes(htmlContent) {
             container.style.maxWidth = '860px';
             container.style.margin = '20px auto';
             container.innerHTML = `
-                <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
-                   style="display:block; width:100%; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
-                   onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
-                   onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
-                    ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
-                    <div class="play-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:opacity 0.2s;opacity:0.7;">
-                        <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);margin-bottom:12px;">
-                            <i class="fas fa-play" style="color:white;font-size:1.8rem;margin-left:5px;"></i>
-                        </div>
-                        <span style="color:white;font-weight:800;font-size:0.95rem;background:rgba(10,106,161,0.85);padding:8px 20px;border-radius:999px;display:flex;align-items:center;gap:8px;">
-                            <i class="fab fa-google-drive"></i> Abrir vídeo en Google Drive
-                        </span>
-                    </div>
-                </a>
+                <div style="position:relative; width:100%; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background:#000; aspect-ratio:16/9;">
+                    <video controls style="width:100%; height:100%; border:none; display:block;" preload="metadata">
+                        <source src="https://drive.google.com/uc?export=download&id=${driveId}" type="video/mp4">
+                        Tu navegador no soporta la reproducción directa. <a href="${driveDirectUrl}" target="_blank" style="color:#0a6aa1; font-weight:bold;">Haz clic aquí para abrir en Google Drive</a>.
+                    </video>
+                </div>
             `;
 
             let targetToReplace = iframe;
@@ -1596,20 +1588,12 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 const thumbUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1280` : '';
                 innerVideoHtml = `
                     <div style="width: 100%; max-width: 860px; margin: 0 auto;">
-                        <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
-                           style="display:block; width:100%; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
-                           onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
-                           onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
-                            ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
-                            <div class="play-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:opacity 0.2s;opacity:0.7;">
-                                <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);margin-bottom:12px;">
-                                    <i class="fas fa-play" style="color:white;font-size:1.8rem;margin-left:5px;"></i>
-                                </div>
-                                <span style="color:white;font-weight:800;font-size:0.95rem;background:rgba(10,106,161,0.85);padding:8px 20px;border-radius:999px;display:flex;align-items:center;gap:8px;">
-                                    <i class="fab fa-google-drive"></i> Abrir vídeo en Google Drive
-                                </span>
-                            </div>
-                        </a>
+                        <div style="position:relative; width:100%; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background:#000; aspect-ratio:16/9;">
+                            <video controls style="width:100%; height:100%; border:none; display:block;" preload="metadata">
+                                <source src="https://drive.google.com/uc?export=download&id=${driveId}" type="video/mp4">
+                                Tu navegador no soporta la reproducción directa. <a href="${driveDirectUrl}" target="_blank" style="color:#0a6aa1; font-weight:bold;">Haz clic aquí para abrir en Google Drive</a>.
+                            </video>
+                        </div>
                     </div>
                 `;
             } else if (isYouTube) {
