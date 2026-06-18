@@ -2938,7 +2938,7 @@ async function generateBotResponse(userInput) {
         });
 
         return { protocol: p, score, source: 'protocol' };
-    }).filter(m => m.score >= 50).sort((a,b) => b.score - a.score); // min score 50 to avoid noise matches
+    }).filter(m => m.score >= 15).sort((a,b) => b.score - a.score);
 
     const allChannels = typeof channels_config !== 'undefined' ? channels_config : [];
     const channelMatches = allChannels.map(ch => {
@@ -2965,7 +2965,7 @@ async function generateBotResponse(userInput) {
             protocol: { title: ch.name, section: 'Canal: ' + ch.name, content: ch.content, info_html: ch.htmlContent },
             score, source: 'channel', channelData: ch
         };
-    }).filter(m => m.score >= 50).sort((a,b) => b.score - a.score); // min score 50 to avoid noise matches
+    }).filter(m => m.score >= 15).sort((a,b) => b.score - a.score);
 
     const allMatches = [...channelMatches, ...matches].sort((a,b) => b.score - a.score);
 
