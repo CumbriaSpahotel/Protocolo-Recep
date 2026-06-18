@@ -2041,7 +2041,7 @@ function initVideoUnits(root) {
 function scanAndConvertVideoLinks(root) {
     const links = root.querySelectorAll('.protocol-full-body a');
     links.forEach(link => {
-        if (link.closest('.video-wrapper') || link.closest('.drive-access-card') || link.classList.contains('btn-premium-video')) return;
+        if (link.closest('.video-wrapper') || link.closest('.drive-access-card') || link.closest('.drive-video-replacement') || link.classList.contains('btn-premium-video')) return;
         const url = link.getAttribute('href') || '';
         const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
         const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
