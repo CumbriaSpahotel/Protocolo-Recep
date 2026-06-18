@@ -2898,6 +2898,27 @@ async function generateBotResponse(userInput) {
     }
 
     // ============================================================
+    // OFF-TOPIC DETECTION — Questions with no hotel relevance
+    // ============================================================
+    const offTopicPatterns = [
+        /^qu[eé] d[íi]a (es|hay|tenemos)/i,
+        /^qu[eé] hora (es|hay|tenemos)/i,
+        /^cu[aá]ntos a[ñn]os/i,
+        /^d[oó]nde est[aá]/i,
+        /^(el )?tiempo (en|que)/i,
+        /^qu[eé] tiempo (hace|hay)/i,
+        /^c[oó]mo (te llamas|est[aá]s|eres)/i,
+        /^qui[eé]n (eres|te hizo|te creo)/i,
+        /^(cu[aá]l es la capital|d[oó]nde est[aá])/i,
+        /^(dame|dime|hazme|cu[eé]ntame) (un chiste|un poema|una historia)/i,
+    ];
+    const isOffTopic = offTopicPatterns.some(rx => rx.test(input.trim()));
+    if (isOffTopic) {
+        appendChatMessage('bot', '😊 Eso está fuera de mi área de especialidad. Soy el <b>Formador de Recepción</b> y solo puedo ayudarte con procedimientos del hotel: check-in, facturación, canales de venta, caja, grupos... ¿Tienes alguna duda operativa?', true);
+        return;
+    }
+
+    // ============================================================
     // SEARCH IN PROTOCOLS + CHANNELS
     // ============================================================
     const allProtocols = typeof protocols_data !== 'undefined' ? protocols_data : (typeof protocols !== 'undefined' ? protocols : []);
@@ -2917,7 +2938,7 @@ async function generateBotResponse(userInput) {
         });
 
         return { protocol: p, score, source: 'protocol' };
-    }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
+    }).filter(m => m.score >= 50).sort((a,b) => b.score - a.score); // min score 50 to avoid noise matches
 
     const allChannels = typeof channels_config !== 'undefined' ? channels_config : [];
     const channelMatches = allChannels.map(ch => {
@@ -2944,7 +2965,7 @@ async function generateBotResponse(userInput) {
             protocol: { title: ch.name, section: 'Canal: ' + ch.name, content: ch.content, info_html: ch.htmlContent },
             score, source: 'channel', channelData: ch
         };
-    }).filter(m => m.score > 0).sort((a,b) => b.score - a.score);
+    }).filter(m => m.score >= 50).sort((a,b) => b.score - a.score); // min score 50 to avoid noise matches
 
     const allMatches = [...channelMatches, ...matches].sort((a,b) => b.score - a.score);
 
@@ -3113,7 +3134,21 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
             if (rawData.error) throw new Error(rawData.error.message || 'Error en la API');
             if (!rawData.candidates || !rawData.candidates[0]) throw new Error('Respuesta vacía de la IA');
             
-            let answerText = rawData.candidates[0].content.parts[0].text;
+            const candidate = rawData.candidates[0];
+            // Handle cases where Gemini returns a candidate with no text (content filtered, off-topic refusal, etc.)
+            const answerTextRaw = candidate?.content?.parts?.[0]?.text;
+            if (!answerTextRaw || !answerTextRaw.trim()) {
+                // If no relevant matches exist either, give a polite off-topic response
+                if (allMatches.length === 0) {
+                    appendChatMessage('bot', '😊 No encuentro información sobre eso en el manual del hotel. Si es una duda operativa, intenta reformularla (ej: "cómo hago el check-in", "qué es una VCC"). Si necesitas ayuda urgente, consulta con tu responsable de recepción.', true);
+                    return;
+                }
+                // Otherwise show relevant matches as fallback
+                appendChatMessage('bot', 'No encontré una respuesta específica a eso, pero aquí tienes los protocolos más relacionados:', true);
+                showClassicResults(allMatches, searchTerms);
+                return;
+            }
+            let answerText = answerTextRaw;
             
             // Save to memory
             chatMemory.add('model', answerText);
