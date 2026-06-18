@@ -2404,6 +2404,30 @@ function handleHashRouting() {
     if (hash.startsWith('protocol/')) {
         const pId = decodeURIComponent(hash.replace('protocol/', ''));
         const targetId = getRedirectedSection(pId);
+
+        // ── Special case: direct link to a channel (e.g. "Canal: BOOKING.COM") ──
+        if (pId.startsWith('Canal: ') && typeof channels_config !== 'undefined') {
+            const channelName = pId.replace('Canal: ', '').trim();
+            const ch = channels_config.find(c => c.name === channelName);
+            if (ch) {
+                // Load the channels hub protocol first (section 3.5 / 2.1)
+                const channelsProtocol = protocols.find(pr => pr.section === '3.5' || pr.section === '2.1.0' || pr.section === '2.1');
+                if (channelsProtocol) {
+                    viewHistory.push({ type: 'protocol', payload: channelsProtocol });
+                    loadProtocol(channelsProtocol, '', true);
+                    // Then auto-open the specific channel detail after the DOM renders
+                    setTimeout(() => {
+                        if (window.showChannelDetail) window.showChannelDetail(ch.id);
+                    }, 150);
+                    // Highlight nav tab for category 3 or 2
+                    const catId = String(channelsProtocol.section || '').split('.')[0];
+                    const link = document.querySelector(`.nav-link[data-cat="${catId}"]`);
+                    if (link) setActiveNav(link);
+                }
+                return;
+            }
+        }
+
         const p = protocols.find(item => item.section === targetId || item.title === pId || item.title === targetId);
         if (p) {
             viewHistory.push({ type: 'protocol', payload: p });
@@ -2417,6 +2441,7 @@ function handleHashRouting() {
                 setActiveNav(link);
             }
         }
+
     } else if (hash.startsWith('category/')) {
         const id = hash.replace('category/', '');
         const CAT_MAP = getCatMap();
