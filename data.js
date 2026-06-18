@@ -1104,7 +1104,7 @@ const home_config = {
 };
 
 var cloud_config = {
-  "scriptUrl": "https://script.google.com/d/1E5kY9xgeTclH0X0fBld7BoRXCka_LMZbCdw73JZXa9qeKSfh1Mp0gGRu/edit?usp=sharing",
+  "scriptUrl": "https://script.google.com/macros/s/AKfycbytVnxql5WPL3eGZLjbLeE-ik2Ia6EAJP6O4DThs-A_H_pp4kad_oiv1NnEdwdoj-Oi/exec",
   "sheetId": "1Sf30Em_DbqcXuNqhWNFMtKpjBvCtyXdm6-mRsk1RTQs",
   "geminiApiKey": ""
 };
