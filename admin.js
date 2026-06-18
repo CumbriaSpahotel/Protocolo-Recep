@@ -80,16 +80,34 @@ window.scanHtmlLinks = function() {
             }
 
         if (src) {
+                // Try to find the enclosing wrapper block (.video-wrapper or .video-container) in the full HTML
+                // so we can extract the caption and replace the entire block correctly
+                const escapedTag = fullTag_vid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const wrapperRegex = new RegExp(
+                    '(<div[^>]*class=["\'][^"\']*video-wrapper[^"\']*["\'][^>]*>[\\s\\S]*?' + escapedTag + '[\\s\\S]*?<\\/div>)',
+                    'i'
+                );
+                const wrapperMatch = wrapperRegex.exec(htmlText);
+                const originalBlock = wrapperMatch ? wrapperMatch[1] : fullTag_vid;
+                
+                // Extract caption from the wrapper block
+                let caption = '';
+                if (wrapperMatch) {
+                    const wrapperDoc = parser.parseFromString(wrapperMatch[1], 'text/html');
+                    caption = wrapperDoc.querySelector('.video-caption')?.textContent.trim() || '';
+                }
+                
                 elements.push({
                     type: 'video',
                     src: src,
                     tagName: el_vid.tagName.toLowerCase(),
-                    caption: el_vid.closest('.video-wrapper')?.querySelector('.video-caption')?.textContent.trim() || '',
-                    original: fullTag_vid
+                    caption: caption,
+                    original: originalBlock
                 });
             }
         }
     }
+
     
     if (elements.length === 0) {
         list.innerHTML = '<div style="font-size: 0.85rem; color: #999; font-style: italic; text-align: center; padding: 10px;">No se han detectado elementos editables en el código.</div>';
@@ -251,14 +269,26 @@ window.scanHtmlLinks = function() {
                 if (videoUrlInput && videoCaptionInput) {
                     videoUrlInput.value = finalUrl;
                     videoCaptionInput.value = captionText;
-                    showToast('🎬 Datos de vídeo cargados en la sección de Vídeo');
                     
                     // Si el video original estaba en el editor HTML, lo quitamos para limpiar el código
                     const editor2 = document.getElementById('html-editor');
                     if (editor2.value.includes(originalHtml)) {
                         editor2.value = editor2.value.replace(originalHtml, '');
-                        showToast('✅ Vídeo movido a la sección independiente');
+                        showToast('✅ Vídeo y título guardados en la sección de Vídeo');
+                        // Re-scan but preserve the caption we just saved
                         window.scanHtmlLinks();
+                        // After scan re-renders the list, restore caption in any matching video input
+                        setTimeout(() => {
+                            document.querySelectorAll('[id^="html-item-url-"]').forEach(urlInput => {
+                                if (urlInput.value === finalUrl || urlInput.value === val1) {
+                                    const textId = urlInput.id.replace('html-item-url-', 'html-item-text-');
+                                    const textInput = document.getElementById(textId);
+                                    if (textInput && !textInput.value) textInput.value = captionText;
+                                }
+                            });
+                        }, 50);
+                    } else {
+                        showToast('🎬 Título de vídeo guardado');
                     }
                 } else {
                     // Fallback antiguo: Construir bloque con wrapper + caption opcional e insertar en HTML
