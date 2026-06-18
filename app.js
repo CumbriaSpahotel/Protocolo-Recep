@@ -3243,7 +3243,8 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
 // ============================================================
 function showClassicResults(allMatches, searchTerms) {
     if (!window._chatProtocolIndex) window._chatProtocolIndex = {};
-    let combinedLinksHtml = '<div style="margin-bottom: 8px; font-weight:600;">He encontrado estos protocolos relevantes:</div>';
+    const extraCount = allMatches.length > 3 ? allMatches.length - 3 : 0;
+    let combinedLinksHtml = `<div style="margin-bottom: 8px; font-weight:600;">He encontrado estos protocolos relevantes:${extraCount > 0 ? ` <span style="font-weight:400; font-size:0.82rem; color:#666;">📎 También encontré otros ${extraCount} resultados relacionados.</span>` : ''}</div>`;
     
     allMatches.slice(0, 3).forEach((m, i) => {
         const p = m.protocol;
@@ -3282,9 +3283,6 @@ function showClassicResults(allMatches, searchTerms) {
     });
     
     appendChatMessage('bot', combinedLinksHtml, true);
-    if (allMatches.length > 3) {
-        appendChatMessage('bot', `📎 También encontré otros ${allMatches.length - 3} resultados relacionados.`);
-    }
 }
 
 // ============================================================
