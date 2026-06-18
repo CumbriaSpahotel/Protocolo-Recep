@@ -50,7 +50,7 @@ function replaceGoogleDriveIframes(htmlContent) {
             container.style.margin = '20px auto';
             container.innerHTML = `
                 <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
-                   style="display:block; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
+                   style="display:block; width:100%; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
                    onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
                    onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
                     ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
@@ -1357,7 +1357,7 @@ window.showChannelDetail = function(id) {
                 galleryItems += `
                     <div style="flex:0 0 auto;width:240px;">
                         <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
-                           style="display:block; position:relative; border-radius:10px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
+                           style="display:block; width:100%; position:relative; border-radius:10px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
                            onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
                            onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
                             ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
@@ -1596,7 +1596,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 innerVideoHtml = `
                     <div style="max-width: 860px; margin: 0 auto;">
                         <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
-                           style="display:block; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
+                           style="display:block; width:100%; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
                            onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
                            onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
                             ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
