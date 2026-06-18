@@ -3213,10 +3213,10 @@ ${contextText ? `DOCUMENTACIÓN INTERNA DISPONIBLE PARA ${currentHotel.toUpperCa
         } catch (err) {
             console.error('[Chatbot] Error Gemini:', err);
             if (allMatches.length > 0) {
-                appendChatMessage('bot', '⚠️ Error con la IA (' + err.message + '). Te muestro los protocolos relevantes:', true);
+                appendChatMessage('bot', 'He encontrado estos protocolos relevantes:', true);
                 showClassicResults(allMatches, searchTerms);
             } else {
-                appendChatMessage('bot', '⚠️ Error: ' + err.message + '. Inténtalo de nuevo en unos segundos.', true);
+                appendChatMessage('bot', 'No encontré información específica sobre eso en el manual. Intenta reformular la pregunta o consulta con tu responsable de recepción. 😊', true);
             }
         }
 
