@@ -1002,6 +1002,7 @@ function initAdmin() {
             const driveMatch = videoUrl.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
             if (driveMatch && driveMatch[1]) {
                 const driveId = driveMatch[1];
+                alert('ℹ️ Recordatorio de permisos para Google Drive:\n\nPara evitar que se solicite inicio de sesión (acreditación) al visualizar el vídeo, asegúrate en la configuración de compartir de Google Drive de que el Acceso General esté configurado en "Cualquier persona con el enlace" con el rol de "Lector" (Viewer) y NO de "Editor".');
                 const embedUrl = `https://drive.google.com/file/d/${driveId}/preview`;
                 finalHtml = `
 <div class="video-container" style="margin: 20px 0; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; background: #000;">
