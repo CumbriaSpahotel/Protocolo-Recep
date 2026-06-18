@@ -84,7 +84,12 @@ window.scanHtmlLinks = function() {
                 // so we can extract the caption and replace the entire block correctly
                 const escapedTag = fullTag_vid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const wrapperRegex = new RegExp(
-                    '(<div[^>]*class=["\'][^"\']*video-wrapper[^"\']*["\'][^>]*>[\\s\\S]*?' + escapedTag + '[\\s\\S]*?<\\/div>)',
+                    '(<div[^>]*class=["\'][^"\']*video-wrapper[^"\']*["\'][^>]*>\\s*' +
+                    '<div[^>]*class=["\'][^"\']*video-container[^"\']*["\'][^>]*>\\s*' +
+                    escapedTag + '\\s*' +
+                    '<\\/div>\\s*' +
+                    '(?:<p[^>]*class=["\'][^"\']*video-caption[^"\']*["\'][^>]*>[\\s\\S]*?<\\/p>)?\\s*' +
+                    '<\\/div>)',
                     'i'
                 );
                 const wrapperMatch = wrapperRegex.exec(htmlText);

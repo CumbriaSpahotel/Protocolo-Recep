@@ -23,6 +23,72 @@ const safeStorage = {
     }
 };
 
+function replaceGoogleDriveIframes(htmlContent) {
+    if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+    if (!htmlContent.includes('drive.google.com')) return htmlContent;
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const iframes = doc.querySelectorAll('iframe');
+    let modified = false;
+
+    iframes.forEach(iframe => {
+        const src = iframe.getAttribute('src') || '';
+        if (src.includes('drive.google.com')) {
+            let driveId = '';
+            const match = src.match(/\/d\/([^\/\?&]+)/) || src.match(/[?&]id=([^&]+)/);
+            if (match) {
+                driveId = match[1];
+            }
+
+            const driveDirectUrl = driveId ? `https://drive.google.com/file/d/${driveId}/view` : src;
+            const thumbUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1280` : '';
+
+            const container = doc.createElement('div');
+            container.className = 'drive-video-replacement';
+            container.style.maxWidth = '860px';
+            container.style.margin = '20px auto';
+            container.innerHTML = `
+                <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
+                   style="display:block; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
+                   onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
+                   onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
+                    \${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
+                    <div class="play-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:opacity 0.2s;opacity:0.7;">
+                        <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);margin-bottom:12px;">
+                            <i class="fas fa-play" style="color:white;font-size:1.8rem;margin-left:5px;"></i>
+                        </div>
+                        <span style="color:white;font-weight:800;font-size:0.95rem;background:rgba(10,106,161,0.85);padding:8px 20px;border-radius:999px;display:flex;align-items:center;gap:8px;">
+                            <i class="fab fa-google-drive"></i> Abrir vídeo en Google Drive
+                        </span>
+                    </div>
+                </a>
+            `;
+
+            let targetToReplace = iframe;
+            let currentParent = iframe.parentElement;
+
+            while (currentParent && (
+                currentParent.classList.contains('video-container') ||
+                currentParent.classList.contains('video-wrapper') ||
+                (currentParent.style.paddingBottom && currentParent.style.paddingBottom.includes('%')) ||
+                (currentParent.style.height === '0px' || currentParent.style.height === '0')
+            )) {
+                targetToReplace = currentParent;
+                currentParent = currentParent.parentElement;
+            }
+
+            targetToReplace.parentNode.replaceChild(container, targetToReplace);
+            modified = true;
+        }
+    });
+
+    if (modified) {
+        return doc.body.innerHTML;
+    }
+    return htmlContent;
+}
+
 // Setup seamless iframe resizing for channel details
 window.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'resize-iframe') {
@@ -1209,13 +1275,14 @@ window.showChannelDetail = function(id) {
     // Build safeHtmlContent from htmlContent field
     let safeHtmlContent = '';
     if (config.htmlContent && config.htmlContent.trim()) {
-        if (config.htmlContent.toLowerCase().includes('<!doctype') || config.htmlContent.toLowerCase().includes('<html')) {
-            let escaped = config.htmlContent;
+        const cleanedHtml = replaceGoogleDriveIframes(config.htmlContent);
+        if (cleanedHtml.toLowerCase().includes('<!doctype') || cleanedHtml.toLowerCase().includes('<html')) {
+            let escaped = cleanedHtml;
             escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0;padding:0;background:transparent;font-family:Outfit,sans-serif;">');
             escaped = escaped.replace(/"/g, '&quot;');
             safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;"><iframe srcdoc="${escaped}" style="width:100%;height:800px;border:none;background:transparent;border-radius:12px;" scrolling="auto"></iframe></div>`;
         } else {
-            safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;border-top:1px solid #f1f5f9;padding-top:20px;">${config.htmlContent}</div>`;
+            safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;border-top:1px solid #f1f5f9;padding-top:20px;">${cleanedHtml}</div>`;
         }
     }
 
@@ -1277,16 +1344,52 @@ window.showChannelDetail = function(id) {
 
         videoItems.forEach(m => {
             let vUrl = m.url;
-            if (vUrl.includes('drive.google.com') && vUrl.includes('/view')) vUrl = vUrl.replace(/\/view.*$/, '/preview');
-            const isEmbeddable = vUrl.includes('drive.google.com') || vUrl.includes('youtube.com') || vUrl.includes('youtu.be');
-            galleryItems += `
-                <div style="flex:0 0 auto;width:240px;">
-                    ${isEmbeddable
-                        ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.12);"><iframe src="${vUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>`
-                        : `<a href="${vUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;height:80px;background:#0a6aa1;color:white;border-radius:10px;text-decoration:none;font-weight:700;gap:8px;font-size:0.85rem;"><i class="fas fa-play-circle" style="font-size:1.3rem;"></i> Ver Vídeo</a>`
-                    }
-                    ${m.caption ? `<p style="margin:5px 0 0;font-size:0.65rem;color:#94a3b8;text-align:center;">${m.caption}</p>` : ''}
-                </div>`;
+            let isDrive = vUrl.includes('drive.google.com');
+            let driveId = '';
+            if (isDrive) {
+                const match = vUrl.match(/\/d\/([^\/\?&]+)/) || vUrl.match(/[?&]id=([^&]+)/);
+                if (match) driveId = match[1];
+            }
+
+            if (isDrive) {
+                const driveDirectUrl = driveId ? `https://drive.google.com/file/d/${driveId}/view` : vUrl;
+                const thumbUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w600` : '';
+                galleryItems += `
+                    <div style="flex:0 0 auto;width:240px;">
+                        <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
+                           style="display:block; position:relative; border-radius:10px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
+                           onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
+                           onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
+                            ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
+                            <div class="play-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:opacity 0.2s;opacity:0.7;">
+                                <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);margin-bottom:6px;">
+                                    <i class="fas fa-play" style="color:white;font-size:0.9rem;margin-left:2px;"></i>
+                                </div>
+                                <span style="color:white;font-weight:800;font-size:0.65rem;background:rgba(10,106,161,0.85);padding:4px 10px;border-radius:999px;display:flex;align-items:center;gap:4px;">
+                                    <i class="fab fa-google-drive"></i> Abrir en Drive
+                                </span>
+                            </div>
+                        </a>
+                        ${m.caption ? `<p style="margin:5px 0 0;font-size:0.65rem;color:#94a3b8;text-align:center;">${m.caption}</p>` : ''}
+                    </div>`;
+            } else {
+                let finalVideoUrl = vUrl;
+                let isYouTube = false;
+                const ytMatch = vUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch && ytMatch[1]) {
+                    isYouTube = true;
+                    finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+                }
+                const isMp4 = vUrl.toLowerCase().endsWith('.mp4') || vUrl.toLowerCase().endsWith('.webm');
+                galleryItems += `
+                    <div style="flex:0 0 auto;width:240px;">
+                        ${isYouTube || isMp4
+                            ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.12);">${isYouTube ? `<iframe src="${finalVideoUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>` : `<video controls style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"><source src="${finalVideoUrl}" type="video/mp4"></video>`}</div>`
+                            : `<a href="${vUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;height:80px;background:#0a6aa1;color:white;border-radius:10px;text-decoration:none;font-weight:700;gap:8px;font-size:0.85rem;"><i class="fas fa-play-circle" style="font-size:1.3rem;"></i> Ver Vídeo</a>`
+                        }
+                        ${m.caption ? `<p style="margin:5px 0 0;font-size:0.65rem;color:#94a3b8;text-align:center;">${m.caption}</p>` : ''}
+                    </div>`;
+            }
         });
 
         mediaFooterHtml = `
@@ -1400,7 +1503,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
     toggleHomeComponents(false);
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
-    let content = p.content;
+    let content = replaceGoogleDriveIframes(p.content);
     
     // Si es un documento HTML completo, extraemos estilos y scripts para que el diseño funcione
     if (content && (content.includes('<html') || content.includes('<!DOCTYPE'))) {
