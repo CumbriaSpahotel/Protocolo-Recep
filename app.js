@@ -46,6 +46,7 @@ function replaceGoogleDriveIframes(htmlContent) {
 
             const container = doc.createElement('div');
             container.className = 'drive-video-replacement';
+            container.style.width = '100%';
             container.style.maxWidth = '860px';
             container.style.margin = '20px auto';
             container.innerHTML = `
@@ -1594,7 +1595,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 const driveDirectUrl = driveId ? `https://drive.google.com/file/d/${driveId}/view` : item.url;
                 const thumbUrl = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1280` : '';
                 innerVideoHtml = `
-                    <div style="max-width: 860px; margin: 0 auto;">
+                    <div style="width: 100%; max-width: 860px; margin: 0 auto;">
                         <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
                            style="display:block; width:100%; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
                            onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
