@@ -53,7 +53,7 @@ function replaceGoogleDriveIframes(htmlContent) {
                    style="display:block; position:relative; border-radius:16px; overflow:hidden; box-shadow: 0 22px 44px rgba(2,6,23,0.2); text-decoration:none; background:#0f172a; aspect-ratio:16/9; cursor:pointer;"
                    onmouseover="this.querySelector('.play-overlay').style.opacity='1'"
                    onmouseout="this.querySelector('.play-overlay').style.opacity='0.7'">
-                    \${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
+                    ${thumbUrl ? `<img src="${thumbUrl}" alt="miniatura vídeo" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
                     <div class="play-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:opacity 0.2s;opacity:0.7;">
                         <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:3px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);margin-bottom:12px;">
                             <i class="fas fa-play" style="color:white;font-size:1.8rem;margin-left:5px;"></i>
