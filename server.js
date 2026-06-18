@@ -142,6 +142,21 @@ app.post('/api/save', (req, res) => {
 
         // Write without BOM - always use plain UTF-8
         fs.writeFileSync(dataFilePath, jsContent, { encoding: 'utf8' });
+
+        // Compilar Tailwind CSS en segundo plano tras actualizar data.js
+        try {
+            const { exec } = require('child_process');
+            exec('npx tailwindcss -i input.css -o tailwind.css', { cwd: __dirname }, (err, stdout, stderr) => {
+                if (err) {
+                    console.error('⚠️ Error al compilar Tailwind CSS:', err);
+                } else {
+                    console.log('⚡ Tailwind CSS compilado correctamente tras guardado');
+                }
+            });
+        } catch (tailwindErr) {
+            console.error('⚠️ Error iniciando compilación de Tailwind:', tailwindErr.message);
+        }
+
         res.json({ success: true, message: 'Datos guardados correctamente (Secrets en .env)' });
     } catch (e) {
         console.error('❌ Error al guardar:', e);

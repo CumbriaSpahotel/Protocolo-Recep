@@ -1,0 +1,6 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+@theme {
+  --color-slate-850: #1e293b;
+}

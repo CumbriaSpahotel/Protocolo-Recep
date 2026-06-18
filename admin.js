@@ -202,8 +202,8 @@ window.scanHtmlLinks = function() {
             const embedUrl = `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
             finalHtml = `\n<div class="video-wrapper"><div class="video-container"><iframe src="${embedUrl}" allow="autoplay" allowfullscreen></iframe></div></div>\n`;
         } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (ytMatch) {
+            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+            if (ytMatch && ytMatch[1].length === 11) {
                 finalHtml = `\n<div class="video-wrapper"><div class="video-container"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div></div>\n`;
             }
         } else if (url.endsWith('.mp4') || url.includes('/documentos/')) {
@@ -1011,8 +1011,8 @@ function initAdmin() {
             }
             // 2. Detección de YouTube
             else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-                if (ytMatch && ytMatch[1]) {
+                const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+                if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
                     const ytId = ytMatch[1];
                     const embedUrl = `https://www.youtube.com/embed/${ytId}`;
                     finalHtml = `

@@ -791,8 +791,8 @@ function renderHome() {
         if (driveMatch && driveMatch[1]) {
             heroVideoExternal = heroVideoUrl;
         } else if (heroVideoUrl.includes('youtube.com') || heroVideoUrl.includes('youtu.be')) {
-            const ytMatch = heroVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (ytMatch) heroVideoEmbed = `https://www.youtube.com/embed/${ytMatch[1]}`;
+            const ytMatch = heroVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+            if (ytMatch && ytMatch[1].length === 11) heroVideoEmbed = `https://www.youtube.com/embed/${ytMatch[1]}`;
         } else {
             heroVideoExternal = heroVideoUrl;
         }
@@ -1271,6 +1271,8 @@ window.showChannelDetail = function(id) {
         const cleanedHtml = replaceGoogleDriveIframes(config.htmlContent);
         if (cleanedHtml.toLowerCase().includes('<!doctype') || cleanedHtml.toLowerCase().includes('<html')) {
             let escaped = cleanedHtml;
+            // Reemplazar la CDN de Tailwind por la versión estática local para producción y evitar advertencias
+            escaped = escaped.replace(/<script[^>]*src=["']https:\/\/cdn\.tailwindcss\.com["'][^>]*><\/script>/gi, '<link rel="stylesheet" href="tailwind.css">');
             escaped = escaped.replace(/<body[^>]*>/i, '<body style="margin:0;padding:0;background:transparent;font-family:Outfit,sans-serif;">');
             escaped = escaped.replace(/"/g, '&quot;');
             safeHtmlContent = `<div class="channel-custom-html" style="margin-top:20px;"><iframe srcdoc="${escaped}" style="width:100%;height:800px;border:none;background:transparent;border-radius:12px;" scrolling="auto"></iframe></div>`;
@@ -1368,8 +1370,8 @@ window.showChannelDetail = function(id) {
             } else {
                 let finalVideoUrl = vUrl;
                 let isYouTube = false;
-                const ytMatch = vUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-                if (ytMatch && ytMatch[1]) {
+                const ytMatch = vUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+                if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
                     isYouTube = true;
                     finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
                 }
@@ -1505,6 +1507,11 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         
         // Inyectar estilos y scripts del head del protocolo al head de la página principal
         doc.head.querySelectorAll('style, link, script').forEach(el => {
+            // Omitir la CDN de Tailwind para evitar la advertencia en consola,
+            // ya que index.html ya carga la hoja de estilos tailwind.css compilada localmente.
+            if (el.tagName === 'SCRIPT' && el.src && el.src.includes('cdn.tailwindcss.com')) {
+                return;
+            }
             if (!document.head.querySelector(`[data-proto-id="${p.section}"]`)) {
                 const clone = el.cloneNode(true);
                 clone.setAttribute('data-proto-id', p.section);
@@ -1574,8 +1581,8 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
                 if (driveMatch && driveMatch[1]) driveId = driveMatch[1];
             }
 
-            const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (ytMatch && ytMatch[1]) {
+            const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+            if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
                 isYouTube = true;
                 finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
             }
@@ -2029,10 +2036,10 @@ function scanAndConvertVideoLinks(root) {
         if (link.closest('.video-wrapper') || link.closest('.drive-access-card') || link.closest('.drive-video-replacement') || link.classList.contains('btn-premium-video')) return;
         const url = link.getAttribute('href') || '';
         const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^\/\?&]+)/);
-        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
         const isMp4 = url.toLowerCase().endsWith('.mp4');
 
-        if (driveMatch || ytMatch || isMp4) {
+        if (driveMatch || (ytMatch && ytMatch[1].length === 11) || isMp4) {
             // Check if it's already inside a video-container or video-unit
             if (link.closest('.video-container') || link.closest('.video-unit')) return;
 
@@ -2056,7 +2063,7 @@ function scanAndConvertVideoLinks(root) {
                 container.style.paddingBottom = '0';
                 container.style.background = 'transparent';
                 container.style.boxShadow = 'none';
-            } else if (ytMatch) {
+            } else if (ytMatch && ytMatch[1].length === 11) {
                 embedHtml = `<iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>`;
             } else if (isMp4) {
                 embedHtml = `<video controls style="position:absolute; top:0; left:0; width:100%; height:100%;"><source src="${url}" type="video/mp4"></video>`;
