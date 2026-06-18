@@ -1488,15 +1488,33 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
 
             let innerVideoHtml = '';
             if (isDrive) {
-                innerVideoHtml = `<div class="video-container" style="max-width: 980px; margin: 0 auto; padding-bottom: 75%; position:relative; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
-                        <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="position:absolute;top:0;left:0;width: 100%; height: 100%; border: none;"></iframe>
+                const driveDirectUrl = driveId ? `https://drive.google.com/file/d/${driveId}/view` : item.url;
+                innerVideoHtml = `
+                    <div style="max-width: 980px; margin: 0 auto;">
+                        <!-- Primary action: always-visible open button -->
+                        <div style="display:flex; justify-content:center; margin-bottom: 16px;">
+                            <a href="${driveDirectUrl}" target="_blank" rel="noopener noreferrer"
+                               style="display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 14px 28px; border-radius: 14px; text-decoration: none; font-size: 1rem; font-weight: 800; box-shadow: 0 8px 24px rgba(10, 106, 161, 0.35); transition: all 0.2s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 32px rgba(10,106,161,0.45)'"
+                               onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 24px rgba(10,106,161,0.35)'">
+                                <i class="fab fa-google-drive" style="font-size:1.2rem;"></i>
+                                <span>Abrir vídeo en Google Drive</span>
+                                <i class="fas fa-external-link-alt" style="font-size:0.85rem; opacity:0.8;"></i>
+                            </a>
+                        </div>
+                        <!-- Embedded preview (may fail if file is not publicly shared or tracking prevention is active) -->
+                        <div style="position:relative; padding-bottom: 56.25%; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #0f172a;">
+                            <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen; storage-access" allowfullscreen
+                                    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+                                    loading="lazy"></iframe>
+                        </div>
+                        <!-- Info note -->
+                        <div style="margin-top:10px; padding: 8px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; font-size:0.78rem; color:#92400e; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Si el reproductor muestra un error, abre el vídeo directamente en Drive con el botón de arriba. Asegúrate de que el archivo esté compartido como <b>"Cualquiera con el enlace puede ver"</b>.</span>
+                        </div>
                     </div>
-                    <div style="max-width:980px; margin:12px auto 0; text-align:right;">
-                        <a href="${driveOpenUrl}" target="_blank" rel="noopener noreferrer" class="btn-premium-video" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(90deg, #0a6aa1 0%, #0f88c9 100%); color: white; padding: 11px 16px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 800; box-shadow: 0 8px 18px rgba(10, 106, 161, 0.26);">
-                            <span>Abrir en Drive</span>
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>`;
+                `;
             } else if (isYouTube) {
                 innerVideoHtml = `<div class="video-container" style="max-width: 980px; margin: 0 auto; box-shadow: 0 22px 44px rgba(2,6,23,0.18); border-radius: 16px; overflow: hidden; background: #000;">
                         <iframe src="${finalVideoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
