@@ -1507,9 +1507,10 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         
         // Inyectar estilos y scripts del head del protocolo al head de la página principal
         doc.head.querySelectorAll('style, link, script').forEach(el => {
-            // Omitir la CDN de Tailwind para evitar la advertencia en consola,
-            // ya que index.html ya carga la hoja de estilos tailwind.css compilada localmente.
-            if (el.tagName === 'SCRIPT' && el.src && el.src.includes('cdn.tailwindcss.com')) {
+            // Omitir la hoja de estilos Tailwind compilada localmente (y la antigua CDN),
+            // ya que index.html ya la carga en el head principal.
+            if ((el.tagName === 'SCRIPT' && el.src && el.src.includes('cdn.tailwindcss.com')) || 
+                (el.tagName === 'LINK' && el.href && el.href.includes('tailwind.css'))) {
                 return;
             }
             if (!document.head.querySelector(`[data-proto-id="${p.section}"]`)) {
@@ -1584,7 +1585,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
             const ytMatch = finalVideoUrl.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
             if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
                 isYouTube = true;
-                finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+                finalVideoUrl = `https://www.youtube.com/embed/${ytMatch[1]}?rel=0`;
             }
             const isMp4 = finalVideoUrl.toLowerCase().endsWith('.mp4') || finalVideoUrl.toLowerCase().endsWith('.webm');
             const driveOpenUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : item.url;
