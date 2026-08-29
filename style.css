@@ -162,6 +162,12 @@ body.dark-mode .top-nav {
     right: 100%;
 }
 
+/* For the last two main menu items, the top-level dropdown should align to the right */
+.nav-item-wrapper:nth-last-child(-n+2) > .dropdown-content {
+    left: auto;
+    right: 0;
+}
+
 /* For the last two main menu items, even the 2nd level nested dropdown should open to the left */
 .nav-item-wrapper:nth-last-child(-n+2) .dropdown-content.nested {
     left: auto;

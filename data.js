@@ -1065,6 +1065,18 @@ const navigation_config = {
         "url": "https://nataliogc.github.io/menus-cocteles/"
       }
     ]
+  },
+  "7": {
+    "name": "Gestion-incidencias",
+    "icon": "fa-smile",
+    "subsections": {},
+    "links": [
+      {
+        "icon": "fa-link",
+        "text": "Alata de Incidencias",
+        "url": "https://cumbriaspahotel.github.io/gestion-incidencias/RegistroIncidencia.html"
+      }
+    ]
   }
 };
 
