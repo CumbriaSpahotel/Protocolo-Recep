@@ -1067,7 +1067,7 @@ const navigation_config = {
     ]
   },
   "7": {
-    "name": "Gestion-incidencias",
+    "name": "Gestión Formularios",
     "icon": "fa-smile",
     "subsections": {},
     "links": [
@@ -1075,6 +1075,11 @@ const navigation_config = {
         "icon": "fa-link",
         "text": "Alata de Incidencias",
         "url": "https://cumbriaspahotel.github.io/gestion-incidencias/RegistroIncidencia.html"
+      },
+      {
+        "icon": "fa-link",
+        "text": "Objetos Perdidos",
+        "url": "https://objetos-perdidos-hoteles.web.app/recepcion"
       }
     ]
   }
