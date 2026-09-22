@@ -968,7 +968,7 @@ const navigation_config = {
       {
         "icon": "fa-lock",
         "text": "Selección de Personal",
-        "url": "https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?usp=sharing"
+        "url": "https://docs.google.com/spreadsheets/d/1J9bnXU3iw-vHemsgWOhOnpGhAPtsutbt6Y1UYRpAe74/edit?gid=20260919#gid=20260919"
       }
     ]
   },
