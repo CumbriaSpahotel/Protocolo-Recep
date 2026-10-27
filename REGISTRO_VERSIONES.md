@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.0.0`** | **27/10/2026** | En producción |
+| **`v1.0.1`** | **27/10/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.0.1] — 27/10/2026
+- **Módulos Afectados:** Sistema / Configuracion
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Sistema de versionado automatico integrado mediante GEMINI.md, AGENTS.md y script bump-version
 
 ### [v1.0.0] — 27/10/2026
 - **Módulos Afectados:** General (todos los módulos: Visor, Administración, Servidor, Datos).
