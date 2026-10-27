@@ -1,4 +1,7 @@
 {
+  "name": "protocolo-recep",
+  "version": "1.0.0",
+  "description": "Protocolos de Recepción - Sercotel Guadiana & Cumbria Spa & Hotel",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
