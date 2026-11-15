@@ -4,6 +4,7 @@ const path = require('path');
 // Rutas a los archivos clave
 const packagePath = path.join(__dirname, '..', 'package.json');
 const registroPath = path.join(__dirname, '..', 'REGISTRO_VERSIONES.md');
+const adminHtmlPath = path.join(__dirname, '..', 'admin.html');
 
 // Argumentos: node bump-version.js "Descripción de la mejora" [--patch|--minor|--major] [--modules "Módulo 1, Módulo 2"]
 const args = process.argv.slice(2);
@@ -94,6 +95,18 @@ if (fs.existsSync(registroPath)) {
     }
 
     fs.writeFileSync(registroPath, content, 'utf8');
+}
+
+// 4. Actualizar badge de versión en admin.html
+if (fs.existsSync(adminHtmlPath)) {
+    let adminHtml = fs.readFileSync(adminHtmlPath, 'utf8');
+    const updatedAdminHtml = adminHtml.replace(
+        /(<span id="app-version-badge"[^>]*>)v[0-9.]+(<\/span>)/,
+        `$1v${newVersion}$2`
+    );
+    if (updatedAdminHtml !== adminHtml) {
+        fs.writeFileSync(adminHtmlPath, updatedAdminHtml, 'utf8');
+    }
 }
 
 console.log(`✅ Versión incrementada automáticamente a v${newVersion} (${formattedDate})`);

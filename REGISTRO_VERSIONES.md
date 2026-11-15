@@ -11,11 +11,29 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.0.2`** | **15/11/2026** | En producción |
+| **`v1.0.5`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.0.5] — 15/11/2026
+- **Módulos Afectados:** Manuales Oficiales, data.js, assets/onity
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadidas 25 ilustraciones y capturas oficiales de los PDFs de Onity con visor Lightbox al Manual Interactivo Onity
+
+### [v1.0.4] — 15/11/2026
+- **Módulos Afectados:** Administración
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido distintivo visual de Panel de Administración en la cabecera de admin.html
+
+### [v1.0.3] — 15/11/2026
+- **Módulos Afectados:** Administración, Scripts
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido indicador de versión en la cabecera de admin.html y sincronización automática en bump-version.js
 
 ### [v1.0.2] — 15/11/2026
 - **Módulos Afectados:** Manuales Oficiales, data.js
