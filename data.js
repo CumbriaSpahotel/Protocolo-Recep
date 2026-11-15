@@ -1205,10 +1205,13 @@ var cloud_config = {
 const menus_data = [];
 
 var security_config = {
+  "adminEmails": [
+    "nataliohoteles@gmail.com"
+  ],
   "rules": [
     {
-      "section": "6.2.1",
-      "label": "Manual Interactivo Onity",
+      "section": "*",
+      "label": "Plataforma General (Recepción)",
       "allowedEmails": [
         "hcumbri@gmail.com",
         "hotelguad@gmail.com",

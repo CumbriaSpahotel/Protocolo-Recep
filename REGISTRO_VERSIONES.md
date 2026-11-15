@@ -11,11 +11,23 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.0`** | **15/11/2026** | En producción |
+| **`v1.2.2`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.2] — 15/11/2026
+- **Módulos Afectados:** Seguridad, Visor, data.js, Backend
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Cambiada la regla de seguridad de 6.2.1 a acceso general (*) para proteger toda la plataforma de Recepción al cargar index.html
+
+### [v1.2.1] — 15/11/2026
+- **Módulos Afectados:** Seguridad, Spa, Administración, data.js
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido administrador nataliohoteles@gmail.com con acceso total e integrado el logo oficial de Cumbria Bienestar en spa.html
 
 ### [v1.2.0] — 15/11/2026
 - **Módulos Afectados:** Spa, Seguridad, Visor

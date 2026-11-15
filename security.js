@@ -7,10 +7,11 @@
 
     function getDefaultSecurityConfig() {
         return {
+            adminEmails: ['nataliohoteles@gmail.com'],
             rules: [
                 {
-                    section: '6.2.1',
-                    label: 'Manual Interactivo Onity',
+                    section: '*',
+                    label: 'Plataforma General (Recepción)',
                     allowedEmails: [
                         'hcumbri@gmail.com',
                         'hotelguad@gmail.com',
@@ -36,6 +37,9 @@
             window.security_config = getDefaultSecurityConfig();
         }
         const cfg = window.security_config;
+        if (!Array.isArray(cfg.adminEmails)) {
+            cfg.adminEmails = ['nataliohoteles@gmail.com'];
+        }
         if (!Array.isArray(cfg.rules)) {
             cfg.rules = getDefaultSecurityConfig().rules;
         }
@@ -53,10 +57,11 @@
         const matches = cfg.rules
             .filter(r => {
                 const prot = String(r.section || '').trim();
-                return prot && (s === prot || s.startsWith(prot + '.'));
+                return prot && prot !== '*' && (s === prot || s.startsWith(prot + '.'));
             })
             .sort((a, b) => String(b.section).length - String(a.section).length);
-        return matches[0] || null;
+        if (matches[0]) return matches[0];
+        return cfg.rules.find(r => String(r.section || '').trim() === '*') || null;
     }
 
     function getStoredSession() {
@@ -78,6 +83,19 @@
         try {
             localStorage.removeItem(SESSION_KEY);
         } catch (e) {}
+    }
+
+    function isAdminEmail(email) {
+        if (!email) return false;
+        const clean = String(email).trim().toLowerCase();
+        return (ensureSecurityConfig().adminEmails || []).some(e => String(e).trim().toLowerCase() === clean);
+    }
+
+    function isEmailAuthorizedForRule(email, rule) {
+        if (isAdminEmail(email)) return true;
+        if (!rule) return false;
+        const clean = String(email).trim().toLowerCase();
+        return (rule.allowedEmails || []).some(e => String(e).trim().toLowerCase() === clean);
     }
 
     function isGuestAllowedForSection(pass, sectionId) {
@@ -129,8 +147,7 @@
                 return { ok: false, reason: null };
             }
             const email = String(session.email || '').trim().toLowerCase();
-            const allowed = (rule.allowedEmails || []).some(e => String(e).trim().toLowerCase() === email);
-            if (!allowed) {
+            if (!isEmailAuthorizedForRule(email, rule)) {
                 return { ok: false, reason: `La cuenta "${email}" no tiene permiso para acceder a "${rule.label || rule.section}".` };
             }
             return { ok: true, session };
@@ -205,8 +222,7 @@
                         });
                         const user = await r.json();
                         const email = String(user.email || '').trim().toLowerCase();
-                        const allowed = rule && (rule.allowedEmails || []).some(e => String(e).trim().toLowerCase() === email);
-                        if (!allowed) {
+                        if (!isEmailAuthorizedForRule(email, rule)) {
                             showAuthError(`La cuenta "${email}" no está autorizada para acceder a esta sección.`);
                             return;
                         }
@@ -217,7 +233,12 @@
                             name: user.name || email,
                             expiresAt: Date.now() + 12 * 60 * 60 * 1000
                         });
-                        if (typeof window.loadProtocol === 'function' && protocolToReload) {
+                        if (window.__platformUnlockCallback) {
+                            const cb = window.__platformUnlockCallback;
+                            window.__platformUnlockCallback = null;
+                            togglePlatformChrome(true);
+                            cb();
+                        } else if (typeof window.loadProtocol === 'function' && protocolToReload) {
                             window.loadProtocol(protocolToReload);
                         } else {
                             location.reload();
@@ -259,8 +280,7 @@
             });
             const account = loginResp.account || {};
             const email = String(account.username || '').trim().toLowerCase();
-            const allowed = rule && (rule.allowedEmails || []).some(e => String(e).trim().toLowerCase() === email);
-            if (!allowed) {
+            if (!isEmailAuthorizedForRule(email, rule)) {
                 showAuthError(`La cuenta Microsoft "${email}" no está autorizada para acceder a esta sección.`);
                 return;
             }
@@ -271,7 +291,12 @@
                 name: account.name || email,
                 expiresAt: Date.now() + 12 * 60 * 60 * 1000
             });
-            if (typeof window.loadProtocol === 'function' && protocolToReload) {
+            if (window.__platformUnlockCallback) {
+                const cb = window.__platformUnlockCallback;
+                window.__platformUnlockCallback = null;
+                togglePlatformChrome(true);
+                cb();
+            } else if (typeof window.loadProtocol === 'function' && protocolToReload) {
                 window.loadProtocol(protocolToReload);
             } else {
                 location.reload();
@@ -295,12 +320,93 @@
             section: pass.section || '*',
             expiresAt: new Date(pass.expiresAt).getTime()
         });
-        if (typeof window.loadProtocol === 'function' && protocolToReload) {
+        if (window.__platformUnlockCallback) {
+            const cb = window.__platformUnlockCallback;
+            window.__platformUnlockCallback = null;
+            togglePlatformChrome(true);
+            cb();
+        } else if (typeof window.loadProtocol === 'function' && protocolToReload) {
             window.loadProtocol(protocolToReload);
         } else {
             location.reload();
         }
     }
+
+    function togglePlatformChrome(visible) {
+        const displayVal = visible ? '' : 'none';
+        const nav = document.querySelector('.top-nav');
+        const side = document.querySelector('.sidebar-col');
+        const botBtn = document.getElementById('chatbot-toggle-btn');
+        const botBox = document.getElementById('chatbot-container');
+        if (nav) nav.style.display = displayVal;
+        if (side) side.style.display = displayVal;
+        if (botBtn) botBtn.style.display = displayVal;
+        if (botBox && !visible) botBox.style.display = 'none';
+    }
+
+    window.checkPlatformSecurityGate = function (onSuccessCallback) {
+        const rule = getRuleForSection('*');
+        if (!rule) return true;
+
+        const check = getActiveValidSessionForRule(rule, '*');
+        if (check.ok) {
+            window.__currentActiveSecuritySession = check.session;
+            togglePlatformChrome(true);
+            return true;
+        }
+
+        const mainColumn = document.querySelector('.main-col');
+        if (!mainColumn) return false;
+
+        togglePlatformChrome(false);
+        window.__platformUnlockCallback = onSuccessCallback;
+        window.__pendingProtectedProtocol = { section: '*', title: rule.label || 'Plataforma de Protocolos' };
+
+        mainColumn.innerHTML = `
+            <div style="max-width:560px; margin:3rem auto; background:var(--white, #fff); border:1px solid var(--border, #e2e8f0); border-radius:18px; box-shadow:var(--shadow, 0 12px 30px rgba(0,0,0,0.08)); overflow:hidden; color:var(--text-dark, #0f172a);">
+                <div style="height:6px; background:linear-gradient(90deg, var(--accent-blue, #0a6aa1), #a58c5f, var(--accent-green, #27ae60));"></div>
+                <div style="padding:2rem;">
+                    <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.25rem;">
+                        <div style="width:52px; height:52px; border-radius:14px; background:rgba(10,106,161,0.12); color:var(--accent-blue, #0a6aa1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-blue, #0a6aa1);">Acceso Restringido</span>
+                            <h2 style="margin:2px 0 0; font-size:1.35rem; font-weight:800;">${rule.label || 'Plataforma General (Recepción)'}</h2>
+                        </div>
+                    </div>
+
+                    <p style="font-size:0.92rem; color:var(--text-muted, #475569); margin:0 0 1.25rem; line-height:1.55;">
+                        Inicia sesión con una cuenta corporativa autorizada (<strong>Google</strong> o <strong>Microsoft</strong>) o introduce un <strong>pase temporal de invitado</strong> para acceder a la plataforma.
+                    </p>
+
+                    <div id="sec-gate-error" style="${check.reason ? 'display:block;' : 'display:none;'} margin-bottom:1rem; padding:0.8rem 1rem; border-radius:10px; background:rgba(178,34,34,0.1); border-left:4px solid #b22222; color:#b22222; font-size:0.88rem; font-weight:600;">${check.reason || ''}</div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;">
+                        <button type="button" onclick="window.__secLoginGoogle()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
+                            <i class="fab fa-google" style="color:#ea4335; font-size:1.1rem;"></i> Iniciar sesión con Google
+                        </button>
+                        <button type="button" onclick="window.__secLoginMicrosoft()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
+                            <i class="fab fa-microsoft" style="color:#00a4ef; font-size:1.1rem;"></i> Iniciar sesión con Microsoft
+                        </button>
+                    </div>
+
+                    <div style="border-top:1px dashed var(--border, #cbd5e1); padding-top:1.25rem;">
+                        <label style="display:block; font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:8px;">
+                            <i class="fas fa-ticket-alt"></i> Acceso para Invitados (Pase Temporal)
+                        </label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <input type="text" id="sec-guest-code-input" placeholder="Introduce código (ej: INV-XXXXXX)" style="flex:1; min-width:180px; padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.92rem; text-transform:uppercase;" onkeydown="if(event.key==='Enter') window.__secLoginGuest();" />
+                            <button type="button" onclick="window.__secLoginGuest()" style="padding:0.7rem 1.2rem; border-radius:10px; border:none; background:var(--accent-blue, #0a6aa1); color:#fff; font-weight:700; cursor:pointer;">
+                                Acceder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        return false;
+    };
 
     window.checkProtocolSecurityGate = function (p) {
         if (!p) return true;
@@ -391,7 +497,9 @@
         window.__lastLoadedProtocol = p;
         const label = s.type === 'guest'
             ? `⏳ Pase Invitado (${s.label}) · Caduca: ${new Date(s.expiresAt).toLocaleString('es-ES')}`
-            : `🔓 Sesión autorizada (${s.provider}): ${s.email}`;
+            : (isAdminEmail(s.email)
+                ? `👑 Administrador (${s.provider}): ${s.email}`
+                : `🔓 Sesión autorizada (${s.provider}): ${s.email}`);
         return `
             <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; padding:0.65rem 1rem; margin-bottom:1rem; border-radius:10px; background:rgba(39,174,96,0.1); border:1px solid rgba(39,174,96,0.3); font-size:0.84rem; font-weight:600; color:var(--text-dark, #0f172a);">
                 <span>${label}</span>
@@ -431,6 +539,21 @@
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
                 <!-- 1. REGLAS POR SECCIÓN -->
                 <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+                    <h3 style="margin-top:0; color:#b45309;"><i class="fas fa-crown"></i> Administradores (Acceso Total)</h3>
+                    <p style="font-size:0.83rem; color:#64748b; margin-top:0;">Tienen acceso automático a todas las secciones protegidas (Recepción, Onity, Spa, etc.):</p>
+                    <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
+                        ${(cfg.adminEmails || []).map((em, aIdx) => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 10px; font-size:0.85rem;">
+                                <span><i class="fas fa-user-shield" style="color:#b45309; margin-right:6px;"></i> <strong>${em}</strong></span>
+                                <button type="button" onclick="window.__secAdminRemoveAdmin(${aIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:800;">×</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display:flex; gap:6px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
+                        <input type="email" id="sec-admin-new-admin" placeholder="Añadir correo administrador..." style="flex:1; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem;">
+                        <button type="button" class="btn-secondary" style="padding:6px 10px; font-size:0.82rem;" onclick="window.__secAdminAddAdmin()">+ Admin</button>
+                    </div>
+
                     <h3 style="margin-top:0; color:#0a6aa1;"><i class="fas fa-shield-alt"></i> Reglas de Acceso por Sección</h3>
                     <p style="font-size:0.84rem; color:#64748b; margin-top:0;">Cada sección protegida tiene su propia lista de correos autorizados (Google / Microsoft).</p>
 
@@ -578,6 +701,20 @@
         `;
     };
 
+    window.__secAdminAddAdmin = () => {
+        const inp = document.getElementById('sec-admin-new-admin');
+        const val = (inp ? inp.value : '').trim().toLowerCase();
+        if (!val || !val.includes('@')) return;
+        const cfg = ensureSecurityConfig();
+        if (!cfg.adminEmails.includes(val)) cfg.adminEmails.push(val);
+        window.renderSecurityAdminTab();
+        saveSecurityToAdminServer();
+    };
+    window.__secAdminRemoveAdmin = (aIdx) => {
+        ensureSecurityConfig().adminEmails.splice(aIdx, 1);
+        window.renderSecurityAdminTab();
+        saveSecurityToAdminServer();
+    };
     window.__secAdminAddRule = () => {
         const sec = (document.getElementById('sec-new-rule-section').value || '').trim();
         const label = (document.getElementById('sec-new-rule-label').value || '').trim() || ('Sección ' + sec);
@@ -653,11 +790,13 @@
         saveSecurityToAdminServer();
     };
     window.__secAdminCopyGuestLink = (code, section) => {
-        const targetSec = (!section || section === '*') ? '6.2.1' : section;
+        const targetSec = (!section || section === '*') ? '*' : section;
         const isSpa = targetSec === '5.2' || targetSec.startsWith('5.2.');
         const link = isSpa
             ? `https://cumbriaspahotel.github.io/Protocolo-Recep/spa.html?guest=${encodeURIComponent(code)}`
-            : `https://cumbriaspahotel.github.io/Protocolo-Recep/index.html?guest=${encodeURIComponent(code)}#protocol/${encodeURIComponent(targetSec)}`;
+            : (targetSec === '*'
+                ? `https://cumbriaspahotel.github.io/Protocolo-Recep/index.html?guest=${encodeURIComponent(code)}`
+                : `https://cumbriaspahotel.github.io/Protocolo-Recep/index.html?guest=${encodeURIComponent(code)}#protocol/${encodeURIComponent(targetSec)}`);
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(() => {
                 if (typeof window.showToast === 'function') window.showToast('🔗 Enlace de invitado copiado al portapapeles');

@@ -385,6 +385,9 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
+    if (typeof window.checkPlatformSecurityGate === 'function' && !window.checkPlatformSecurityGate(() => initApp())) {
+        return;
+    }
     renderNavigation();
     renderHome();
     renderSidebar();
