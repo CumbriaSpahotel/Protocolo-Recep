@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.0.5`** | **15/11/2026** | En producción |
+| **`v1.1.0`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.1.0] — 15/11/2026
+- **Módulos Afectados:** Seguridad, Visor, Administración, Backend, data.js
+- **Tipo de Cambio:** Nueva Característica / Mejora
+- **Detalle de Cambios:**
+  - Implementado sistema de seguridad por sección (Google/Microsoft OAuth + pases de invitado con caducidad) para Manual Onity (6.2.1) y Cumbria Bienestar Spa (5.2), gestionable desde admin.html
 
 ### [v1.0.5] — 15/11/2026
 - **Módulos Afectados:** Manuales Oficiales, data.js, assets/onity

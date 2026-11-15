@@ -1479,6 +1479,10 @@ function switchTab(tabId) {
                 loadAdminComments();
             }
         }
+
+        if (tabId === 'seguridad' && typeof window.renderSecurityAdminTab === 'function') {
+            window.renderSecurityAdminTab();
+        }
     }
 }
 
@@ -2909,7 +2913,8 @@ function saveToServer(protocolsData, navData, homeData) {
         protocols: protocolsData || (typeof protocols_data !== 'undefined' ? protocols_data : []),
         navConfig: finalNav,
         homeConfig: finalHome,
-        channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined
+        channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined,
+        securityConfig: (typeof window.security_config !== 'undefined') ? window.security_config : undefined
     };
 
     // On GitHub Pages there is no server: offer direct download instead
@@ -2950,6 +2955,7 @@ function showDownloadPrompt(payload) {
     if (payload.protocols) newContent += "const protocols_data = " + JSON.stringify(payload.protocols, null, 2) + ";\n\n";
     if (payload.navConfig) newContent += "const navigation_config = " + JSON.stringify(payload.navConfig, null, 2) + ";\n\n";
     if (payload.homeConfig) newContent += "const home_config = " + JSON.stringify(payload.homeConfig, null, 2) + ";\n\n";
+    if (payload.securityConfig) newContent += "var security_config = " + JSON.stringify(payload.securityConfig, null, 2) + ";\n\n";
     const blob = new Blob([newContent], { type: 'text/javascript' });
     const url = URL.createObjectURL(blob);
     

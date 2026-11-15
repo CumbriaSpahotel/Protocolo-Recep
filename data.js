@@ -1204,3 +1204,27 @@ var cloud_config = {
 
 const menus_data = [];
 
+var security_config = {
+  "rules": [
+    {
+      "section": "6.2.1",
+      "label": "Manual Interactivo Onity",
+      "allowedEmails": [
+        "hcumbri@gmail.com",
+        "hotelguad@gmail.com",
+        "comunicaciones@hotelguadiana.es"
+      ]
+    },
+    {
+      "section": "5.2",
+      "label": "Cumbria Bienestar (Spa)",
+      "allowedEmails": [
+        "cumbriaspa@gmail.com"
+      ]
+    }
+  ],
+  "googleClientId": "",
+  "microsoftClientId": "",
+  "guestPasses": []
+};
+

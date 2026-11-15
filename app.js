@@ -1498,6 +1498,10 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
     toggleHomeComponents(false);
     document.querySelector('.app-wrapper').classList.add('reading-mode');
 
+    if (typeof window.checkProtocolSecurityGate === 'function' && !window.checkProtocolSecurityGate(p)) {
+        return;
+    }
+
     let content = replaceGoogleDriveIframes(p.content);
     
     // Si es un documento HTML completo, extraemos estilos y scripts para que el diseño funcione
@@ -1819,6 +1823,7 @@ function loadProtocol(p, highlightText = '', skipScroll = false) {
         </div>
 
         <article class="protocol-full animate-fade-in" style="${articleStyle}">
+            ${typeof window.getSecurityStatusBannerHtml === 'function' ? window.getSecurityStatusBannerHtml(p) : ''}
             ${headerHTML}
 
             <div class="protocol-full-body" style="${isChannelProtocol ? '' : 'font-size: 1.05rem; line-height: 1.7; color: #333;'}">
