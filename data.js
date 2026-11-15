@@ -1206,7 +1206,8 @@ const menus_data = [];
 
 var security_config = {
   "adminEmails": [
-    "nataliohoteles@gmail.com"
+    "nataliohoteles@gmail.com",
+    "comunicaciones@hotelguadiana.es"
   ],
   "rules": [
     {
@@ -1215,8 +1216,7 @@ var security_config = {
       "accessKey": "Recep2026!",
       "allowedEmails": [
         "hcumbri@gmail.com",
-        "hotelguad@gmail.com",
-        "comunicaciones@hotelguadiana.es"
+        "hotelguad@gmail.com"
       ]
     },
     {
