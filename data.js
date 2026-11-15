@@ -1212,6 +1212,7 @@ var security_config = {
     {
       "section": "*",
       "label": "Plataforma General (Recepción)",
+      "accessKey": "Recep2026!",
       "allowedEmails": [
         "hcumbri@gmail.com",
         "hotelguad@gmail.com",
@@ -1221,6 +1222,7 @@ var security_config = {
     {
       "section": "5.2",
       "label": "Cumbria Bienestar (Spa)",
+      "accessKey": "Spa2026!",
       "allowedEmails": [
         "cumbriaspa@gmail.com"
       ]

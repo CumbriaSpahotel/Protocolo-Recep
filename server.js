@@ -58,7 +58,7 @@ app.post('/api/save', (req, res) => {
         // ====================================================================
         // CRITICAL: Read EXISTING data.js first to preserve data not being sent.
         // ====================================================================
-        let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [], security: { adminEmails: ['nataliohoteles@gmail.com'], rules: [{ section: '*', label: 'Plataforma General (Recepción)', allowedEmails: ['hcumbri@gmail.com', 'hotelguad@gmail.com', 'comunicaciones@hotelguadiana.es'] }, { section: '5.2', label: 'Cumbria Bienestar (Spa)', allowedEmails: ['cumbriaspa@gmail.com'] }], googleClientId: '', microsoftClientId: '', guestPasses: [] } };
+        let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [], security: { adminEmails: ['nataliohoteles@gmail.com'], rules: [{ section: '*', label: 'Plataforma General (Recepción)', accessKey: 'Recep2026!', allowedEmails: ['hcumbri@gmail.com', 'hotelguad@gmail.com', 'comunicaciones@hotelguadiana.es'] }, { section: '5.2', label: 'Cumbria Bienestar (Spa)', accessKey: 'Spa2026!', allowedEmails: ['cumbriaspa@gmail.com'] }], googleClientId: '', microsoftClientId: '', guestPasses: [] } };
         
         const dataFilePath = path.join(__dirname, 'data.js');
         if (fs.existsSync(dataFilePath)) {

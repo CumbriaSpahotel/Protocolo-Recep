@@ -12,6 +12,7 @@
                 {
                     section: '*',
                     label: 'Plataforma General (Recepción)',
+                    accessKey: 'Recep2026!',
                     allowedEmails: [
                         'hcumbri@gmail.com',
                         'hotelguad@gmail.com',
@@ -21,6 +22,7 @@
                 {
                     section: '5.2',
                     label: 'Cumbria Bienestar (Spa)',
+                    accessKey: 'Spa2026!',
                     allowedEmails: [
                         'cumbriaspa@gmail.com'
                     ]
@@ -344,6 +346,112 @@
         if (botBox && !visible) botBox.style.display = 'none';
     }
 
+    function renderGateCardHtml(title, subtitle, reasonMsg) {
+        const cfg = ensureSecurityConfig();
+        const hasGoogle = !!(cfg.googleClientId && cfg.googleClientId.trim());
+        const hasMs = !!(cfg.microsoftClientId && cfg.microsoftClientId.trim());
+
+        const oauthHtml = (hasGoogle || hasMs) ? `
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.25rem;">
+                ${hasGoogle ? `<button type="button" onclick="window.__secLoginGoogle()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.8rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.92rem; cursor:pointer;">
+                    <i class="fab fa-google" style="color:#ea4335; font-size:1.05rem;"></i> Iniciar sesión con Google
+                </button>` : ''}
+                ${hasMs ? `<button type="button" onclick="window.__secLoginMicrosoft()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.8rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.92rem; cursor:pointer;">
+                    <i class="fab fa-microsoft" style="color:#00a4ef; font-size:1.05rem;"></i> Iniciar sesión con Microsoft
+                </button>` : ''}
+            </div>
+            <div style="text-align:center; font-size:0.78rem; color:var(--text-muted, #64748b); margin-bottom:1rem; font-weight:700;">— O ACCEDE CON TU CORREO Y CLAVE —</div>
+        ` : '';
+
+        return `
+            <div style="max-width:540px; margin:2.5rem auto; background:var(--white, #fff); border:1px solid var(--border, #e2e8f0); border-radius:18px; box-shadow:var(--shadow, 0 12px 30px rgba(0,0,0,0.08)); overflow:hidden; color:var(--text-dark, #0f172a);">
+                <div style="height:6px; background:linear-gradient(90deg, var(--accent-blue, #0a6aa1), #a58c5f, var(--accent-green, #27ae60));"></div>
+                <div style="padding:2rem;">
+                    <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.15rem;">
+                        <div style="width:50px; height:50px; border-radius:14px; background:rgba(10,106,161,0.12); color:var(--accent-blue, #0a6aa1); display:flex; align-items:center; justify-content:center; font-size:1.45rem; flex-shrink:0;">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div>
+                            <span style="font-size:0.74rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-blue, #0a6aa1);">${subtitle}</span>
+                            <h2 style="margin:2px 0 0; font-size:1.3rem; font-weight:800;">${title}</h2>
+                        </div>
+                    </div>
+
+                    <div id="sec-gate-error" style="${reasonMsg ? 'display:block;' : 'display:none;'} margin-bottom:1rem; padding:0.75rem 1rem; border-radius:10px; background:rgba(178,34,34,0.1); border-left:4px solid #b22222; color:#b22222; font-size:0.86rem; font-weight:600;">${reasonMsg || ''}</div>
+
+                    ${oauthHtml}
+
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.35rem;">
+                        <div>
+                            <label style="display:block; font-size:0.76rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:5px;">Correo autorizado</label>
+                            <input type="email" id="sec-email-input" placeholder="usuario@correo.com" style="width:100%; padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.92rem;" onkeydown="if(event.key==='Enter') document.getElementById('sec-key-input').focus();" />
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.76rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:5px;">Clave de acceso</label>
+                            <input type="password" id="sec-key-input" placeholder="Introduce la clave..." style="width:100%; padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.92rem;" onkeydown="if(event.key==='Enter') window.__secLoginEmailKey();" />
+                        </div>
+                        <button type="button" onclick="window.__secLoginEmailKey()" style="width:100%; padding:0.8rem 1rem; border-radius:10px; border:none; background:var(--accent-blue, #0a6aa1); color:#fff; font-weight:700; font-size:0.95rem; cursor:pointer;">
+                            <i class="fas fa-sign-in-alt" style="margin-right:6px;"></i> Entrar
+                        </button>
+                    </div>
+
+                    <div style="border-top:1px dashed var(--border, #cbd5e1); padding-top:1.1rem;">
+                        <label style="display:block; font-size:0.76rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:7px;">
+                            <i class="fas fa-ticket-alt"></i> Acceso para Invitados (Pase Temporal)
+                        </label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <input type="text" id="sec-guest-code-input" placeholder="Código (ej: INV-XXXXXX)" style="flex:1; min-width:170px; padding:0.65rem 0.85rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.9rem; text-transform:uppercase;" onkeydown="if(event.key==='Enter') window.__secLoginGuest();" />
+                            <button type="button" onclick="window.__secLoginGuest()" style="padding:0.65rem 1.1rem; border-radius:10px; border:none; background:var(--accent-green, #27ae60); color:#fff; font-weight:700; cursor:pointer;">
+                                Acceder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function loginWithEmailAndKey(emailVal, keyVal, protocolToReload) {
+        const email = String(emailVal || '').trim().toLowerCase();
+        const key = String(keyVal || '').trim();
+        if (!email || !email.includes('@')) {
+            showAuthError('Introduce un correo electrónico válido.');
+            return;
+        }
+        const sectionId = protocolToReload ? protocolToReload.section : '*';
+        const rule = getRuleForSection(sectionId);
+        if (!isEmailAuthorizedForRule(email, rule)) {
+            showAuthError(`El correo "${email}" no está autorizado para acceder aquí.`);
+            return;
+        }
+        const expectedKey = (rule && rule.accessKey) ? String(rule.accessKey).trim() : '';
+        // El administrador puede entrar con la clave de la regla o con la clave maestra de admin (si existe)
+        const cfg = ensureSecurityConfig();
+        const adminKey = cfg.adminAccessKey ? String(cfg.adminAccessKey).trim() : '';
+        const keyOk = !expectedKey || key === expectedKey || (isAdminEmail(email) && adminKey && key === adminKey);
+        if (!keyOk) {
+            showAuthError('La clave de acceso es incorrecta.');
+            return;
+        }
+        saveSession({
+            type: 'oauth',
+            provider: 'Correo',
+            email: email,
+            name: email,
+            expiresAt: Date.now() + 12 * 60 * 60 * 1000
+        });
+        if (window.__platformUnlockCallback) {
+            const cb = window.__platformUnlockCallback;
+            window.__platformUnlockCallback = null;
+            togglePlatformChrome(true);
+            cb();
+        } else if (typeof window.loadProtocol === 'function' && protocolToReload) {
+            window.loadProtocol(protocolToReload);
+        } else {
+            location.reload();
+        }
+    }
+
     window.checkPlatformSecurityGate = function (onSuccessCallback) {
         const rule = getRuleForSection('*');
         if (!rule) return true;
@@ -362,49 +470,11 @@
         window.__platformUnlockCallback = onSuccessCallback;
         window.__pendingProtectedProtocol = { section: '*', title: rule.label || 'Plataforma de Protocolos' };
 
-        mainColumn.innerHTML = `
-            <div style="max-width:560px; margin:3rem auto; background:var(--white, #fff); border:1px solid var(--border, #e2e8f0); border-radius:18px; box-shadow:var(--shadow, 0 12px 30px rgba(0,0,0,0.08)); overflow:hidden; color:var(--text-dark, #0f172a);">
-                <div style="height:6px; background:linear-gradient(90deg, var(--accent-blue, #0a6aa1), #a58c5f, var(--accent-green, #27ae60));"></div>
-                <div style="padding:2rem;">
-                    <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.25rem;">
-                        <div style="width:52px; height:52px; border-radius:14px; background:rgba(10,106,161,0.12); color:var(--accent-blue, #0a6aa1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <div>
-                            <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-blue, #0a6aa1);">Acceso Restringido</span>
-                            <h2 style="margin:2px 0 0; font-size:1.35rem; font-weight:800;">${rule.label || 'Plataforma General (Recepción)'}</h2>
-                        </div>
-                    </div>
-
-                    <p style="font-size:0.92rem; color:var(--text-muted, #475569); margin:0 0 1.25rem; line-height:1.55;">
-                        Inicia sesión con una cuenta corporativa autorizada (<strong>Google</strong> o <strong>Microsoft</strong>) o introduce un <strong>pase temporal de invitado</strong> para acceder a la plataforma.
-                    </p>
-
-                    <div id="sec-gate-error" style="${check.reason ? 'display:block;' : 'display:none;'} margin-bottom:1rem; padding:0.8rem 1rem; border-radius:10px; background:rgba(178,34,34,0.1); border-left:4px solid #b22222; color:#b22222; font-size:0.88rem; font-weight:600;">${check.reason || ''}</div>
-
-                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;">
-                        <button type="button" onclick="window.__secLoginGoogle()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
-                            <i class="fab fa-google" style="color:#ea4335; font-size:1.1rem;"></i> Iniciar sesión con Google
-                        </button>
-                        <button type="button" onclick="window.__secLoginMicrosoft()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
-                            <i class="fab fa-microsoft" style="color:#00a4ef; font-size:1.1rem;"></i> Iniciar sesión con Microsoft
-                        </button>
-                    </div>
-
-                    <div style="border-top:1px dashed var(--border, #cbd5e1); padding-top:1.25rem;">
-                        <label style="display:block; font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:8px;">
-                            <i class="fas fa-ticket-alt"></i> Acceso para Invitados (Pase Temporal)
-                        </label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <input type="text" id="sec-guest-code-input" placeholder="Introduce código (ej: INV-XXXXXX)" style="flex:1; min-width:180px; padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.92rem; text-transform:uppercase;" onkeydown="if(event.key==='Enter') window.__secLoginGuest();" />
-                            <button type="button" onclick="window.__secLoginGuest()" style="padding:0.7rem 1.2rem; border-radius:10px; border:none; background:var(--accent-blue, #0a6aa1); color:#fff; font-weight:700; cursor:pointer;">
-                                Acceder
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        mainColumn.innerHTML = renderGateCardHtml(
+            rule.label || 'Plataforma General (Recepción)',
+            'Acceso Restringido',
+            check.reason
+        );
         return false;
     };
 
@@ -429,49 +499,15 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                 <div class="back-btn" onclick="goBack()" style="margin-bottom:0;"><i class="fas fa-arrow-left"></i> Volver</div>
             </div>
-            <div style="max-width:560px; margin:2rem auto; background:var(--white, #fff); border:1px solid var(--border, #e2e8f0); border-radius:18px; box-shadow:var(--shadow, 0 12px 30px rgba(0,0,0,0.08)); overflow:hidden; color:var(--text-dark, #0f172a);">
-                <div style="height:6px; background:linear-gradient(90deg, var(--accent-blue, #0a6aa1), #a58c5f, var(--accent-green, #27ae60));"></div>
-                <div style="padding:2rem;">
-                    <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.25rem;">
-                        <div style="width:52px; height:52px; border-radius:14px; background:rgba(10,106,161,0.12); color:var(--accent-blue, #0a6aa1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <div>
-                            <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-blue, #0a6aa1);">Acceso Restringido · ${rule.label || 'Sección ' + p.section}</span>
-                            <h2 style="margin:2px 0 0; font-size:1.35rem; font-weight:800;">${cleanTitle}</h2>
-                        </div>
-                    </div>
-
-                    <p style="font-size:0.92rem; color:var(--text-muted, #475569); margin:0 0 1.25rem; line-height:1.55;">
-                        Este contenido requiere iniciar sesión con una cuenta autorizada (<strong>Google</strong> o <strong>Microsoft</strong>) o introducir un <strong>pase temporal de invitado</strong>.
-                    </p>
-
-                    <div id="sec-gate-error" style="${check.reason ? 'display:block;' : 'display:none;'} margin-bottom:1rem; padding:0.8rem 1rem; border-radius:10px; background:rgba(178,34,34,0.1); border-left:4px solid #b22222; color:#b22222; font-size:0.88rem; font-weight:600;">${check.reason || ''}</div>
-
-                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;">
-                        <button type="button" onclick="window.__secLoginGoogle()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
-                            <i class="fab fa-google" style="color:#ea4335; font-size:1.1rem;"></i> Iniciar sesión con Google
-                        </button>
-                        <button type="button" onclick="window.__secLoginMicrosoft()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:0.85rem 1rem; border-radius:12px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-weight:700; font-size:0.95rem; cursor:pointer;">
-                            <i class="fab fa-microsoft" style="color:#00a4ef; font-size:1.1rem;"></i> Iniciar sesión con Microsoft
-                        </button>
-                    </div>
-
-                    <div style="border-top:1px dashed var(--border, #cbd5e1); padding-top:1.25rem;">
-                        <label style="display:block; font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--text-muted, #475569); margin-bottom:8px;">
-                            <i class="fas fa-ticket-alt"></i> Acceso para Invitados (Pase Temporal)
-                        </label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <input type="text" id="sec-guest-code-input" placeholder="Introduce código (ej: INV-XXXXXX)" style="flex:1; min-width:180px; padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border, #cbd5e1); background:var(--bg-light, #f8fafc); color:var(--text-dark, #0f172a); font-size:0.92rem; text-transform:uppercase;" onkeydown="if(event.key==='Enter') window.__secLoginGuest();" />
-                            <button type="button" onclick="window.__secLoginGuest()" style="padding:0.7rem 1.2rem; border-radius:10px; border:none; background:var(--accent-blue, #0a6aa1); color:#fff; font-weight:700; cursor:pointer;">
-                                Acceder
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            ${renderGateCardHtml(cleanTitle, 'Acceso Restringido · ' + (rule.label || 'Sección ' + p.section), check.reason)}
         `;
         return false;
+    };
+
+    window.__secLoginEmailKey = () => {
+        const em = document.getElementById('sec-email-input');
+        const ky = document.getElementById('sec-key-input');
+        loginWithEmailAndKey(em ? em.value : '', ky ? ky.value : '', window.__pendingProtectedProtocol);
     };
 
     window.__secLoginGoogle = () => loginWithGoogle(window.__pendingProtectedProtocol);
@@ -566,6 +602,10 @@
                                         <strong style="margin-left:6px; font-size:0.95rem; color:#0f172a;">${rule.label || ''}</strong>
                                     </div>
                                     <button type="button" onclick="window.__secAdminRemoveRule(${rIdx})" style="background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.75rem; font-weight:700;">Eliminar regla</button>
+                                </div>
+                                <div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">
+                                    <label style="font-size:0.78rem; font-weight:700; color:#475569; white-space:nowrap;">🔑 Clave de acceso:</label>
+                                    <input type="text" value="${rule.accessKey || ''}" placeholder="Sin clave" onchange="window.__secAdminUpdateKey(${rIdx}, this.value)" style="flex:1; padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem; font-family:monospace;">
                                 </div>
                                 <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
                                     ${(rule.allowedEmails || []).map((em, eIdx) => `
@@ -713,6 +753,11 @@
     window.__secAdminRemoveAdmin = (aIdx) => {
         ensureSecurityConfig().adminEmails.splice(aIdx, 1);
         window.renderSecurityAdminTab();
+        saveSecurityToAdminServer();
+    };
+    window.__secAdminUpdateKey = (rIdx, newKey) => {
+        const rule = ensureSecurityConfig().rules[rIdx];
+        if (rule) rule.accessKey = String(newKey || '').trim();
         saveSecurityToAdminServer();
     };
     window.__secAdminAddRule = () => {
