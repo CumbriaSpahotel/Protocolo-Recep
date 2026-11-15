@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Interactivo Onity - OnPortal &amp; Cerraduras RFID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f1f5f9;
+      font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+    }
+    .standalone-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="standalone-shell">
+    <!-- MANUAL INTERACTIVO ONITY - PROTOCOLO RECEP -->
+<div id="onity-manual-root" class="onity-manual-wrap">
+<style>
+  .onity-manual-wrap {
+    --om-bg: var(--white, #ffffff);
+    --om-soft: var(--bg-light, #f8fafc);
+    --om-border: var(--border, #e2e8f0);
+    --om-text: var(--text-dark, #0f172a);
+    --om-muted: var(--text-muted, #475569);
+    --om-blue: var(--accent-blue, #0a6aa1);
+    --om-green: var(--accent-green, #27ae60);
+    --om-red: var(--accent-red, #b22222);
+    --om-gold: #a58c5f;
+    --om-shadow: var(--shadow, 0 10px 25px rgba(15, 23, 42, 0.08));
+    font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--om-text);
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.6;
+  }
+  .onity-manual-wrap * { box-sizing: border-box; }
+  .om-top-bar {
+    height: 6px;
+    background: linear-gradient(90deg, var(--om-blue) 0%, var(--om-gold) 50%, var(--om-green) 100%);
+    border-radius: 16px 16px 0 0;
+  }
+  .om-card {
+    background: var(--om-bg);
+    border: 1px solid var(--om-border);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    box-shadow: var(--om-shadow);
+    padding: 2rem;
+  }
+  .om-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--om-border);
+  }
+  .om-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .om-icon-box {
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(10,106,161,0.14), rgba(165,140,95,0.12));
+    border: 1.5px solid var(--om-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: var(--om-blue);
+    flex-shrink: 0;
+  }
+  .om-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .om-badge {
+    padding: 0.22rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .om-badge-blue { background: var(--om-blue); color: #fff; }
+  .om-badge-gold { background: rgba(165,140,95,0.18); color: #8b6f3d; border: 1px solid rgba(165,140,95,0.4); }
+  .om-title { margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--om-text); line-height: 1.2; }
+  .om-subtitle { margin: 4px 0 0; font-size: 0.95rem; color: var(--om-muted); }
+
+  /* Buscador */
+  .om-search-bar {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    background: var(--om-soft);
+    border: 1px solid var(--om-border);
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+  }
+  .om-search-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--om-border);
+    background: var(--om-bg);
+    color: var(--om-text);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .om-search-input:focus { border-color: var(--om-blue); box-shadow: 0 0 0 3px rgba(10,106,161,0.15); }
+  .om-search-clear {
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--om-border);
+    background: var(--om-bg);
+    color: var(--om-muted);
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .om-search-count { font-size: 0.82rem; font-weight: 700; color: var(--om-blue); }
+
+  /* Tabs */
+  .om-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.75rem;
+    padding: 0.5rem;
+    background: var(--om-soft);
+    border: 1px solid var(--om-border);
+    border-radius: 14px;
+  }
+  .om-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.65rem 1.05rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--om-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .om-tab-btn:hover { background: var(--om-bg); color: var(--om-blue); }
+  .om-tab-btn.is-active {
+    background: var(--om-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(10,106,161,0.25);
+  }
+  .om-panel { display: none; animation: omFade 0.2s ease; }
+  .om-panel.is-active { display: block; }
+  @keyframes omFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Grids y tarjetas */
+  .om-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .om-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .om-box {
+    background: var(--om-soft);
+    border: 1px solid var(--om-border);
+    border-radius: 14px;
+    padding: 1.25rem;
+  }
+  .om-box-white {
+    background: var(--om-bg);
+    border: 1px solid var(--om-border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .om-box h3, .om-box-white h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--om-blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .om-kbd {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border-radius: 6px;
+    background: var(--om-blue);
+    color: #fff;
+    font-family: Consolas, monospace;
+  }
+  .om-alert {
+    padding: 1rem 1.15rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    border-left: 5px solid;
+    font-size: 0.92rem;
+  }
+  .om-alert-warn { background: rgba(245, 158, 11, 0.1); border-color: #d97706; color: var(--om-text); }
+  .om-alert-danger { background: rgba(178, 34, 34, 0.09); border-color: var(--om-red); color: var(--om-text); }
+  .om-alert-info { background: rgba(10, 106, 161, 0.08); border-color: var(--om-blue); color: var(--om-text); }
+  .om-alert-ok { background: rgba(39, 174, 96, 0.1); border-color: var(--om-green); color: var(--om-text); }
+
+  /* Pasos numerados */
+  .om-steps { display: flex; flex-direction: column; gap: 0.65rem; margin: 0.75rem 0; }
+  .om-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--om-bg);
+    border: 1px solid var(--om-border);
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+  .om-step-num {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--om-blue);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* Simulador LED */
+  .om-led-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .om-led-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid var(--om-border);
+    background: var(--om-bg);
+    color: var(--om-text);
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+  }
+  .om-led-btn:hover, .om-led-btn.is-selected {
+    border-color: var(--om-blue);
+    background: rgba(10,106,161,0.08);
+    transform: translateY(-1px);
+  }
+  .om-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .om-dot-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+  .om-dot-red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  .om-dot-dual { background: linear-gradient(90deg, #22c55e 50%, #ef4444 50%); box-shadow: 0 0 8px #f59e0b; }
+
+  /* Selector de modelo pilas */
+  .om-model-switch { display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .om-model-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--om-border);
+    background: var(--om-bg);
+    color: var(--om-text);
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .om-model-btn.is-active {
+    background: var(--om-green);
+    border-color: var(--om-green);
+    color: #fff;
+  }
+
+  /* Acordeón FAQ */
+  .om-faq-item {
+    border: 1px solid var(--om-border);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background: var(--om-bg);
+  }
+  .om-faq-q {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.25rem;
+    background: var(--om-soft);
+    border: none;
+    color: var(--om-text);
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .om-faq-a {
+    display: none;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--om-border);
+    font-size: 0.92rem;
+  }
+  .om-faq-item.is-open .om-faq-a { display: block; }
+
+  /* Checklist */
+  .om-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    background: var(--om-bg);
+    border: 1px solid var(--om-border);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .om-progress-track {
+    height: 10px;
+    background: var(--om-border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 0.5rem 0 1rem;
+  }
+  .om-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--om-blue), var(--om-green));
+    transition: width 0.25s ease;
+  }
+  .om-hidden-search { display: none !important; }
+  .om-footer-note {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--om-border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--om-muted);
+  }
+  @media (max-width: 640px) {
+    .om-card { padding: 1.15rem; }
+    .om-title { font-size: 1.4rem; }
+  }
+</style>
+
+<div class="om-top-bar"></div>
+<div class="om-card">
+  <!-- CABECERA -->
+  <header class="om-header">
+    <div class="om-header-left">
+      <div class="om-icon-box">🔐</div>
+      <div>
+        <div class="om-badges">
+          <span class="om-badge om-badge-blue">Manual Oficial Onity</span>
+          <span class="om-badge om-badge-gold">OnPortal · Advance &amp; Trillium RFID</span>
+        </div>
+        <h1 class="om-title">Manual Interactivo de Cerraduras Onity</h1>
+        <p class="om-subtitle">Guía operativa unificada para Recepción, Mantenimiento, Programador Portátil (PP), Emergencias y Soporte.</p>
+      </div>
+    </div>
+    <div style="text-align: right; font-size: 0.85rem; color: var(--om-muted);">
+      <strong style="color: var(--om-text); display: block;">Sercotel Guadiana · Cumbria Spa &amp; Hotel</strong>
+      <span>Basado en 11 manuales oficiales Onity</span>
+    </div>
+  </header>
+
+  <!-- BUSCADOR RÁPIDO -->
+  <div class="om-search-bar">
+    <span style="font-size: 1.1rem;">🔍</span>
+    <input
+      type="text"
+      id="omSearchInput"
+      class="om-search-input"
+      placeholder="Buscar en todo el manual (ej: luz roja, pila 9V, F5, maestra, Torx, Check-out, CSV, Node Service...)"
+      oninput="
+        var root = document.getElementById('onity-manual-root');
+        var q = this.value.trim().toLowerCase();
+        var items = root.querySelectorAll('.om-searchable');
+        var countEl = root.querySelector('#omSearchCount');
+        var tabs = root.querySelector('.om-tabs');
+        var panels = root.querySelectorAll('.om-panel');
+        if (!q) {
+          items.forEach(function(el){ el.classList.remove('om-hidden-search'); });
+          panels.forEach(function(p){ p.style.display = ''; });
+          if (tabs) tabs.style.opacity = '1';
+          countEl.textContent = '';
+          return;
+        }
+        if (tabs) tabs.style.opacity = '0.5';
+        var hits = 0;
+        panels.forEach(function(p){ p.style.display = 'block'; });
+        items.forEach(function(el){
+          var txt = el.textContent.toLowerCase();
+          if (txt.indexOf(q) !== -1) {
+            el.classList.remove('om-hidden-search');
+            hits++;
+          } else {
+            el.classList.add('om-hidden-search');
+          }
+        });
+        countEl.textContent = hits + ' coincidencia(s)';
+      "
+    />
+    <span id="omSearchCount" class="om-search-count"></span>
+    <button
+      type="button"
+      class="om-search-clear"
+      onclick="
+        var root = document.getElementById('onity-manual-root');
+        var inp = root.querySelector('#omSearchInput');
+        inp.value = '';
+        inp.oninput();
+      "
+    >Limpiar</button>
+  </div>
+
+  <!-- NAVEGACIÓN POR PESTAÑAS -->
+  <nav class="om-tabs" role="tablist">
+    <button type="button" class="om-tab-btn is-active" data-tab="tab-recepcion" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-recepcion').classList.add('is-active');
+    ">🖥️ Recepción (OnPortal)</button>
+
+    <button type="button" class="om-tab-btn" data-tab="tab-led" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-led').classList.add('is-active');
+    ">💡 Diagnóstico LED</button>
+
+    <button type="button" class="om-tab-btn" data-tab="tab-pp" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-pp').classList.add('is-active');
+    ">🔧 Programador Portátil</button>
+
+    <button type="button" class="om-tab-btn" data-tab="tab-pilas" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-pilas').classList.add('is-active');
+    ">🔋 Cambio de Pilas</button>
+
+    <button type="button" class="om-tab-btn" data-tab="tab-emergencia" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-emergencia').classList.add('is-active');
+    ">🆘 Emergencias y Maestras</button>
+
+    <button type="button" class="om-tab-btn" data-tab="tab-faq" onclick="
+      var root = document.getElementById('onity-manual-root');
+      root.querySelectorAll('.om-tab-btn').forEach(function(b){ b.classList.remove('is-active'); });
+      root.querySelectorAll('.om-panel').forEach(function(p){ p.classList.remove('is-active'); });
+      this.classList.add('is-active');
+      root.querySelector('#tab-faq').classList.add('is-active');
+    ">❓ FAQ y Soporte</button>
+  </nav>
+
+  <!-- ==================== TAB 1: RECEPCIÓN ==================== -->
+  <section id="tab-recepcion" class="om-panel is-active">
+    <div class="om-alert om-alert-info om-searchable">
+      <strong>Atajos de teclado en OnPortal (Recepción):</strong>
+      <span class="om-kbd">F2</span> Info Hotel ·
+      <span class="om-kbd">F3</span> Leer Tarjeta ·
+      <span class="om-kbd">F5</span> Cliente Nuevo ·
+      <span class="om-kbd">F6</span> Copia Cliente ·
+      <span class="om-kbd">F7</span> Check-out ·
+      <span class="om-kbd">F8</span> Apertura Única
+    </div>
+
+    <div class="om-grid-2">
+      <!-- F5 Cliente Nuevo -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F5</span> Cliente Nuevo (Check-in)</h3>
+        <div class="om-steps">
+          <div class="om-step"><span class="om-step-num">1</span><span>Introduce el número de habitación (se pueden incluir <strong>hasta 3 habitaciones</strong> en una misma tarjeta).</span></div>
+          <div class="om-step"><span class="om-step-num">2</span><span>Selecciona las noches con <strong>“- / +”</strong>, teclado o fecha de salida. Puedes cambiar la <strong>hora de salida</strong> (ej. <em>late check-out</em>).</span></div>
+          <div class="om-step"><span class="om-step-num">3</span><span>Marca autorizaciones adicionales si la instalación dispone de cerraduras con permisos especiales.</span></div>
+          <div class="om-step"><span class="om-step-num">4</span><span>Pulsa <strong>Grabar</strong> y presenta la tarjeta sobre el lector. Para copias en ese momento, vuelve a pulsar <strong>Grabar</strong>; si no, pulsa <strong>Completado</strong>.</span></div>
+        </div>
+        <div class="om-alert om-alert-warn">
+          <strong>⚠️ Aviso:</strong> Una tarjeta de <em>Cliente nuevo</em> <strong>anula la tarjeta anterior</strong> en cuanto se pasa por la cerradura.
+        </div>
+      </article>
+
+      <!-- F6 Copia de Cliente -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F6</span> Copia de Cliente (Duplicado)</h3>
+        <p style="margin-top:0;">Crea copias de llaves existentes <strong>sin anular</strong> la tarjeta vigente.</p>
+        <div class="om-steps">
+          <div class="om-step"><span class="om-step-num">1</span><span>Introduce el número de habitación y pulsa <strong>Ir</strong> (solo habitaciones con check-in registrado), <em>o</em> lee una tarjeta válida existente.</span></div>
+          <div class="om-step"><span class="om-step-num">2</span><span>Revisa habitación, fecha/hora de expiración y autorizaciones (puedes modificarlas antes de grabar, ej. para <em>late check-out</em>).</span></div>
+          <div class="om-step"><span class="om-step-num">3</span><span>Pulsa <strong>Grabar</strong> tantas veces como copias necesites. En la esquina superior derecha verás el contador de tarjetas grabadas.</span></div>
+        </div>
+        <div class="om-alert om-alert-danger">
+          <strong>🚨 Pérdida de llave:</strong> Si el cliente ha <strong>perdido</strong> la tarjeta y no sabe dónde está, haz siempre <strong>Cliente Nuevo (F5)</strong> (NO copia) y pídele que la pase por la puerta cuanto antes para anular la perdida.
+        </div>
+      </article>
+
+      <!-- F3 Leer Tarjeta -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F3</span> Leer Tarjeta (Diagnóstico)</h3>
+        <p style="margin-top:0;">Permite consultar la información grabada en una tarjeta cuando un cliente indica que no le abre.</p>
+        <ul style="padding-left: 1.25rem; margin: 0.5rem 0;">
+          <li>Verifica habitación asignada, fecha de caducidad y autorizaciones.</li>
+          <li>Si aparece <strong>“Código de tarjeta no válido”</strong>, normalmente significa que se ha generado un nuevo cliente en esa habitación y la tarjeta quedó anulada.</li>
+        </ul>
+      </article>
+
+      <!-- F7 Check-out -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F7</span> Check-out</h3>
+        <p style="margin-top:0;">Salida manual introduciendo el nº de habitación o leyendo una tarjeta válida. (El check-out automático ocurre al hacer nuevo check-in o al expirar fecha/hora).</p>
+        <div class="om-alert om-alert-warn">
+          <strong>⚠️ Salida anticipada:</strong> Hacer check-out manual en OnPortal <strong>no anula automáticamente</strong> la tarjeta que ya tiene el cliente. Si es salida anticipada, pasa una tarjeta nueva o actualiza la cerradura con el Programador Portátil.
+        </div>
+      </article>
+
+      <!-- F8 Apertura Única -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F8</span> Apertura Única</h3>
+        <ul style="padding-left: 1.25rem; margin: 0;">
+          <li>Genera una llave válida para <strong>una sola apertura</strong> de la cerradura indicada.</li>
+          <li>Máximo <strong>4 tarjetas de un solo uso</strong> desde el último check-in.</li>
+          <li><strong>No cancela</strong> la tarjeta vigente del cliente.</li>
+        </ul>
+      </article>
+
+      <!-- F2 Info Hotel -->
+      <article class="om-box-white om-searchable">
+        <h3><span class="om-kbd">F2</span> Información del Hotel</h3>
+        <p style="margin-top:0;">Vista rápida del estado de todas las habitaciones: libre/ocupada, tarjetas emitidas y llaves digitales <strong>DirectKey</strong>. Permite aplicar filtros para localizar incidencias al instante.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 2: DIAGNÓSTICO LED ==================== -->
+  <section id="tab-led" class="om-panel">
+    <div class="om-box om-searchable" style="margin-bottom: 1.25rem;">
+      <h3 style="margin-top:0;">💡 Simulador Interactivo de Señales Luminosas (Trillium / Advance RFID)</h3>
+      <p style="margin:0; color: var(--om-muted);">Selecciona el patrón de luces que muestra el lector de la cerradura para ver el diagnóstico y la solución oficial:</p>
+    </div>
+
+    <div class="om-led-grid om-searchable">
+      <button type="button" class="om-led-btn is-selected" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🟢 Luz verde + pitido';
+        root.querySelector('#omLedMeaning').textContent = 'Tarjeta autorizada y válida.';
+        root.querySelector('#omLedAction').innerHTML = 'Acciona la manilla para abrir la puerta. Recuerda presentar la tarjeta en el centro del lector.';
+      "><span class="om-dot om-dot-green"></span> Luz verde + pitido</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🔴 Luz roja rápida';
+        root.querySelector('#omLedMeaning').textContent = 'Tarjeta leída correctamente, pero NO autorizada, caducada o anulada.';
+        root.querySelector('#omLedAction').innerHTML = '1) Usa <strong>Leer tarjeta (F3)</strong> en recepción.<br>2) Comprueba habitación, caducidad y que no haya otro check-in posterior.<br>3) Con el PP, usa <strong>“Diagnóstico de tarjeta rechazada”</strong> para ver el motivo exacto.';
+      "><span class="om-dot om-dot-red"></span> Luz roja rápida</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🔴 Luz roja retardada (a los 6 seg)';
+        root.querySelector('#omLedMeaning').textContent = 'El lector intenta leer, pero la tarjeta no es legible o está mal introducida.';
+        root.querySelector('#omLedAction').innerHTML = 'Aproxima la tarjeta al centro del lector RFID. Si fuera cerradura de banda magnética, pasa una <strong>tarjeta limpiadora</strong>. Si persiste, graba una tarjeta nueva.';
+      "><span class="om-dot om-dot-red"></span> Luz roja a los 6 seg</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🔴⚡ Luz roja parpadeante';
+        root.querySelector('#omLedMeaning').textContent = 'Cerradura bloqueada mediante una tarjeta bloqueadora.';
+        root.querySelector('#omLedAction').innerHTML = 'Pasa nuevamente una <strong>tarjeta bloqueadora</strong> para desbloquear la cerradura o asigna otra habitación al cliente.';
+      "><span class="om-dot om-dot-red"></span> Luz roja parpadeante</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🟢🔴 Verde y roja alternando / parpadeando';
+        root.querySelector('#omLedMeaning').textContent = 'Cerradura fuera de horario autorizado o PRIVACIDAD activada desde el interior (pestillo echado).';
+        root.querySelector('#omLedAction').innerHTML = 'Probablemente la habitación está ocupada. Si te consta que está vacía, prueba el indicador de privacidad con el <strong>Programador Portátil</strong>; si está defectuoso, sustituir cerradura.';
+      "><span class="om-dot om-dot-dual"></span> Verde y roja alternando</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🟢💡🔴⚡ Verde fija + roja parpadeante';
+        root.querySelector('#omLedMeaning').textContent = 'Nivel de PILAS BAJAS en la cerradura.';
+        root.querySelector('#omLedAction').innerHTML = 'Sustituir las 4 pilas por <strong>4 pilas alcalinas AA</strong> de alta calidad (Varta, Energizer, Duracell o Panasonic) y <strong>actualizar la cerradura</strong> con el PP.';
+      "><span class="om-dot om-dot-dual"></span> Verde fija + roja parp.</button>
+
+      <button type="button" class="om-led-btn" onclick="
+        var root = document.getElementById('onity-manual-root');
+        root.querySelectorAll('.om-led-btn').forEach(function(b){ b.classList.remove('is-selected'); });
+        this.classList.add('is-selected');
+        root.querySelector('#omLedTitle').textContent = '🟢⚡ Luz verde parpadeante';
+        root.querySelector('#omLedMeaning').textContent = 'Cerradura en modo PASO LIBRE.';
+        root.querySelector('#omLedAction').innerHTML = 'No necesita tarjeta para abrir. Para volver al modo normal, pasa <strong>dos veces</strong> una tarjeta autorizada por el lector.';
+      "><span class="om-dot om-dot-green"></span> Luz verde parpadeante</button>
+    </div>
+
+    <div class="om-box-white om-searchable" style="border-left: 5px solid var(--om-blue);">
+      <h3 id="omLedTitle">🟢 Luz verde + pitido</h3>
+      <p style="margin: 0 0 0.5rem;"><strong>Significado:</strong> <span id="omLedMeaning">Tarjeta autorizada y válida.</span></p>
+      <p style="margin: 0;"><strong>Actuación:</strong> <span id="omLedAction">Acciona la manilla para abrir la puerta. Recuerda presentar la tarjeta en el centro del lector.</span></p>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 3: PROGRAMADOR PORTÁTIL ==================== -->
+  <section id="tab-pp" class="om-panel">
+    <div class="om-alert om-alert-info om-searchable">
+      <strong>🔌 Preparación obligatoria antes de ir a la puerta (Carga del PP):</strong>
+      <ol style="margin: 0.5rem 0 0; padding-left: 1.25rem;">
+        <li>Conecta la tablet/portátil a la red e inicia sesión en OnPortal con usuario y contraseña de <strong>mantenimiento</strong>.</li>
+        <li>Verifica que hay conexión con el servidor: debe verse la <strong>estrella verde ⭐</strong>.</li>
+        <li>Pulsa el icono inferior <strong>“Cargar programador portátil”</strong> para sincronizar datos.</li>
+        <li>Conecta el PP al equipo por <strong>USB</strong> y a la cerradura mediante el <strong>conector Jack</strong> (ubicado debajo del lector).</li>
+      </ol>
+      <p style="margin: 0.5rem 0 0; font-size: 0.88rem;"><em>💡 Truco de conexión:</em> Si da error de comunicación, <strong>inclina ligeramente la clavija jack</strong> dentro de la cerradura. Si acabas de cambiar las pilas y no conecta, quita una pila y vuelve a colocarla tras unos segundos.</p>
+    </div>
+
+    <div class="om-grid-2">
+      <article class="om-box-white om-searchable">
+        <h3>🚪 1. Abrir una puerta con el PP</h3>
+        <p>En la pantalla principal del Programador Portátil, pulsa el icono de <strong>Abrir puerta</strong>. Útil para pilas bajas o lector bloqueado.</p>
+        <div class="om-alert om-alert-danger">
+          <strong>🔋 Pilas muy bajas o “muertas”:</strong> Conecta una <strong>pila de 9V</strong> al Programador Portátil (retirando la tapa con el logo de Onity). El puerto USB por sí solo <strong>no tiene potencia suficiente</strong> para accionar el motor.
+        </div>
+      </article>
+
+      <article class="om-box-white om-searchable">
+        <h3>🔄 2. Actualizar cerradura</h3>
+        <p>En el menú de actualización, pulsa <strong>“Actualizar cerradura”</strong> (no hace falta seleccionar habitación).</p>
+        <ul style="padding-left: 1.25rem; margin: 0;">
+          <li>Sincroniza configuración, códigos, permisos y reloj interno.</li>
+          <li>Necesario para que el <strong>cambio horario verano/invierno (DST)</strong> sea automático.</li>
+          <li><strong>Frecuencia recomendada:</strong> 1 o 2 veces al año y siempre tras un cambio de pilas.</li>
+        </ul>
+      </article>
+
+      <article class="om-box-white om-searchable">
+        <h3>🆕 3. Inicializar cerradura</h3>
+        <p>Se utiliza al instalar una cerradura nueva o cambiarle el nombre/número.</p>
+        <div class="om-steps">
+          <div class="om-step"><span class="om-step-num">1</span><span>Entra en el menú <strong>Inicializar cerradura</strong>.</span></div>
+          <div class="om-step"><span class="om-step-num">2</span><span>Selecciona el <strong>número de habitación</strong> de la lista.</span></div>
+          <div class="om-step"><span class="om-step-num">3</span><span>Pulsa <strong>“Inicializar cerradura”</strong> (graba código de sistema, nombre y parámetros).</span></div>
+        </div>
+      </article>
+
+      <article class="om-box-white om-searchable">
+        <h3>📋 4. Leer aperturas (Auditor)</h3>
+        <p>La cerradura guarda en memoria los últimos <strong>500 registros</strong> de apertura.</p>
+        <div class="om-steps">
+          <div class="om-step"><span class="om-step-num">1</span><span>Conecta el PP, entra en <strong>“Leer aperturas”</strong> y pulsa el botón de lectura.</span></div>
+          <div class="om-step"><span class="om-step-num">2</span><span>Al sincronizar de nuevo el equipo con el servidor, los eventos aparecerán en <strong>Seguridad &gt; Auditor de cerraduras</strong>.</span></div>
+          <div class="om-step"><span class="om-step-num">3</span><span>Desde allí puedes filtrar datos y exportarlos en formato <strong>.CSV</strong>.</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 4: CAMBIO DE PILAS ==================== -->
+  <section id="tab-pilas" class="om-panel">
+    <div class="om-box om-searchable" style="margin-bottom: 1.25rem;">
+      <h3 style="margin-top:0;">🛠️ Material Necesario y Modelo de Cerradura</h3>
+      <p style="margin: 0 0 0.75rem;">Necesitarás: <strong>Destornillador Torx T-10</strong> + <strong>4 pilas Alcalinas AA</strong> (Onity recomienda alta gama: <em>Varta, Energizer, Duracell o Panasonic</em>). Duración estimada: hasta 2 años.</p>
+      <div class="om-model-switch">
+        <button type="button" class="om-model-btn is-active" onclick="
+          var root = document.getElementById('onity-manual-root');
+          root.querySelectorAll('.om-model-btn').forEach(function(b){ b.classList.remove('is-active'); });
+          this.classList.add('is-active');
+          root.querySelector('#pilas-advance').style.display = 'block';
+          root.querySelector('#pilas-trillium').style.display = 'none';
+        ">Cerradura ADVANCE</button>
+        <button type="button" class="om-model-btn" onclick="
+          var root = document.getElementById('onity-manual-root');
+          root.querySelectorAll('.om-model-btn').forEach(function(b){ b.classList.remove('is-active'); });
+          this.classList.add('is-active');
+          root.querySelector('#pilas-advance').style.display = 'none';
+          root.querySelector('#pilas-trillium').style.display = 'block';
+        ">Cerradura TRILLIUM</button>
+      </div>
+    </div>
+
+    <div id="pilas-advance" class="om-box-white om-searchable">
+      <h3>🔋 Procedimiento: Cerradura ADVANCE</h3>
+      <div class="om-steps">
+        <div class="om-step"><span class="om-step-num">1</span><span>Suelta el tornillo <strong>Torx T-10</strong> situado en un lateral de la placa posterior de la cerradura.</span></div>
+        <div class="om-step"><span class="om-step-num">2</span><span><strong>Desliza la tapa hacia arriba</strong> y retira la funda tirando suavemente hacia fuera para descubrir el módulo.</span></div>
+        <div class="om-step"><span class="om-step-num">3</span><span>Retira las 4 pilas antiguas y coloca las 4 nuevas <strong>respetando la polaridad</strong>.</span></div>
+        <div class="om-step"><span class="om-step-num">4</span><span>Coloca de nuevo la tapa y fija el tornillo en orden inverso.</span></div>
+      </div>
+    </div>
+
+    <div id="pilas-trillium" class="om-box-white om-searchable" style="display: none;">
+      <h3>🔋 Procedimiento: Cerradura TRILLIUM</h3>
+      <div class="om-steps">
+        <div class="om-step"><span class="om-step-num">1</span><span>Suelta completamente el tornillo <strong>Torx T-10</strong> ubicado al lado de la ranura del conector.</span></div>
+        <div class="om-step"><span class="om-step-num">2</span><span><strong>Desliza la funda metálica hacia abajo</strong> y retira la tapa con un suave movimiento trayendo la parte inferior hacia ti.</span></div>
+        <div class="om-step"><span class="om-step-num">3</span><span>Retira las 4 pilas antiguas y coloca las 4 nuevas <strong>respetando la polaridad</strong>.</span></div>
+        <div class="om-step"><span class="om-step-num">4</span><span>Coloca de nuevo la funda y fija el tornillo en orden inverso.</span></div>
+      </div>
+    </div>
+
+    <div class="om-alert om-alert-warn om-searchable">
+      <strong>⏰ Paso obligatorio tras cambiar pilas:</strong> Al retirar las pilas, el reloj interno puede volver a <strong>cero (0)</strong>. Actualiza siempre la cerradura con el Programador Portátil (PP) para evitar problemas futuros de acceso.
+    </div>
+
+    <div class="om-grid-2">
+      <div class="om-box om-searchable">
+        <h3>⚠️ Advertencias de Baterías</h3>
+        <ul style="padding-left: 1.25rem; margin: 0; font-size: 0.9rem;">
+          <li>No mezclar pilas nuevas con antiguas ni distintas marcas.</li>
+          <li>Reemplazar módulos con signos de corrosión.</li>
+          <li>No almacenar cerraduras con pilas puestas; guardar pilas a temperatura ambiente.</li>
+          <li>Reciclar pilas usadas según directiva europea <strong>2006/66/CE</strong> (no tirar a la basura).</li>
+        </ul>
+      </div>
+
+      <div class="om-box om-searchable">
+        <h3>✅ Checklist de Mantenimiento</h3>
+        <div style="font-size: 0.82rem; font-weight: 700; color: var(--om-blue);" id="omCheckPct">0% completado (0/4)</div>
+        <div class="om-progress-track"><div id="omCheckBar" class="om-progress-fill"></div></div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label class="om-check-item"><input type="checkbox" class="om-chk" onchange="
+            var root = document.getElementById('onity-manual-root');
+            var chks = root.querySelectorAll('.om-chk');
+            var done = 0; chks.forEach(function(c){ if(c.checked) done++; });
+            var pct = Math.round((done / chks.length) * 100);
+            root.querySelector('#omCheckPct').textContent = pct + '% completado (' + done + '/' + chks.length + ')';
+            root.querySelector('#omCheckBar').style.width = pct + '%';
+          "> 4 pilas alcalinas AA nuevas (misma marca)</label>
+          <label class="om-check-item"><input type="checkbox" class="om-chk" onchange="
+            var root = document.getElementById('onity-manual-root');
+            var chks = root.querySelectorAll('.om-chk');
+            var done = 0; chks.forEach(function(c){ if(c.checked) done++; });
+            var pct = Math.round((done / chks.length) * 100);
+            root.querySelector('#omCheckPct').textContent = pct + '% completado (' + done + '/' + chks.length + ')';
+            root.querySelector('#omCheckBar').style.width = pct + '%';
+          "> Polaridad verificada y tapa Torx T-10 cerrada</label>
+          <label class="om-check-item"><input type="checkbox" class="om-chk" onchange="
+            var root = document.getElementById('onity-manual-root');
+            var chks = root.querySelectorAll('.om-chk');
+            var done = 0; chks.forEach(function(c){ if(c.checked) done++; });
+            var pct = Math.round((done / chks.length) * 100);
+            root.querySelector('#omCheckPct').textContent = pct + '% completado (' + done + '/' + chks.length + ')';
+            root.querySelector('#omCheckBar').style.width = pct + '%';
+          "> Cerradura actualizada con PP (estrella verde)</label>
+          <label class="om-check-item"><input type="checkbox" class="om-chk" onchange="
+            var root = document.getElementById('onity-manual-root');
+            var chks = root.querySelectorAll('.om-chk');
+            var done = 0; chks.forEach(function(c){ if(c.checked) done++; });
+            var pct = Math.round((done / chks.length) * 100);
+            root.querySelector('#omCheckPct').textContent = pct + '% completado (' + done + '/' + chks.length + ')';
+            root.querySelector('#omCheckBar').style.width = pct + '%';
+          "> Prueba de apertura con tarjeta válida realizada</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 5: EMERGENCIAS Y MAESTRAS ==================== -->
+  <section id="tab-emergencia" class="om-panel">
+    <div class="om-grid-2">
+      <article class="om-box-white om-searchable">
+        <h3>🆘 Tarjetas de Emergencia (Si cae el sistema)</h3>
+        <p style="margin-top:0;">Permiten emitir llaves de cliente directamente en la cerradura cuando el ordenador o OnPortal están fuera de servicio (deben grabarse <strong>con antelación</strong>).</p>
+        <p><strong>Preparación en OnPortal:</strong> Menú desplegable superior izq. &gt; <em>Mantenimiento</em> &gt; icono central barra azul (<em>Tarjetas especiales</em>) &gt; <em>Programadora y repuesto</em>.</p>
+        <ul style="padding-left: 1.25rem;">
+          <li><strong>Programadora:</strong> “Tarjeta duplicada” (mismo código) o “Tarjeta nueva” (anula anteriores si se perdió alguna). Onity recomienda tener el <strong>doble</strong> de programadoras.</li>
+          <li><strong>Repuesto:</strong> Grabar por <strong>lotes</strong>, recomendando <strong>1 tarjeta por lote</strong>. Tener como mínimo tantas como habitaciones.</li>
+        </ul>
+        <div class="om-steps">
+          <div class="om-step"><span class="om-step-num">1</span><span>En la puerta, presenta primero la <strong>Tarjeta Programadora</strong>: las luces <strong>roja y verde</strong> quedarán encendidas unos segundos.</span></div>
+          <div class="om-step"><span class="om-step-num">2</span><span>Durante ese periodo, presenta la <strong>Tarjeta de Repuesto</strong>: dará un destello verde, abrirá la puerta y quedará vinculada hasta que se repita el proceso o pase un cliente nuevo.</span></div>
+        </div>
+        <p style="font-size: 0.86rem; color: var(--om-muted); margin-bottom:0;">No son nominativas (reutilizables en otras habitaciones). Guardar en lugar seguro y reponer tras devolución.</p>
+      </article>
+
+      <article class="om-box-white om-searchable">
+        <h3>🔑 Tarjetas Maestras y Pérdida</h3>
+        <p style="margin-top:0;"><strong>Grabar maestra:</strong> <em>Usuarios de Maestra</em> &gt; elegir usuario &gt; verificar fecha/hora de caducidad &gt; <strong>Grabar</strong>.</p>
+        <div class="om-alert om-alert-danger">
+          <strong>🚨 Si un miembro del personal pierde una Maestra:</strong>
+          <ol style="margin: 0.4rem 0 0; padding-left: 1.25rem;">
+            <li>Avisar de inmediato al responsable.</li>
+            <li>En OnPortal: <em>Usuarios de Maestra</em> &gt; <strong>Cancelar usuario</strong>.</li>
+            <li>Volver a activar el usuario, grabar de nuevo su tarjeta y <strong>regrabar TODAS las tarjetas del mismo Grupo de Maestras</strong> (quedan canceladas).</li>
+            <li>Pasar las nuevas tarjetas por todas las cerraduras con acceso o actualizar cerraduras con el PP para anular el código antiguo.</li>
+          </ol>
+        </div>
+
+        <h3 style="margin-top: 1.25rem;">🛡️ Seguridad y Operadores</h3>
+        <ul style="padding-left: 1.25rem; margin: 0;">
+          <li><strong>Bloqueo de usuario:</strong> 6 intentos fallidos = <strong>15 minutos</strong> de bloqueo (no se desbloquea aunque otro usuario resetee la clave).</li>
+          <li><strong>Resetear clave:</strong> <em>Seguridad &gt; Operadores &gt; Resetear contraseña</em> (genera clave temporal aleatoria).</li>
+          <li><strong>Reglas de contraseña:</strong> Cambio obligatorio cada <strong>180 días</strong>; mínimo 4 caracteres (1 mayúscula, 1 minúscula, 1 número); sin repetir las últimas 4.</li>
+          <li><strong>Auditor del sistema:</strong> <em>Seguridad &gt; Auditor del sistema</em> muestra acciones de operadores, tramas del PMS y errores.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 6: FAQ Y SOPORTE ==================== -->
+  <section id="tab-faq" class="om-panel">
+    <div class="om-faq-item om-searchable is-open">
+      <button type="button" class="om-faq-q" onclick="this.parentElement.classList.toggle('is-open');">
+        <span>🚪 La cerradura no abre de ninguna manera habitual, ¿qué orden seguir?</span><span>▾</span>
+      </button>
+      <div class="om-faq-a">
+        Actualizar la cerradura y probar en este orden: <strong>1)</strong> Tarjeta de cliente recién grabada → <strong>2)</strong> Tarjeta maestra → <strong>3)</strong> Tarjetas programadoras y de repuesto → <strong>4)</strong> Programador Portátil (con <strong>pila de 9V</strong> adicional si hay poca batería) → <strong>5)</strong> Forzar apertura (<strong>¡ATENCIÓN!</strong> Contactar antes con el servicio técnico de Onity).
+      </div>
+    </div>
+
+    <div class="om-faq-item om-searchable">
+      <button type="button" class="om-faq-q" onclick="this.parentElement.classList.toggle('is-open');">
+        <span>🔌 No hay conexión con el servidor / No detecta el grabador</span><span>▾</span>
+      </button>
+      <div class="om-faq-a">
+        <ul style="margin:0; padding-left:1.25rem;">
+          <li><strong>Sin servidor:</strong> Comprobar que los equipos están en la misma red interna y reiniciar el servicio de Windows <strong>“OnPortal Node Service”</strong> tanto en el PC cliente como en el servidor.</li>
+          <li><strong>No detecta grabador:</strong> Cambiar de puerto USB (verificar señal visual/sonora). Si es grabador motorizado, comprobar que la ficha trasera está en modo <strong>USB</strong>. Reiniciar <em>OnPortal Node Service</em> y escanear grabadores en Configuración de OnPortal.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="om-faq-item om-searchable">
+      <button type="button" class="om-faq-q" onclick="this.parentElement.classList.toggle('is-open');">
+        <span>🖥️ No se pueden grabar llaves desde el PMS</span><span>▾</span>
+      </button>
+      <div class="om-faq-a">
+        Comprobar en el menú de configuración que el apartado del <strong>PMS está a la escucha</strong>. Ir a <strong>“Auditor del sistema”</strong> para verificar si OnPortal está recibiendo las tramas de información que envía el PMS.
+      </div>
+    </div>
+
+    <div class="om-faq-item om-searchable">
+      <button type="button" class="om-faq-q" onclick="this.parentElement.classList.toggle('is-open');">
+        <span>🕒 Late Check-out y Cambio de Horario (Verano/Invierno)</span><span>▾</span>
+      </button>
+      <div class="om-faq-a">
+        <strong>Late check-out:</strong> Modificar la hora de salida en el check-in (F5) o hacer una <strong>Copia de cliente (F6)</strong> cambiando la hora de expiración.<br>
+        <strong>Cambio horario (DST):</strong> Si los ordenadores tienen cambio automático activado, la cerradura se ajustará sola siempre que se actualice al menos una vez en ese periodo de 6 meses. Si es manual, actualizar con el PP tras cambiar la hora del sistema.
+      </div>
+    </div>
+
+    <div class="om-faq-item om-searchable">
+      <button type="button" class="om-faq-q" onclick="this.parentElement.classList.toggle('is-open');">
+        <span>💾 Copias de seguridad, Avisos de licencia / días restantes y Cambio de PC</span><span>▾</span>
+      </button>
+      <div class="om-faq-a">
+        <ul style="margin:0; padding-left:1.25rem;">
+          <li><strong>Backups automáticos:</strong> Ruta por defecto en el servidor: <code>C:\Onity\OnPortal\FrontDeskClient\Backup</code>.</li>
+          <li><strong>Aviso de días restantes (certificados):</strong> En versiones anteriores a <code>1.6.X.XX</code>, conectar todos los nodos y renovar certificados manualmente desde el servidor en <em>Configuración &gt; Estaciones</em> antes de que acabe la cuenta atrás (si expira, habrá que reinstalar todos los nodos).</li>
+          <li><strong>Aviso de licencia:</strong> Contactar con soporte técnico de Onity para activar nueva licencia (revisar posibles facturas pendientes).</li>
+          <li><strong>Sustituir/Añadir PC cliente:</strong> Borrar el equipo anterior, ejecutar <code>FrontDesk-xxx.exe</code> con permisos de admin, luego ejecutar como admin <code>Post-Installation.bat</code> y registrar el nodo en OnPortal. (Para servidor/backup, contactar con Onity).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="om-alert om-alert-info om-searchable">
+      <strong>📞 Servicio de Asistencia Técnica Onity (Honeywell):</strong><br>
+      Email oficial: <strong>onity.asistencia.tecnica@honeywell.com</strong><br>
+      <em>Nota: Cambios en grupos de maestras o añadir nuevos accesos en el sistema están reservados exclusivamente al personal técnico de Onity.</em>
+    </div>
+  </section>
+
+  <!-- PIE -->
+  <footer class="om-footer-note">
+    <span>🔒 Manual Interactivo Onity · Uso interno Recepción &amp; Mantenimiento</span>
+    <span>Fuentes: 11 PDFs oficiales OnPortal / Advance / Trillium RFID</span>
+  </footer>
+</div>
+</div>
+  </div>
+</body>
+</html>

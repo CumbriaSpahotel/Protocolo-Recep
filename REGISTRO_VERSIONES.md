@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.0.1`** | **27/10/2026** | En producción |
+| **`v1.0.2`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.0.2] — 15/11/2026
+- **Módulos Afectados:** Manuales Oficiales, data.js
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido Manual Interactivo Onity (OnPortal & Cerraduras RFID) en sección 6.2 Manuales Oficiales a partir de los 11 PDFs oficiales
 
 ### [v1.0.1] — 27/10/2026
 - **Módulos Afectados:** Sistema / Configuracion
