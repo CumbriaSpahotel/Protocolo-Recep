@@ -1483,6 +1483,10 @@ function switchTab(tabId) {
         if (tabId === 'seguridad' && typeof window.renderSecurityAdminTab === 'function') {
             window.renderSecurityAdminTab();
         }
+
+        if (tabId === 'spa') {
+            renderSpaAdminTab();
+        }
     }
 }
 
@@ -1728,7 +1732,11 @@ function toggleVisibility(index) {
 
 function populateCategories() {
     const select = document.getElementById('edit-category');
-    select.innerHTML = '<option value="">Sin Sección</option>';
+    const prevVal = select.value;
+    const sourceVal = (document.getElementById('edit-source') ? document.getElementById('edit-source').value : '') || 'Ambos hoteles';
+    const isSpaOnly = sourceVal === 'Cumbria Bienestar';
+
+    select.innerHTML = isSpaOnly ? '' : '<option value="">Sin Sección</option>';
     
     let navConf = typeof navigation_config !== 'undefined' ? navigation_config : {};
     try {
@@ -1739,16 +1747,22 @@ function populateCategories() {
     
     if (navConf) {
         Object.entries(navConf).sort((a,b) => parseInt(a[0]) - parseInt(b[0])).forEach(([id, cat]) => {
-            // Parent category option
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = `${id}. ${cat.name}`;
-            select.appendChild(option);
+            // Parent category option (solo para hoteles/recepción, no para solo Spa)
+            if (!isSpaOnly) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${id}. ${cat.name}`;
+                select.appendChild(option);
+            }
 
             // Subsection options (indented) — only numeric-style IDs like "8.1"
             if (cat.subsections && typeof cat.subsections === 'object') {
                 const numericSubs = Object.entries(cat.subsections)
                     .filter(([subId]) => /^\d+\.\d/.test(subId))
+                    .filter(([subId]) => {
+                        const isSpaSub = subId === '5.2' || subId.startsWith('5.2.');
+                        return isSpaOnly ? isSpaSub : !isSpaSub;
+                    })
                     .sort((a, b) => {
                         const nA = parseFloat(a[0].split('.').slice(1).join('.'));
                         const nB = parseFloat(b[0].split('.').slice(1).join('.'));
@@ -1758,12 +1772,26 @@ function populateCategories() {
                 numericSubs.forEach(([subId, subName]) => {
                     const subOption = document.createElement('option');
                     subOption.value = subId;
-                    subOption.textContent = `\u00A0\u00A0\u2514 ${subId}. ${subName}`;
+                    subOption.textContent = isSpaOnly ? `${subId}. ${subName}` : `\u00A0\u00A0\u2514 ${subId}. ${subName}`;
                     subOption.style.color = '#0a6aa1';
                     select.appendChild(subOption);
                 });
             }
         });
+    }
+
+    if (isSpaOnly && !Array.from(select.options).some(o => o.value === '5.2')) {
+        const spaOpt = document.createElement('option');
+        spaOpt.value = '5.2';
+        spaOpt.textContent = '5.2. 💧 Cumbria Bienestar (Spa)';
+        spaOpt.style.color = '#0a6aa1';
+        select.appendChild(spaOpt);
+    }
+
+    if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) {
+        select.value = prevVal;
+    } else if (isSpaOnly && Array.from(select.options).some(o => o.value === '5.2')) {
+        select.value = '5.2';
     }
 }
 
@@ -1918,7 +1946,7 @@ function renderMediaItem(mediaData = { type: 'image', url: '', caption: '' }, co
     container.appendChild(item);
 }
 
-function openEditor(index = -1) {
+function openEditor(index = -1, options = null) {
     editingIndex = index;
     const form = document.getElementById('protocol-form');
     const title = document.getElementById('editor-title');
@@ -1928,7 +1956,16 @@ function openEditor(index = -1) {
     
     switchTab('editor');
     initQuill();
-    populateCategories();
+
+    const sourceSelect = document.getElementById('edit-source');
+    if (sourceSelect && !sourceSelect.dataset.spaFilterBound) {
+        sourceSelect.dataset.spaFilterBound = '1';
+        sourceSelect.addEventListener('change', () => {
+            populateCategories();
+            updateParentSections('');
+            if (typeof generateNextId === 'function') generateNextId();
+        });
+    }
 
     if (index === -1) {
         // NEW PROTOCOL
@@ -1936,6 +1973,10 @@ function openEditor(index = -1) {
         title.textContent = 'Nuevo Protocolo';
         if (btnDelete) btnDelete.style.display = 'none';
         form.reset();
+        if (options && options.defaultSource && sourceSelect) {
+            sourceSelect.value = options.defaultSource;
+        }
+        populateCategories();
         
         quill.root.innerHTML = '';
         htmlEditor.value = '';
@@ -1963,12 +2004,24 @@ function openEditor(index = -1) {
         btnHtml.classList.remove('btn-primary');
         
         // Final check to see if we can suggest an ID immediately if a category is selected
+        if (options && options.defaultCategory) {
+            const catEl = document.getElementById('edit-category');
+            if (catEl && Array.from(catEl.options).some(o => o.value === options.defaultCategory)) {
+                catEl.value = options.defaultCategory;
+            }
+            updateParentSections();
+        }
         generateNextId();
+        if (options && options.defaultSection) {
+            document.getElementById('edit-section').value = options.defaultSection;
+        }
     } else {
         // EDIT EXISTING PROTOCOL
         title.textContent = 'Editar Protocolo';
         if (btnDelete) btnDelete.style.display = 'block';
         const p = adminProtocols[index];
+        document.getElementById('edit-source').value = p.source || 'Ambos hoteles';
+        populateCategories();
         document.getElementById('edit-title').value = p.title || '';
         document.getElementById('edit-section').value = p.section || '';
         
@@ -2387,10 +2440,17 @@ function addSubRow(container, id, name, subsectionData = null) {
     const finalName = (subsectionData && typeof subsectionData === 'object') ? subsectionData.name : (subsectionData || name);
     const links = (subsectionData && typeof subsectionData === 'object' && subsectionData.links) ? subsectionData.links : [];
 
+    const isSpaSub = String(id) === '5.2' || String(id).startsWith('5.2.');
+    row.dataset.scope = isSpaSub ? 'spa' : 'hotels';
+    const scopeBadgeHtml = isSpaSub
+        ? '<span style="background:#e0f2fe; color:#0369a1; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:800; text-align:center; white-space:nowrap;">💧 Solo Spa</span>'
+        : '<span style="background:#f1f5f9; color:#475569; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:700; text-align:center; white-space:nowrap;">🏨 Hoteles</span>';
+
     row.innerHTML = `
-        <div style="display: grid; grid-template-columns: 80px 1fr 38px 38px; gap: 10px; align-items: center;">
+        <div style="display: grid; grid-template-columns: 80px 1fr 115px 38px 38px; gap: 10px; align-items: center;">
             <input type="text" class="sub-id" value="${id}" data-original-id="${id}" readonly style="width:100%; padding:5px; border:1px solid #eee; border-radius:4px; background:#f9f9f9; text-align:center; font-size:0.85rem; font-weight:bold; color:#888;">
             <input type="text" class="sub-name" value="${finalName}" placeholder="Nombre de la subsección (ej: Registro, Check-out...)" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size: 0.9rem;">
+            ${scopeBadgeHtml}
             <button type="button" class="btn-toggle-sub-links" style="background:${links.length > 0 ? '#e3f2fd' : 'none'}; border:1px solid ${links.length > 0 ? '#90caf9' : 'transparent'}; color:#1976d2; border-radius:4px; height:34px; cursor:pointer;" title="Gestionar Enlaces de esta Subsección">
                 <i class="fas fa-link"></i> ${links.length > 0 ? `<span style="font-size:0.7rem; font-weight:bold; margin-left:3px;">${links.length}</span>` : ''}
             </button>
@@ -2914,7 +2974,8 @@ function saveToServer(protocolsData, navData, homeData) {
         navConfig: finalNav,
         homeConfig: finalHome,
         channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined,
-        securityConfig: (typeof window.security_config !== 'undefined') ? window.security_config : undefined
+        securityConfig: (typeof window.security_config !== 'undefined') ? window.security_config : undefined,
+        spaNavConfig: (typeof window.spa_navigation_config !== 'undefined') ? window.spa_navigation_config : undefined
     };
 
     // On GitHub Pages there is no server: offer direct download instead
@@ -2956,6 +3017,7 @@ function showDownloadPrompt(payload) {
     if (payload.navConfig) newContent += "const navigation_config = " + JSON.stringify(payload.navConfig, null, 2) + ";\n\n";
     if (payload.homeConfig) newContent += "const home_config = " + JSON.stringify(payload.homeConfig, null, 2) + ";\n\n";
     if (payload.securityConfig) newContent += "var security_config = " + JSON.stringify(payload.securityConfig, null, 2) + ";\n\n";
+    if (payload.spaNavConfig) newContent += "var spa_navigation_config = " + JSON.stringify(payload.spaNavConfig, null, 2) + ";\n\n";
     const blob = new Blob([newContent], { type: 'text/javascript' });
     const url = URL.createObjectURL(blob);
     
@@ -4328,6 +4390,290 @@ if (typeof cloud_config !== 'undefined') {
     if (cloud_config.scriptUrl) CLOUD_GATEWAY_URL = cloud_config.scriptUrl;
     if (cloud_config.sheetId) CLOUD_SPREADSHEET_ID = cloud_config.sheetId;
 }
+
+// --- GESTIÓN DEL PORTAL SPA ---
+function renderSpaAdminTab() {
+    const container = document.getElementById('spa-admin-container');
+    if (!container) return;
+
+    const spaList = adminProtocols
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => p.source === 'Cumbria Bienestar' || (p.section && (String(p.section) === '5.2' || String(p.section).startsWith('5.2.'))))
+        .sort((a, b) => String(a.p.section).localeCompare(String(b.p.section), undefined, { numeric: true }));
+
+    const activeCount = spaList.filter(({ p }) => p.status !== 'Anulado').length;
+    const secCfg = (typeof security_config !== 'undefined' && security_config && Array.isArray(security_config.rules))
+        ? security_config.rules.find(r => String(r.section) === '5.2')
+        : null;
+    const spaKey = (secCfg && secCfg.accessKey) ? secCfg.accessKey : 'Spa2026!';
+    const spaEmails = (secCfg && Array.isArray(secCfg.allowedEmails)) ? secCfg.allowedEmails.join(', ') : 'cumbriaspa@gmail.com';
+    const spaUrl = 'https://cumbriaspahotel.github.io/Protocolo-Recep/spa.html';
+
+    container.innerHTML = `
+        <div class="list-header" style="flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <img src="Imagenes/logo-spa.jpg" alt="Logo Spa" style="height:36px; border-radius:6px; border:1px solid #e2e8f0; background:white; padding:2px;">
+                <div>
+                    <h2 style="margin:0;"><i class="fas fa-spa" style="color:#0a6aa1;"></i> Gestión Cumbria Bienestar (Spa)</h2>
+                    <span style="font-size:0.82rem; color:#64748b;">Administra los procedimientos, accesos y enlaces del portal exclusivo del Spa (${activeCount} activos)</span>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <a href="spa.html" target="_blank" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-external-link-alt"></i> Abrir Portal Spa
+                </a>
+                <button type="button" class="btn-secondary" onclick="switchTab('seguridad')">
+                    <i class="fas fa-shield-alt"></i> Clave y Accesos Spa
+                </button>
+                <button type="button" class="btn-primary" style="background:#27ae60;" onclick="window.createNewSpaProtocol()">
+                    <i class="fas fa-plus"></i> Nuevo Procedimiento Spa
+                </button>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:20px;">
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Enlace del Portal Spa</div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <code style="font-size:0.8rem; color:#0a6aa1; word-break:break-all;">${spaUrl}</code>
+                    <button type="button" class="btn-secondary" style="padding:5px 10px; font-size:0.78rem; flex-shrink:0;" onclick="navigator.clipboard.writeText('${spaUrl}'); showToast('Enlace del Spa copiado');">Copiar</button>
+                </div>
+            </div>
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Acceso Directo (Sección 5.2)</div>
+                <div style="font-size:0.86rem; color:#0f172a;">
+                    <div><strong>Clave actual:</strong> <code>${spaKey}</code></div>
+                    <div style="margin-top:4px; color:#475569;"><strong>Correos:</strong> ${spaEmails}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Sección</th>
+                        <th>Procedimiento del Spa</th>
+                        <th>Estado</th>
+                        <th>Última modif.</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${spaList.length === 0 ? `
+                        <tr><td colspan="5" style="text-align:center; padding:24px; color:#64748b;">No hay procedimientos en la sección 5.2 todavía.</td></tr>
+                    ` : spaList.map(({ p, idx }) => {
+                        const cleanTitle = (p.title || '').replace(/\{.*?\}/g, '').trim();
+                        const isAnulado = p.status === 'Anulado';
+                        const statusHtml = isAnulado
+                            ? '<span style="background:#fee2e2; color:#991b1b; padding:3px 9px; border-radius:999px; font-size:0.75rem; font-weight:700;">Anulado</span>'
+                            : '<span style="background:#dcfce7; color:#166534; padding:3px 9px; border-radius:999px; font-size:0.75rem; font-weight:700;">Activo</span>';
+                        const modDate = p.updated || p.published || '—';
+                        return `
+                            <tr style="${isAnulado ? 'opacity:0.6;' : ''}">
+                                <td><span style="background:#0a6aa1; color:white; padding:3px 8px; border-radius:6px; font-size:0.78rem; font-weight:800;">${p.section}</span></td>
+                                <td><strong>${cleanTitle}</strong></td>
+                                <td>${statusHtml}</td>
+                                <td>${modDate}</td>
+                                <td style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <a href="spa.html#protocol/${encodeURIComponent(p.section)}" target="_blank" class="btn-icon" title="Ver en Portal Spa" style="text-decoration:none;"><i class="fas fa-eye"></i></a>
+                                    <button type="button" class="btn-icon" onclick="openEditor(${idx})" title="Editar procedimiento"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+window.createNewSpaProtocol = function () {
+    const subNums = adminProtocols
+        .map(p => String(p.section || ''))
+        .filter(s => /^5\.2\.\d+$/.test(s))
+        .map(s => parseInt(s.split('.')[2], 10))
+        .filter(n => !isNaN(n));
+    const nextNum = subNums.length > 0 ? Math.max(...subNums) + 1 : 1;
+    openEditor(-1, {
+        defaultSource: 'Cumbria Bienestar',
+        defaultCategory: '5.2',
+        defaultSection: `5.2.${nextNum}`
+    });
+};
+window.renderSpaAdminTab = renderSpaAdminTab;
+
+function ensureSpaMenusConfig() {
+    if (!Array.isArray(window.spa_navigation_config) || window.spa_navigation_config.length === 0) {
+        window.spa_navigation_config = [
+            { id: 'procedimientos', name: 'Procedimientos Spa', icon: 'fa-spa', sections: ['5.2.1'], subfolders: [], links: [] },
+            { id: 'bonos', name: 'Bonos', icon: 'fa-ticket-alt', sections: ['5.2.2', '5.2.3'], subfolders: [], links: [] },
+            { id: 'manuales', name: 'Manuales', icon: 'fa-book', sections: ['5.2.4'], subfolders: [], links: [] }
+        ];
+    }
+    return window.spa_navigation_config;
+}
+
+function renderSpaMenusManager() {
+    const container = document.getElementById('spa-menus-container');
+    if (!container) return;
+    const cfg = ensureSpaMenusConfig();
+
+    container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#f0f9ff; border:1px solid #bae6fd; padding:14px 18px; border-radius:10px;">
+            <div>
+                <strong style="color:#0369a1; font-size:0.95rem;"><i class="fas fa-spa"></i> Menús y Subcarpetas del Portal Spa (spa.html)</strong>
+                <div style="font-size:0.82rem; color:#475569;">Configura los menús superiores del Spa, sus subcarpetas internas, protocolos asignados y enlaces externos.</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn-secondary" onclick="window.__spaMenuAdd()" style="background:#0a6aa1; color:white; border-color:#0a6aa1;">
+                    <i class="fas fa-plus"></i> Añadir Menú Spa
+                </button>
+                <button type="button" class="btn-primary" onclick="window.__spaMenuSave()" style="background:#27ae60;">
+                    <i class="fas fa-save"></i> Guardar Menús Spa
+                </button>
+            </div>
+        </div>
+        ${cfg.map((menu, mIdx) => {
+            const subs = Array.isArray(menu.subfolders) ? menu.subfolders : [];
+            const links = Array.isArray(menu.links) ? menu.links : [];
+            const secsStr = Array.isArray(menu.sections) ? menu.sections.join(', ') : '';
+            return `
+                <div style="background:#fff; padding:18px; border-radius:10px; border:1px solid #cbd5e1; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                    <div style="display:grid; grid-template-columns:1fr 180px 1fr 40px; gap:12px; align-items:end; margin-bottom:14px;">
+                        <div>
+                            <label style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">Nombre del Menú</label>
+                            <input type="text" value="${menu.name || ''}" onchange="window.__spaMenuUpdateField(${mIdx}, 'name', this.value)" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">Icono (FontAwesome)</label>
+                            <input type="text" value="${menu.icon || 'fa-spa'}" onchange="window.__spaMenuUpdateField(${mIdx}, 'icon', this.value)" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-family:monospace;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase;">Protocolos Directos (ej: 5.2.1, 5.2.2)</label>
+                            <input type="text" value="${secsStr}" onchange="window.__spaMenuUpdateSections(${mIdx}, this.value)" placeholder="5.2.1, 5.2.2..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+                        </div>
+                        <button type="button" onclick="window.__spaMenuRemove(${mIdx})" style="background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; height:36px; cursor:pointer;" title="Eliminar menú"><i class="fas fa-trash"></i></button>
+                    </div>
+
+                    <div style="border-top:1px dashed #e2e8f0; padding-top:12px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:0.76rem; font-weight:800; color:#0a6aa1; text-transform:uppercase;"><i class="fas fa-folder-open"></i> Subcarpetas dentro de "${menu.name}"</span>
+                            <button type="button" onclick="window.__spaMenuAddSubfolder(${mIdx})" style="background:none; border:none; color:#0a6aa1; font-weight:700; font-size:0.8rem; cursor:pointer;">+ Añadir Subcarpeta</button>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px; padding-left:14px; border-left:2px dashed #bae6fd;">
+                            ${subs.length === 0 ? '<div style="font-size:0.82rem; color:#94a3b8;">Sin subcarpetas (los protocolos directos salen directamente en el desplegable).</div>' : subs.map((sf, sIdx) => `
+                                <div style="display:grid; grid-template-columns:1fr 1fr 34px; gap:8px; align-items:center; background:#f8fafc; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                                    <input type="text" value="${sf.name || ''}" placeholder="Nombre de subcarpeta..." onchange="window.__spaMenuUpdateSub(${mIdx}, ${sIdx}, 'name', this.value)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:5px; font-size:0.85rem;">
+                                    <input type="text" value="${Array.isArray(sf.sections) ? sf.sections.join(', ') : ''}" placeholder="Secciones (ej: 5.2.2, 5.2.3)" onchange="window.__spaMenuUpdateSub(${mIdx}, ${sIdx}, 'sections', this.value)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:5px; font-size:0.85rem;">
+                                    <button type="button" onclick="window.__spaMenuRemoveSub(${mIdx}, ${sIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:800;">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div style="border-top:1px dashed #e2e8f0; padding-top:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-size:0.76rem; font-weight:800; color:#27ae60; text-transform:uppercase;"><i class="fas fa-external-link-alt"></i> Enlaces Externos</span>
+                            <button type="button" onclick="window.__spaMenuAddLink(${mIdx})" style="background:none; border:none; color:#27ae60; font-weight:700; font-size:0.8rem; cursor:pointer;">+ Añadir Enlace</button>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:6px; padding-left:14px; border-left:2px solid #bbf7d0;">
+                            ${links.map((lk, lIdx) => `
+                                <div style="display:grid; grid-template-columns:1fr 1fr 34px; gap:8px; align-items:center;">
+                                    <input type="text" value="${lk.text || ''}" placeholder="Texto del enlace..." onchange="window.__spaMenuUpdateLink(${mIdx}, ${lIdx}, 'text', this.value)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:5px; font-size:0.84rem;">
+                                    <input type="text" value="${lk.url || ''}" placeholder="https://..." onchange="window.__spaMenuUpdateLink(${mIdx}, ${lIdx}, 'url', this.value)" style="padding:6px 8px; border:1px solid #cbd5e1; border-radius:5px; font-size:0.84rem;">
+                                    <button type="button" onclick="window.__spaMenuRemoveLink(${mIdx}, ${lIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:800;">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('')}
+    `;
+}
+
+window.__spaMenuAdd = () => {
+    ensureSpaMenusConfig().push({ id: 'spa-' + Date.now(), name: 'Nuevo Menú Spa', icon: 'fa-spa', sections: [], subfolders: [], links: [] });
+    renderSpaMenusManager();
+};
+window.__spaMenuRemove = (idx) => {
+    if (!confirm('¿Eliminar este menú del Spa?')) return;
+    ensureSpaMenusConfig().splice(idx, 1);
+    renderSpaMenusManager();
+};
+window.__spaMenuUpdateField = (idx, field, val) => { ensureSpaMenusConfig()[idx][field] = val.trim(); };
+window.__spaMenuUpdateSections = (idx, val) => {
+    ensureSpaMenusConfig()[idx].sections = val.split(',').map(s => s.trim()).filter(Boolean);
+};
+window.__spaMenuAddSubfolder = (idx) => {
+    const m = ensureSpaMenusConfig()[idx];
+    if (!Array.isArray(m.subfolders)) m.subfolders = [];
+    m.subfolders.push({ id: 'sub-' + Date.now(), name: 'Nueva Subcarpeta', sections: [] });
+    renderSpaMenusManager();
+};
+window.__spaMenuUpdateSub = (mIdx, sIdx, field, val) => {
+    const sf = ensureSpaMenusConfig()[mIdx].subfolders[sIdx];
+    if (field === 'sections') sf.sections = val.split(',').map(s => s.trim()).filter(Boolean);
+    else sf[field] = val.trim();
+};
+window.__spaMenuRemoveSub = (mIdx, sIdx) => {
+    ensureSpaMenusConfig()[mIdx].subfolders.splice(sIdx, 1);
+    renderSpaMenusManager();
+};
+window.__spaMenuAddLink = (mIdx) => {
+    const m = ensureSpaMenusConfig()[mIdx];
+    if (!Array.isArray(m.links)) m.links = [];
+    m.links.push({ icon: 'fa-link', text: '', url: '' });
+    renderSpaMenusManager();
+};
+window.__spaMenuUpdateLink = (mIdx, lIdx, field, val) => {
+    ensureSpaMenusConfig()[mIdx].links[lIdx][field] = val.trim();
+};
+window.__spaMenuRemoveLink = (mIdx, lIdx) => {
+    ensureSpaMenusConfig()[mIdx].links.splice(lIdx, 1);
+    renderSpaMenusManager();
+};
+window.__spaMenuSave = () => {
+    saveToServer(adminProtocols);
+};
+
+window.__filterMenusScope = function (scope) {
+    const btns = document.querySelectorAll('#menus-scope-filter button');
+    btns.forEach(b => {
+        const active = b.dataset.scope === scope;
+        b.style.background = active ? '#0a6aa1' : '';
+        b.style.color = active ? 'white' : '';
+        b.style.borderColor = active ? '#0a6aa1' : '';
+    });
+
+    const hotelsCont = document.getElementById('menus-container');
+    const spaCont = document.getElementById('spa-menus-container');
+    if (scope === 'spa') {
+        if (hotelsCont) hotelsCont.style.display = 'none';
+        if (spaCont) {
+            spaCont.style.display = 'flex';
+            renderSpaMenusManager();
+        }
+        return;
+    }
+
+    if (hotelsCont) hotelsCont.style.display = 'flex';
+    if (spaCont) spaCont.style.display = 'none';
+
+    document.querySelectorAll('#menus-container .menu-row').forEach(menuRow => {
+        const subRows = Array.from(menuRow.querySelectorAll('.sub-row'));
+        if (scope === 'all') {
+            menuRow.style.display = 'flex';
+            subRows.forEach(sr => sr.style.display = 'flex');
+        } else if (scope === 'hotels') {
+            menuRow.style.display = 'flex';
+            subRows.forEach(sr => {
+                sr.style.display = sr.dataset.scope === 'spa' ? 'none' : 'flex';
+            });
+        }
+    });
+};
 
 // --- Inicialización de Advertencias ---
 document.addEventListener('DOMContentLoaded', () => {

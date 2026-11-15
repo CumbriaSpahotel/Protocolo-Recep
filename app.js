@@ -385,12 +385,25 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
+    protocols = protocols.filter(p => !(p.source === 'Cumbria Bienestar' || (p.section && (String(p.section) === '5.2' || String(p.section).startsWith('5.2.')))));
     if (typeof window.checkPlatformSecurityGate === 'function' && !window.checkPlatformSecurityGate(() => initApp())) {
         return;
     }
     renderNavigation();
     renderHome();
     renderSidebar();
+
+    // Auto-flip dropdowns/submenus to whichever side fits completely inside the viewport
+    document.addEventListener('mouseover', (e) => {
+        const wrapper = e.target.closest('.sub-dropdown-wrapper, .nav-item-wrapper');
+        if (!wrapper) return;
+        const dd = wrapper.querySelector(':scope > .dropdown-content');
+        if (!dd || dd.classList.contains('open-left')) return;
+        const rect = dd.getBoundingClientRect();
+        if (rect.width > 0 && rect.right > window.innerWidth - 16) {
+            dd.classList.add('open-left');
+        }
+    });
     
     // Search listener
     document.getElementById('search-input').addEventListener('keypress', (e) => {

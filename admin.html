@@ -21,7 +21,7 @@
                 <img src="Imagenes/Logo.png" alt="Logo" style="height: 35px; background: white; padding: 3px; border-radius: 4px;">
                 <h1>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
                 <span style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(56,189,248,0.18); border: 1px solid rgba(56,189,248,0.45); color: #bae6fd; letter-spacing: 0.04em; text-transform: uppercase;"><i class="fas fa-user-shield" style="margin-right: 5px;"></i>Panel de Administración</span>
-                <span id="app-version-badge" title="Versión actual del sistema" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: #e2e8f0; letter-spacing: 0.04em;">v1.2.6</span>
+                <span id="app-version-badge" title="Versión actual del sistema" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: #e2e8f0; letter-spacing: 0.04em;">v1.2.56</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <button id="admin-access" class="admin-btn" aria-label="Acceso administrador" style="background: none; border: none; color: inherit; font-size: 1rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; opacity: 0.6; transition: opacity 0.3s;">
@@ -43,6 +43,7 @@
     <div class="admin-tabs">
         <div class="tab-container">
             <button class="tab-btn active" data-tab="listado"><i class="fas fa-file-alt"></i> Protocolos</button>
+            <button class="tab-btn" data-tab="spa"><i class="fas fa-spa"></i> Gestión Spa</button>
             <button class="tab-btn" data-tab="menus"><i class="fas fa-list-ul"></i> Gestión de Menús</button>
             <button class="tab-btn" data-tab="inicio"><i class="fas fa-home"></i> Gestión Inicio</button>
             <button class="tab-btn" data-tab="canales"><i class="fas fa-satellite-dish"></i> Canales</button>
@@ -256,9 +257,19 @@
                 <button type="button" id="btn-save-menus" class="btn-primary"><i class="fas fa-save"></i> Guardar Menús</button>
             </div>
             <div class="editor-body">
-                <p style="margin-bottom: 20px; color: #666;">Configura las secciones principales de la barra de navegación.</p>
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px;">
+                    <p style="margin:0; color:#666;">Configura las secciones principales de la barra de navegación.</p>
+                    <div id="menus-scope-filter" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn-secondary active" data-scope="all" onclick="window.__filterMenusScope('all')" style="padding:6px 14px; font-size:0.84rem; background:#0a6aa1; color:white; border-color:#0a6aa1;">Todos</button>
+                        <button type="button" class="btn-secondary" data-scope="hotels" onclick="window.__filterMenusScope('hotels')" style="padding:6px 14px; font-size:0.84rem;">🏨 Hoteles / Recepción</button>
+                        <button type="button" class="btn-secondary" data-scope="spa" onclick="window.__filterMenusScope('spa')" style="padding:6px 14px; font-size:0.84rem;">💧 Solo Spa</button>
+                    </div>
+                </div>
                 <div id="menus-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
                     <!-- Menu rows injected dynamically -->
+                </div>
+                <div id="spa-menus-container" style="display:none; flex-direction:column; gap:14px; margin-bottom: 20px;">
+                    <!-- Spa menu rows & subfolders injected dynamically -->
                 </div>
                 <div style="display: none;"><textarea id="edit-menus-json"></textarea></div>
             </div>
@@ -459,6 +470,11 @@
                 <h2><i class="fas fa-shield-alt" style="color:#0a6aa1;"></i> Seguridad, Cuentas Autorizadas e Invitados</h2>
             </div>
             <div id="security-admin-container"></div>
+        </section>
+
+        <!-- Gestión Spa View -->
+        <section id="tab-spa" class="tab-page">
+            <div id="spa-admin-container"></div>
         </section>
 
     </main>

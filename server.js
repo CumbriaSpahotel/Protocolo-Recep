@@ -58,7 +58,7 @@ app.post('/api/save', (req, res) => {
         // ====================================================================
         // CRITICAL: Read EXISTING data.js first to preserve data not being sent.
         // ====================================================================
-        let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [], security: { adminEmails: ['nataliohoteles@gmail.com'], rules: [{ section: '*', label: 'Plataforma General (Recepción)', accessKey: 'Recep2026!', allowedEmails: ['hcumbri@gmail.com', 'hotelguad@gmail.com', 'comunicaciones@hotelguadiana.es'] }, { section: '5.2', label: 'Cumbria Bienestar (Spa)', accessKey: 'Spa2026!', allowedEmails: ['cumbriaspa@gmail.com'] }], googleClientId: '', microsoftClientId: '', guestPasses: [] } };
+        let existing = { channels: [], protocols: [], nav: {}, home: {}, cloud: { scriptUrl: '', sheetId: '', geminiApiKey: '' }, menus: [], security: { adminEmails: ['nataliohoteles@gmail.com'], rules: [{ section: '*', label: 'Plataforma General (Recepción)', accessKey: 'Recep2026!', allowedEmails: ['hcumbri@gmail.com', 'hotelguad@gmail.com', 'comunicaciones@hotelguadiana.es'] }, { section: '5.2', label: 'Cumbria Bienestar (Spa)', accessKey: 'Spa2026!', allowedEmails: ['cumbriaspa@gmail.com'] }], googleClientId: '', microsoftClientId: '', guestPasses: [] }, spaNav: [] };
         
         const dataFilePath = path.join(__dirname, 'data.js');
         if (fs.existsSync(dataFilePath)) {
@@ -84,6 +84,7 @@ app.post('/api/save', (req, res) => {
                 existing.cloud = extractVar('cloud_config') || { scriptUrl: '', sheetId: '', geminiApiKey: '' };
                 existing.menus = extractVar('menus_data') || [];
                 existing.security = extractVar('security_config') || existing.security;
+                existing.spaNav = extractVar('spa_navigation_config') || [];
             } catch (parseErr) {
                 console.warn('⚠️ Error parseando data.js:', parseErr.message);
             }
@@ -96,6 +97,7 @@ app.post('/api/save', (req, res) => {
         const home = isSet(data.homeConfig) ? data.homeConfig : existing.home;
         const menus = isSet(data.menusConfig) ? data.menusConfig : existing.menus;
         const security = isSet(data.securityConfig) ? data.securityConfig : existing.security;
+        const spaNav = isSet(data.spaNavConfig) ? data.spaNavConfig : existing.spaNav;
         
         // Cloud config merge
         const cloud = { ...existing.cloud };
@@ -142,6 +144,7 @@ app.post('/api/save', (req, res) => {
         jsContent += 'var cloud_config = ' + JSON.stringify(cloud, null, 2) + ';\n\n';
         jsContent += 'const menus_data = ' + JSON.stringify(menus, null, 2) + ';\n\n';
         jsContent += 'var security_config = ' + JSON.stringify(security, null, 2) + ';\n\n';
+        jsContent += 'var spa_navigation_config = ' + JSON.stringify(spaNav, null, 2) + ';\n\n';
 
         // Write without BOM - always use plain UTF-8
         fs.writeFileSync(dataFilePath, jsContent, { encoding: 'utf8' });

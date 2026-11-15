@@ -540,11 +540,14 @@
                 ? `👑 Administrador (${s.provider}): ${s.email}`
                 : `🔓 Sesión autorizada (${s.provider}): ${s.email}`);
         return `
-            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; padding:0.65rem 1rem; margin-bottom:1rem; border-radius:10px; background:rgba(39,174,96,0.1); border:1px solid rgba(39,174,96,0.3); font-size:0.84rem; font-weight:600; color:var(--text-dark, #0f172a);">
-                <span>${label}</span>
-                <button type="button" onclick="window.__secLogout()" style="padding:4px 10px; border-radius:6px; border:1px solid rgba(178,34,34,0.35); background:rgba(178,34,34,0.08); color:#b22222; font-weight:700; font-size:0.78rem; cursor:pointer;">
-                    Cerrar sesión
-                </button>
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:0.65rem;">
+                <div style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px; padding:4px 12px; border-radius:999px; background:rgba(148,163,184,0.1); border:1px solid rgba(148,163,184,0.22); font-size:0.74rem; font-weight:500; color:var(--text-muted, #64748b);">
+                    <span>${label}</span>
+                    <span style="opacity:0.4;">·</span>
+                    <button type="button" onclick="window.__secLogout()" style="padding:0; border:none; background:none; color:#94a3b8; font-weight:600; font-size:0.74rem; cursor:pointer; text-decoration:underline;" onmouseenter="this.style.color='#b22222'" onmouseleave="this.style.color='#94a3b8'">
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
         `;
     };
