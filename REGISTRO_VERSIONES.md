@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.1.0`** | **15/11/2026** | En producción |
+| **`v1.2.0`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.0] — 15/11/2026
+- **Módulos Afectados:** Spa, Seguridad, Visor
+- **Tipo de Cambio:** Nueva Característica / Mejora
+- **Detalle de Cambios:**
+  - Creado portal exclusivo para Cumbria Bienestar (Spa) en spa.html sin menús ni elementos de recepción, protegido con cumbriaspa@gmail.com e invitados
 
 ### [v1.1.0] — 15/11/2026
 - **Módulos Afectados:** Seguridad, Visor, Administración, Backend, data.js

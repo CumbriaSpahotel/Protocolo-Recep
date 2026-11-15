@@ -654,8 +654,10 @@
     };
     window.__secAdminCopyGuestLink = (code, section) => {
         const targetSec = (!section || section === '*') ? '6.2.1' : section;
-        const hash = targetSec === '5.2' ? '#protocol/5.2.1' : `#protocol/${encodeURIComponent(targetSec)}`;
-        const link = `https://cumbriaspahotel.github.io/Protocolo-Recep/index.html?guest=${encodeURIComponent(code)}${hash}`;
+        const isSpa = targetSec === '5.2' || targetSec.startsWith('5.2.');
+        const link = isSpa
+            ? `https://cumbriaspahotel.github.io/Protocolo-Recep/spa.html?guest=${encodeURIComponent(code)}`
+            : `https://cumbriaspahotel.github.io/Protocolo-Recep/index.html?guest=${encodeURIComponent(code)}#protocol/${encodeURIComponent(targetSec)}`;
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(() => {
                 if (typeof window.showToast === 'function') window.showToast('🔗 Enlace de invitado copiado al portapapeles');
