@@ -11,11 +11,29 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.3`** | **15/11/2026** | En producción |
+| **`v1.2.6`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.6] — 15/11/2026
+- **Módulos Afectados:** Estilos Admin (admin.css), Seguridad (security.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Ajustado el panel de administración y Seguridad y Accesos para ocupar todo el ancho de la pantalla y equilibrar las columnas
+
+### [v1.2.5] — 15/11/2026
+- **Módulos Afectados:** Seguridad (security.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadidos campos de Nombre completo y Correo electrónico en Pases Temporales para Invitados y ajustado el contenedor al ancho completo de pantalla
+
+### [v1.2.4] — 15/11/2026
+- **Módulos Afectados:** Portal Spa (spa.html)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Rediseñado spa.html con el mismo diseño, barra superior, sidebar y tarjetas de inicio que index.html (Recepción)
 
 ### [v1.2.3] — 15/11/2026
 - **Módulos Afectados:** Seguridad, Backend, data.js

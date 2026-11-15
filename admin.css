@@ -106,9 +106,11 @@ body {
 
 /* Content Area */
 .admin-content {
-    max-width: 1300px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     margin: 1rem auto;
-    padding: 0 1.5rem;
+    padding: 0 2rem;
 }
 
 .tab-page {

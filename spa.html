@@ -3,58 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cumbria Bienestar (Spa) · Manual de Procedimientos</title>
+    <title>CUMBRIA BIENESTAR (SPA) - PORTAL DE PROCEDIMIENTOS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="tailwind.css">
     <link rel="icon" href="Imagenes/logo-spa.jpg" type="image/jpeg">
     <style>
-        .spa-shell { max-width: 1150px; margin: 24px auto; padding: 0 18px 40px; }
-        .spa-nav-pills {
-            display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px;
-            background: var(--white, #ffffff); border: 1px solid var(--border, #e2e8f0);
-            border-radius: 14px; margin-bottom: 20px; box-shadow: var(--shadow);
+        .spa-sidebar-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--text-dark, #1e293b);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            margin-bottom: 6px;
+            cursor: pointer;
         }
-        .spa-pill {
-            padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border, #e2e8f0);
-            background: var(--bg-light, #f8fafc); color: var(--text-dark, #0f172a);
-            font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
-            display: inline-flex; align-items: center; gap: 8px;
+        .spa-sidebar-item:hover {
+            background: rgba(10, 106, 161, 0.08);
+            border-color: rgba(10, 106, 161, 0.2);
+            color: var(--accent-blue, #0a6aa1);
         }
-        .spa-pill:hover { border-color: var(--accent-blue, #0a6aa1); color: var(--accent-blue, #0a6aa1); }
-        .spa-pill.active {
-            background: var(--accent-blue, #0a6aa1); color: #ffffff; border-color: var(--accent-blue, #0a6aa1);
+        .spa-sidebar-item.active {
+            background: var(--accent-blue, #0a6aa1);
+            color: #ffffff;
         }
-        .spa-article {
-            background: var(--white, #ffffff); border: 1px solid var(--border, #e2e8f0);
-            border-radius: 16px; padding: 2rem; box-shadow: var(--shadow);
+        .spa-sec-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(10, 106, 161, 0.12);
+            color: var(--accent-blue, #0a6aa1);
+            flex-shrink: 0;
+        }
+        .spa-sidebar-item.active .spa-sec-badge {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+        }
+        .dark-mode .spa-sidebar-item {
+            color: #e2e8f0;
+        }
+        .dark-mode .spa-sidebar-item:hover {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
         }
     </style>
 </head>
 <body>
     <header class="main-header">
-        <div class="header-content" style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 2rem; flex-wrap:wrap; gap:12px;">
-            <div style="display:flex; align-items:center; gap:14px;">
-                <img src="Imagenes/logo-spa.jpg" alt="Logo Cumbria Bienestar" style="height:40px; background:white; padding:3px 6px; border-radius:6px; object-fit:contain;">
-                <div>
-                    <h1 style="margin:0; font-size:1.05rem; letter-spacing:0.4px;">CUMBRIA BIENESTAR (SPA)</h1>
-                    <div style="font-size:0.72rem; color:rgba(255,255,255,0.7);">Portal Exclusivo de Procedimientos Spa</div>
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 2rem; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; min-width: 250px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="Imagenes/logo-spa.jpg" alt="Logo Cumbria Bienestar" style="height: 36px; background: white; padding: 2px 5px; border-radius: 5px; object-fit: contain;">
+                    <h1 style="margin: 0; font-size: 1rem; letter-spacing: 0.3px;">CUMBRIA BIENESTAR (SPA) · PROCEDIMIENTOS</h1>
+                </div>
+                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.65); margin-left: 51px; font-weight: 500;">
+                    <i class="fas fa-spa"></i> Portal Exclusivo · Manual Operativo del Spa
                 </div>
             </div>
-            <button id="spa-theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background:#f1c40f; border:none; color:#2c3e50; font-size:1.05rem; cursor:pointer; padding:0.5rem; border-radius:8px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;">
-                <i class="fas fa-moon"></i>
-            </button>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <button id="theme-toggle" class="theme-btn" aria-label="Cambiar modo oscuro" style="background: #f1c40f; border: none; color: #2c3e50; font-size: 1.1rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="spa-shell">
-        <div id="spa-main-col" class="main-col" style="width:100%; max-width:100%;"></div>
-    </main>
+    <nav class="top-nav">
+        <div class="nav-container" id="spa-top-nav">
+            <a href="#" class="nav-link active" data-spa-nav="inicio" onclick="event.preventDefault(); window.__spaGoHome();"><i class="fas fa-th-large"></i> Inicio</a>
+        </div>
+    </nav>
 
-    <footer class="main-footer" style="margin-top:2rem;">
+    <div class="app-wrapper">
+        <aside class="sidebar-col" id="spa-sidebar-col">
+            <div class="sidebar-widget premium-shadow">
+                <h3 class="widget-title"><i class="fas fa-search"></i> BÚSQUEDA EN SPA</h3>
+                <div class="sidebar-search">
+                    <input type="text" id="spa-search-input" placeholder="Buscar procedimiento...">
+                    <i class="fas fa-search" style="position: absolute; right: 1rem; top: 1.1rem; color: #999;"></i>
+                </div>
+            </div>
+
+            <div class="sidebar-widget premium-shadow">
+                <h3 class="widget-title"><i class="fas fa-list-ul"></i> PROCEDIMIENTOS SPA</h3>
+                <div id="spa-sidebar-list">
+                    <div style="font-size:0.85rem; color:#64748b;">Cargando procedimientos...</div>
+                </div>
+            </div>
+
+            <div class="sidebar-widget graphic-box premium-shadow">
+                <h5 style="color: var(--accent-blue); margin-bottom: 1rem; text-transform: uppercase; font-size: 0.85rem;">Claves de Bienestar</h5>
+                <p style="font-size: 0.9rem; margin-bottom: 10px; font-weight: 600;">Cada detalle cuenta en la experiencia del cliente</p>
+                <p style="font-size: 0.85rem; color: #666; font-style: italic;">"El orden y la atención cuidada transmiten la calma que define al Spa."</p>
+            </div>
+        </aside>
+
+        <main class="main-col" id="spa-main-col">
+            <div class="nav-loading">Sincronizando portal de Cumbria Bienestar (Spa)...</div>
+        </main>
+    </div>
+
+    <footer class="main-footer" style="margin-top: 2rem;">
         <div class="footer-content">
             <p class="legal-notice"><i class="fas fa-shield-alt"></i> Portal exclusivo de uso interno para el personal de <strong>Cumbria Bienestar (Spa)</strong>.</p>
         </div>
@@ -70,8 +131,7 @@
                 document.body.appendChild(s);
             });
 
-            // Modo oscuro
-            const themeBtn = document.getElementById('spa-theme-toggle');
+            const themeBtn = document.getElementById('theme-toggle');
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-mode');
                 themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
@@ -94,35 +154,119 @@
                 .filter(p => p.section && (String(p.section) === '5.2' || String(p.section).startsWith('5.2.')) && p.status !== 'Anulado')
                 .sort((a, b) => String(a.section).localeCompare(String(b.section), undefined, { numeric: true }));
 
+            const mainCol = document.getElementById('spa-main-col');
+            const sidebarCol = document.getElementById('spa-sidebar-col');
+            const topNav = document.getElementById('spa-top-nav');
+            const sidebarList = document.getElementById('spa-sidebar-list');
+
             if (spaProtocols.length === 0) {
-                document.getElementById('spa-main-col').innerHTML = '<div class="spa-article">No hay procedimientos de Spa activos en este momento.</div>';
+                mainCol.innerHTML = '<article class="protocol-detail" style="background:white;padding:2rem;border-radius:16px;">No hay procedimientos de Spa activos en este momento.</article>';
                 return;
             }
 
-            // Determinar protocolo inicial desde hash (#protocol/5.2.1 o #5.2.1)
-            function getTargetProtocol() {
-                const h = decodeURIComponent(location.hash || '').replace(/^#(?:protocol\/)?/, '');
-                return spaProtocols.find(p => String(p.section) === h) || spaProtocols[0];
+            const cleanTitle = (t) => String(t || '').replace(/\{.*?\}/g, '').trim();
+
+            function formatSpaDate(dateStr) {
+                if (!dateStr) return 'Reciente';
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
             }
 
-            window.goBack = function () {
-                renderSpaProtocol(spaProtocols[0]);
-            };
+            function renderNavAndSidebar(activeSection) {
+                topNav.innerHTML = `
+                    <a href="#" class="nav-link ${!activeSection ? 'active' : ''}" onclick="event.preventDefault(); window.__spaGoHome();"><i class="fas fa-th-large"></i> Inicio</a>
+                    ${spaProtocols.map(sp => `
+                        <a href="#protocol/${encodeURIComponent(sp.section)}" class="nav-link ${activeSection === sp.section ? 'active' : ''}" onclick="event.preventDefault(); window.__selectSpaSection('${sp.section}');">
+                            <i class="fas fa-spa"></i> ${cleanTitle(sp.title)}
+                        </a>
+                    `).join('')}
+                `;
 
-            window.loadProtocol = function (p) {
-                renderSpaProtocol(p);
-            };
+                sidebarList.innerHTML = spaProtocols.map(sp => `
+                    <div class="spa-sidebar-item ${activeSection === sp.section ? 'active' : ''}" onclick="window.__selectSpaSection('${sp.section}')">
+                        <span>${cleanTitle(sp.title)}</span>
+                        <span class="spa-sec-badge">${sp.section}</span>
+                    </div>
+                `).join('');
+            }
 
-            function renderSpaProtocol(p) {
-                location.hash = 'protocol/' + encodeURIComponent(p.section);
-                if (!window.checkProtocolSecurityGate(p)) {
-                    // Ocultar botón "Volver" en la pantalla de login exclusiva del Spa
+            function ensureAuthorized(targetProto) {
+                const ok = window.checkProtocolSecurityGate(targetProto || spaProtocols[0]);
+                if (!ok) {
+                    sidebarCol.style.display = 'none';
+                    topNav.parentElement.style.display = 'none';
                     const backBtn = document.querySelector('#spa-main-col .back-btn');
                     if (backBtn && backBtn.parentElement) backBtn.parentElement.style.display = 'none';
-                    return;
+                    return false;
                 }
+                sidebarCol.style.display = '';
+                topNav.parentElement.style.display = '';
+                return true;
+            }
 
-                const container = document.getElementById('spa-main-col');
+            function renderSpaDashboard() {
+                if (!ensureAuthorized(spaProtocols[0])) return;
+                if (location.hash && location.hash !== '#inicio') history.replaceState(null, '', '#inicio');
+                renderNavAndSidebar(null);
+
+                const banner = typeof window.getSecurityStatusBannerHtml === 'function' ? window.getSecurityStatusBannerHtml(spaProtocols[0]) : '';
+                const cardsHtml = spaProtocols.map(sp => {
+                    const t = cleanTitle(sp.title);
+                    const plain = String(sp.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                    const excerpt = plain ? (plain.slice(0, 110) + (plain.length > 110 ? '...' : '')) : 'Manual operativo de Cumbria Bienestar (Spa).';
+                    return `
+                        <div class="quick-card-wrapper">
+                            <div class="quick-card" onclick="window.__selectSpaSection('${sp.section}')">
+                                <div class="quick-icon"><i class="fas fa-spa"></i></div>
+                                <div class="quick-info">
+                                    <h3>${t}</h3>
+                                    <p>${excerpt}</p>
+                                </div>
+                                <i class="fas fa-chevron-right quick-arrow"></i>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                mainCol.innerHTML = `
+                    ${banner}
+                    <div class="welcome-hero">
+                        <div class="welcome-hero-inner">
+                            <div class="welcome-text-block">
+                                <div class="welcome-badge-pill">
+                                    <i class="fas fa-spa"></i> CUMBRIA BIENESTAR (SPA)
+                                </div>
+                                <h1 class="welcome-title">Portal de Procedimientos del Spa</h1>
+                                <p class="welcome-subtitle">Manual operativo exclusivo para recepción y personal de Cumbria Bienestar. Consulta protocolos, bonos regalo, escapadas y normativas vigentes.</p>
+                                <div class="welcome-meta-row">
+                                    <span class="welcome-chip"><i class="fas fa-shield-alt"></i> Acceso Restringido</span>
+                                    <span class="welcome-chip"><i class="fas fa-book-open"></i> ${spaProtocols.length} Procedimientos</span>
+                                    <span class="welcome-chip online-chip"><i class="fas fa-circle"></i> En línea</span>
+                                </div>
+                            </div>
+                            <div class="welcome-deco-block">
+                                <div class="welcome-deco-circle">
+                                    <i class="fas fa-spa"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-access-section">
+                        <h2 class="section-title"><i class="fas fa-rocket"></i> Procedimientos del Spa</h2>
+                        <div class="quick-access-grid">
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderSpaProtocol(p, highlightText = '') {
+                if (!ensureAuthorized(p)) return;
+                location.hash = 'protocol/' + encodeURIComponent(p.section);
+                renderNavAndSidebar(p.section);
+
                 let content = p.content || '';
                 if (content.includes('<html') || content.includes('<!DOCTYPE')) {
                     const doc = new DOMParser().parseFromString(content, 'text/html');
@@ -136,39 +280,125 @@
                     content = doc.body.innerHTML;
                 }
 
-                const cleanTitle = (p.title || '').replace(/\{.*?\}/g, '').trim();
+                let displayTitle = cleanTitle(p.title);
+                if (highlightText) {
+                    const safe = highlightText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    content = content.replace(new RegExp(`(?<!<[^>]*>)(${safe})`, 'gi'), '<span class="highlight">$1</span>');
+                    displayTitle = displayTitle.replace(new RegExp(`(${safe})`, 'gi'), '<span class="highlight">$1</span>');
+                }
+
+                const mediaItems = (p.media && p.media.length) ? p.media : [];
+                let mediaHtml = '';
+                mediaItems.forEach(item => {
+                    if (!item || !item.url) return;
+                    if (item.type === 'image') {
+                        mediaHtml += `
+                            <div style="margin-top:2.5rem; padding:1.5rem; border-radius:16px; background:#f8fafc; border:1px solid #e2e8f0; text-align:center;">
+                                ${item.caption ? `<h3 style="margin:0 0 1rem; color:#0f172a; font-size:1.1rem;">${item.caption}</h3>` : ''}
+                                <img src="${item.url}" alt="${item.caption || 'Imagen adjunta'}" style="max-width:100%; border-radius:12px;">
+                            </div>
+                        `;
+                    }
+                });
+
                 const banner = typeof window.getSecurityStatusBannerHtml === 'function' ? window.getSecurityStatusBannerHtml(p) : '';
 
-                const navHtml = `
-                    <nav class="spa-nav-pills" aria-label="Manuales del Spa">
-                        ${spaProtocols.map(sp => {
-                            const t = (sp.title || '').replace(/\{.*?\}/g, '').trim();
-                            const activeCls = sp.section === p.section ? 'active' : '';
-                            return `<button type="button" class="spa-pill ${activeCls}" onclick="window.__selectSpaSection('${sp.section}')">${t}</button>`;
-                        }).join('')}
-                    </nav>
-                `;
-
-                container.innerHTML = `
+                mainCol.innerHTML = `
                     ${banner}
-                    ${navHtml}
-                    <article class="spa-article">
-                        <header style="border-bottom:1px solid var(--border, #e2e8f0); padding-bottom:1rem; margin-bottom:1.5rem;">
-                            <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--accent-blue, #0a6aa1);">Cumbria Bienestar (Spa) · Sección ${p.section}</span>
-                            <h2 style="margin:4px 0 0; font-size:1.65rem; font-weight:800;">${cleanTitle}</h2>
+                    <div style="margin-bottom: 1.5rem;">
+                        <button type="button" class="back-btn" onclick="window.__spaGoHome()">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio del Spa
+                        </button>
+                    </div>
+                    <article class="protocol-detail" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                        <header style="text-align: center; margin-bottom: 2.5rem; border-bottom: 1px solid #eee; padding-bottom: 1.5rem;">
+                            <h1 style="color: #032d4b; font-size: 2rem; margin-bottom: 0.75rem;">${displayTitle}</h1>
+                            <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; color: #666; font-size: 0.85rem;">
+                                <span><i class="fas fa-calendar-alt"></i> Última actualización: ${formatSpaDate(p.updated || p.published)}</span>
+                                <span style="color: #ddd;">|</span>
+                                <span><i class="fas fa-spa"></i> Cumbria Bienestar (Spa)</span>
+                                <span style="color: #ddd;">|</span>
+                                <span><i class="fas fa-folder"></i> Sección ${p.section}</span>
+                            </div>
                         </header>
                         <div class="protocol-full-body">${content}</div>
+                        ${mediaHtml}
                     </article>
+                `;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function renderSpaSearch(query) {
+                if (!ensureAuthorized(spaProtocols[0])) return;
+                const q = String(query || '').trim().toLowerCase();
+                if (!q) {
+                    renderSpaDashboard();
+                    return;
+                }
+                const matches = spaProtocols.filter(sp => {
+                    const hay = (cleanTitle(sp.title) + ' ' + String(sp.content || '').replace(/<[^>]+>/g, ' ')).toLowerCase();
+                    return hay.includes(q);
+                });
+
+                const banner = typeof window.getSecurityStatusBannerHtml === 'function' ? window.getSecurityStatusBannerHtml(spaProtocols[0]) : '';
+                mainCol.innerHTML = `
+                    ${banner}
+                    <div style="margin-bottom: 1.5rem;">
+                        <button type="button" class="back-btn" onclick="window.__spaGoHome()">
+                            <i class="fas fa-arrow-left"></i> Volver al inicio del Spa
+                        </button>
+                    </div>
+                    <div class="quick-access-section">
+                        <h2 class="section-title"><i class="fas fa-search"></i> Resultados para "${query}" (${matches.length})</h2>
+                        ${matches.length === 0
+                            ? '<div style="background:white; padding:2rem; border-radius:16px; color:#64748b;">No se encontraron procedimientos del Spa que coincidan con tu búsqueda.</div>'
+                            : `<div class="quick-access-grid">
+                                ${matches.map(sp => `
+                                    <div class="quick-card-wrapper">
+                                        <div class="quick-card" onclick="window.__selectSpaSection('${sp.section}', '${query.replace(/'/g, "\\'")}')">
+                                            <div class="quick-icon"><i class="fas fa-spa"></i></div>
+                                            <div class="quick-info">
+                                                <h3>${cleanTitle(sp.title)}</h3>
+                                                <p>Sección ${sp.section}</p>
+                                            </div>
+                                            <i class="fas fa-chevron-right quick-arrow"></i>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>`
+                        }
+                    </div>
                 `;
             }
 
-            window.__selectSpaSection = function (sec) {
+            document.getElementById('spa-search-input').addEventListener('input', (e) => {
+                renderSpaSearch(e.target.value);
+            });
+
+            window.__spaGoHome = renderSpaDashboard;
+            window.__selectSpaSection = function (sec, highlight) {
                 const found = spaProtocols.find(p => String(p.section) === String(sec));
-                if (found) renderSpaProtocol(found);
+                if (found) renderSpaProtocol(found, highlight || '');
+            };
+            window.goBack = renderSpaDashboard;
+            window.loadProtocol = function (p) {
+                if (p && p.section) renderSpaProtocol(p);
+                else renderSpaDashboard();
             };
 
-            window.addEventListener('hashchange', () => renderSpaProtocol(getTargetProtocol()));
-            renderSpaProtocol(getTargetProtocol());
+            function routeFromHash() {
+                const h = decodeURIComponent(location.hash || '').replace(/^#(?:protocol\/)?/, '');
+                if (!h || h === 'inicio') {
+                    renderSpaDashboard();
+                    return;
+                }
+                const target = spaProtocols.find(p => String(p.section) === h);
+                if (target) renderSpaProtocol(target);
+                else renderSpaDashboard();
+            }
+
+            window.addEventListener('hashchange', routeFromHash);
+            routeFromHash();
         }
 
         window.addEventListener('DOMContentLoaded', initSpaPortal);

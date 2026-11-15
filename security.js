@@ -127,10 +127,13 @@
             if (urlGuest) {
                 const pass = validateGuestCode(urlGuest, sectionId);
                 if (pass) {
+                    const displayGuest = pass.guestName
+                        ? `${pass.guestName}${pass.email ? ' (' + pass.email + ')' : ''}`
+                        : (pass.label || 'Invitado');
                     const s = {
                         type: 'guest',
                         code: pass.code,
-                        label: pass.label || 'Invitado',
+                        label: displayGuest,
                         section: pass.section || '*',
                         expiresAt: new Date(pass.expiresAt).getTime()
                     };
@@ -572,26 +575,11 @@
         const originHint = 'https://cumbriaspahotel.github.io';
 
         container.innerHTML = `
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:20px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(420px, 1fr)); gap:20px; width:100%; box-sizing:border-box;">
                 <!-- 1. REGLAS POR SECCIÓN -->
                 <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
-                    <h3 style="margin-top:0; color:#b45309;"><i class="fas fa-crown"></i> Administradores (Acceso Total)</h3>
-                    <p style="font-size:0.83rem; color:#64748b; margin-top:0;">Tienen acceso automático a todas las secciones protegidas (Recepción, Onity, Spa, etc.):</p>
-                    <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
-                        ${(cfg.adminEmails || []).map((em, aIdx) => `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 10px; font-size:0.85rem;">
-                                <span><i class="fas fa-user-shield" style="color:#b45309; margin-right:6px;"></i> <strong>${em}</strong></span>
-                                <button type="button" onclick="window.__secAdminRemoveAdmin(${aIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:800;">×</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="display:flex; gap:6px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
-                        <input type="email" id="sec-admin-new-admin" placeholder="Añadir correo administrador..." style="flex:1; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem;">
-                        <button type="button" class="btn-secondary" style="padding:6px 10px; font-size:0.82rem;" onclick="window.__secAdminAddAdmin()">+ Admin</button>
-                    </div>
-
                     <h3 style="margin-top:0; color:#0a6aa1;"><i class="fas fa-shield-alt"></i> Reglas de Acceso por Sección</h3>
-                    <p style="font-size:0.84rem; color:#64748b; margin-top:0;">Cada sección protegida tiene su propia lista de correos autorizados (Google / Microsoft).</p>
+                    <p style="font-size:0.84rem; color:#64748b; margin-top:0;">Cada sección protegida tiene su propia clave de acceso y lista de correos autorizados.</p>
 
                     <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:16px;">
                         ${cfg.rules.map((rule, rIdx) => `
@@ -616,7 +604,7 @@
                                     `).join('')}
                                 </div>
                                 <div style="display:flex; gap:6px;">
-                                    <input type="email" id="sec-rule-email-${rIdx}" placeholder="Añadir correo (Google o Microsoft)..." style="flex:1; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem;">
+                                    <input type="email" id="sec-rule-email-${rIdx}" placeholder="Añadir correo autorizado..." style="flex:1; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem;">
                                     <button type="button" class="btn-secondary" style="padding:6px 10px; font-size:0.82rem;" onclick="window.__secAdminAddEmail(${rIdx})">+ Añadir</button>
                                 </div>
                             </div>
@@ -633,48 +621,69 @@
                     </div>
                 </div>
 
-                <!-- 2. CREDENCIALES OAUTH -->
-                <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
-                    <h3 style="margin-top:0; color:#0a6aa1;"><i class="fas fa-key"></i> Credenciales OAuth (Google &amp; Microsoft)</h3>
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">Google OAuth Client ID</label>
-                        <input type="text" id="sec-admin-google-id" value="${cfg.googleClientId}" placeholder="1234567890-xxxx.apps.googleusercontent.com" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                <!-- 2. ADMINISTRADORES Y CREDENCIALES OAUTH -->
+                <div style="display:flex; flex-direction:column; gap:20px;">
+                    <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+                        <h3 style="margin-top:0; color:#b45309;"><i class="fas fa-crown"></i> Administradores (Acceso Total)</h3>
+                        <p style="font-size:0.83rem; color:#64748b; margin-top:0;">Tienen acceso automático a todas las secciones protegidas (Recepción, Onity, Spa, etc.):</p>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:10px;">
+                            ${(cfg.adminEmails || []).map((em, aIdx) => `
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:6px 10px; font-size:0.85rem;">
+                                    <span><i class="fas fa-user-shield" style="color:#b45309; margin-right:6px;"></i> <strong>${em}</strong></span>
+                                    <button type="button" onclick="window.__secAdminRemoveAdmin(${aIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:800;">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <input type="email" id="sec-admin-new-admin" placeholder="Añadir correo administrador..." style="flex:1; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.84rem;">
+                            <button type="button" class="btn-secondary" style="padding:7px 12px; font-size:0.82rem;" onclick="window.__secAdminAddAdmin()">+ Admin</button>
+                        </div>
                     </div>
-                    <div style="margin-bottom:14px;">
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">Microsoft Entra (Azure) Client ID</label>
-                        <input type="text" id="sec-admin-ms-id" value="${cfg.microsoftClientId}" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+
+                    <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+                        <h3 style="margin-top:0; color:#0a6aa1;"><i class="fas fa-key"></i> OAuth Opcional (Google &amp; Microsoft)</h3>
+                        <p style="font-size:0.82rem; color:#64748b; margin-top:0;">Solo necesario si en el futuro deseas activar inicio de sesión con botón de Google o Microsoft.</p>
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">Google OAuth Client ID</label>
+                            <input type="text" id="sec-admin-google-id" value="${cfg.googleClientId}" placeholder="Opcional" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
+                        </div>
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">Microsoft Entra (Azure) Client ID</label>
+                            <input type="text" id="sec-admin-ms-id" value="${cfg.microsoftClientId}" placeholder="Opcional" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
+                        </div>
+                        <button type="button" class="btn-primary" style="width:100%;" onclick="window.__secAdminSaveOAuth()">
+                            <i class="fas fa-save"></i> Guardar Toda la Configuración de Seguridad
+                        </button>
                     </div>
-                    <details style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:0.82rem; color:#475569; margin-bottom:16px;">
-                        <summary style="cursor:pointer; font-weight:700; color:#0a6aa1;">¿Cómo obtener los Client IDs? (3 minutos)</summary>
-                        <ul style="margin:8px 0 0; padding-left:18px; line-height:1.5;">
-                            <li><strong>Google:</strong> Google Cloud Console &gt; APIs y servicios &gt; Credenciales &gt; ID de cliente OAuth (Aplicación web) &gt; Origen autorizado: <code>${originHint}</code></li>
-                            <li><strong>Microsoft:</strong> Azure Portal (portal.azure.com) &gt; Microsoft Entra ID &gt; Registros de aplicaciones &gt; Nuevo registro &gt; URI de redirección SPA: <code>${originHint}/Protocolo-Recep/index.html</code></li>
-                        </ul>
-                    </details>
-                    <button type="button" class="btn-primary" style="width:100%;" onclick="window.__secAdminSaveOAuth()">
-                        <i class="fas fa-save"></i> Guardar Toda la Configuración de Seguridad
-                    </button>
                 </div>
             </div>
 
             <!-- 3. GESTIÓN DE INVITADOS CON CADUCIDAD -->
-            <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; margin-top:20px;">
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-top:20px; width:100%; box-sizing:border-box;">
                 <h3 style="margin-top:0; color:#0a6aa1;"><i class="fas fa-user-clock"></i> Pases Temporales para Invitados (con Caducidad)</h3>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:16px; align-items:end;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; background:#f8fafc; padding:16px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:18px; align-items:end; width:100%; box-sizing:border-box;">
                     <div>
-                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Motivo / Invitado</label>
-                        <input type="text" id="sec-guest-label" placeholder="Ej: Técnico / Apoyo Spa" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Nombre completo</label>
+                        <input type="text" id="sec-guest-name" placeholder="Ej: Ana García" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Correo electrónico</label>
+                        <input type="email" id="sec-guest-email" placeholder="Ej: invitado@empresa.com" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Motivo / Nota</label>
+                        <input type="text" id="sec-guest-label" placeholder="Ej: Técnico / Apoyo Spa" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
                     </div>
                     <div>
                         <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Acceso a Sección</label>
-                        <select id="sec-guest-section" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                        <select id="sec-guest-section" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
                             ${cfg.rules.map(r => `<option value="${r.section}">${r.section} · ${r.label}</option>`).join('')}
                             <option value="*">Todas las secciones protegidas</option>
                         </select>
                     </div>
                     <div>
                         <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Duración</label>
-                        <select id="sec-guest-duration" onchange="document.getElementById('sec-guest-custom-wrap').style.display = this.value==='custom' ? 'block' : 'none';" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                        <select id="sec-guest-duration" onchange="document.getElementById('sec-guest-custom-wrap').style.display = this.value==='custom' ? 'block' : 'none';" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
                             <option value="2">2 horas</option>
                             <option value="24" selected>24 horas</option>
                             <option value="48">48 horas</option>
@@ -685,24 +694,26 @@
                     </div>
                     <div id="sec-guest-custom-wrap" style="display:none;">
                         <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Caduca el</label>
-                        <input type="datetime-local" id="sec-guest-custom-date" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                        <input type="datetime-local" id="sec-guest-custom-date" style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; box-sizing:border-box;">
                     </div>
                     <div>
                         <label style="display:block; font-size:0.78rem; font-weight:700; color:#475569; margin-bottom:4px;">Código</label>
-                        <input type="text" id="sec-guest-code-new" value="${generateGuestCode()}" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; text-transform:uppercase;">
+                        <input type="text" id="sec-guest-code-new" value="${generateGuestCode()}" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; text-transform:uppercase; box-sizing:border-box;">
                     </div>
                     <div>
-                        <button type="button" class="btn-primary" style="width:100%; background:#27ae60;" onclick="window.__secAdminCreateGuest()">
+                        <button type="button" class="btn-primary" style="width:100%; background:#27ae60; padding:9px 14px;" onclick="window.__secAdminCreateGuest()">
                             <i class="fas fa-plus"></i> Crear Pase
                         </button>
                     </div>
                 </div>
 
-                <div class="table-container">
-                    <table class="admin-table">
+                <div class="table-container" style="width:100%; overflow-x:auto;">
+                    <table class="admin-table" style="width:100%;">
                         <thead>
                             <tr>
-                                <th>Invitado / Motivo</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Motivo</th>
                                 <th>Sección</th>
                                 <th>Código</th>
                                 <th>Caducidad</th>
@@ -712,7 +723,7 @@
                         </thead>
                         <tbody>
                             ${cfg.guestPasses.length === 0 ? `
-                                <tr><td colspan="6" style="text-align:center; color:#64748b; padding:18px;">No hay pases de invitado creados todavía.</td></tr>
+                                <tr><td colspan="8" style="text-align:center; color:#64748b; padding:18px;">No hay pases de invitado creados todavía.</td></tr>
                             ` : cfg.guestPasses.map((g, idx) => {
                                 const expMs = new Date(g.expiresAt).getTime();
                                 const isExpired = isNaN(expMs) || expMs <= now;
@@ -721,7 +732,9 @@
                                 else if (isExpired) statusBadge = '<span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:999px; font-size:0.75rem; font-weight:700;">Caducado</span>';
                                 return `
                                     <tr>
-                                        <td><strong>${g.label || 'Invitado'}</strong></td>
+                                        <td><strong>${g.guestName || '—'}</strong></td>
+                                        <td>${g.email ? `<a href="mailto:${g.email}" style="color:#0a6aa1; text-decoration:none;">${g.email}</a>` : '—'}</td>
+                                        <td>${g.label || 'Invitado'}</td>
                                         <td><code>${g.section || '*'}</code></td>
                                         <td><code>${g.code}</code></td>
                                         <td>${new Date(g.expiresAt).toLocaleString('es-ES')}</td>
@@ -799,6 +812,8 @@
     };
     window.__secAdminCreateGuest = () => {
         const cfg = ensureSecurityConfig();
+        const guestName = (document.getElementById('sec-guest-name').value || '').trim();
+        const email = (document.getElementById('sec-guest-email').value || '').trim().toLowerCase();
         const label = (document.getElementById('sec-guest-label').value || '').trim() || 'Invitado temporal';
         const section = document.getElementById('sec-guest-section').value || '6.2.1';
         const dur = document.getElementById('sec-guest-duration').value;
@@ -813,6 +828,8 @@
         }
         cfg.guestPasses.unshift({
             id: 'g-' + Date.now(),
+            guestName,
+            email,
             label,
             section: section === '*' ? '*' : section,
             code,
