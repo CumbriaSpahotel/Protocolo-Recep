@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.2`** | **15/11/2026** | En producción |
+| **`v1.2.3`** | **15/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.3] — 15/11/2026
+- **Módulos Afectados:** Seguridad, Backend, data.js
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Simplificado acceso con correo autorizado y clave de acceso sin requerir Google/Microsoft Client ID
 
 ### [v1.2.2] — 15/11/2026
 - **Módulos Afectados:** Seguridad, Visor, data.js, Backend

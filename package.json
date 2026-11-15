@@ -1,6 +1,6 @@
 {
   "name": "protocolo-recep",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Protocolos de Recepción - Sercotel Guadiana & Cumbria Spa & Hotel",
   "scripts": {
     "bump": "node scripts/bump-version.js"
