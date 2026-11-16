@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.70`** | **16/11/2026** | En producción |
+| **`v1.2.71`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.71] — 16/11/2026
+- **Módulos Afectados:** Panel Admin (admin.html, admin.js, server.js), Visor General (app.js), Portal Spa (spa.html)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido detector en tiempo real de cambios sin sincronizar y sin publicar en GitHub, simplificada la pestaña Gestión de Menús (un solo botón Guardar), eliminado duplicado de botones en Protocolos, cabecera compacta de categorías en index.html y eliminado Menú Cóctel por defecto
 
 ### [v1.2.70] — 16/11/2026
 - **Módulos Afectados:** Manuales Gest-Spa Bloques 1, 2 y 3 (data.js)

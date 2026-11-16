@@ -1330,6 +1330,10 @@ function initAdmin() {
     const btnAddMenu = document.getElementById('btn-add-menu');
     if (btnAddMenu) {
         btnAddMenu.addEventListener('click', () => {
+            if (window.__currentMenusScope === 'spa') {
+                if (typeof window.__spaMenuAdd === 'function') window.__spaMenuAdd();
+                return;
+            }
             const currentRows = document.querySelectorAll('#menus-container .menu-row').length;
             if (typeof addMenuRow === 'function') addMenuRow(currentRows + 1, '', 'fa-folder', {}, '');
         });
@@ -1347,16 +1351,16 @@ function initAdmin() {
         });
     }
     
-    // Save Menus Config
+    // Save Menus Config (Hoteles + Spa unificado)
     const btnSaveMenus = document.getElementById('btn-save-menus');
     if (btnSaveMenus) {
         btnSaveMenus.addEventListener('click', () => {
             try {
                 const { newNav, idMap } = collectMenus();
+                let renumbered = false;
 
                 // --- Safety check: warn if protocols would be renumbered ---
                 if (Object.keys(idMap).length > 0) {
-                    // Count affected protocols
                     const affectedProtocols = adminProtocols.filter(p => {
                         if (!p.section) return false;
                         const parts = p.section.split('.');
@@ -1376,6 +1380,7 @@ function initAdmin() {
 
                     if (confirmed) {
                         syncProtocolsWithNewIds(idMap);
+                        renumbered = true;
                     }
                 }
 
@@ -1383,8 +1388,8 @@ function initAdmin() {
                     Object.keys(navigation_config).forEach(key => delete navigation_config[key]);
                     Object.assign(navigation_config, newNav);
                 }
-                saveToServer(adminProtocols, newNav, typeof home_config !== 'undefined' ? home_config : undefined);
-                showToast('Configuración de menús guardada');
+                saveToServer(renumbered ? adminProtocols : undefined, newNav, typeof home_config !== 'undefined' ? home_config : undefined);
+                showToast('Configuración de menús (Hoteles y Spa) guardada');
                 populateCategories();
             } catch(e) {
                 alert('Error al guardar menús: ' + e.message);
@@ -1398,7 +1403,7 @@ function initAdmin() {
         btnSaveInicio.addEventListener('click', () => {
             try {
                 const parsedHome = collectInicio();
-                saveToServer(adminProtocols, typeof navigation_config !== 'undefined' ? navigation_config : undefined, parsedHome);
+                saveToServer(undefined, typeof navigation_config !== 'undefined' ? navigation_config : undefined, parsedHome);
                 showToast('Configuración de inicio guardada');
             } catch(e) {
                 alert('Error al guardar inicio: ' + e.message);
@@ -2215,8 +2220,7 @@ function initSettingsEditors() {
             },
             links: [
                 { icon: 'fa-download', text: 'Descarga Menús', url: 'https://1drv.ms/f/c/7cdc5f6b199a606e/EspwQwoBy05Fu9q4XbKzGUsBNVdzDdnFam7JpqtDB7h1dg?e=we0DeU' },
-                { icon: 'fa-file-invoice', text: 'Presupuesto Menú Eventos', url: 'https://nataliogc.github.io/menus-eventos/l' },
-                { icon: 'fa-glass-martini-alt', text: 'Menú Cóctel', url: 'https://nataliogc.github.io/menus-cocteles/' }
+                { icon: 'fa-file-invoice', text: 'Presupuesto Menú Eventos', url: 'https://nataliogc.github.io/menus-eventos/l' }
             ]
         },
         '5': {
@@ -2245,8 +2249,7 @@ function initSettingsEditors() {
                 { icon: 'fa-link', text: '🗂️Procedimientos Sercotel →☁️', url: 'https://drive.google.com/drive/folders/1KETvtJnPCuXuguPc6EP3WGNl5MYhJZn5' },
                 { icon: 'fa-link', text: '📷 Guadiana →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&resid=7CDC5F6B199A606E!s0b80276d82dc46bfb9a7b4fd04ab7358&ithint=folder&e=HHXrIF&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VtMG5nQXZjZ3I5R3VhZTBfUVNyYzFnQkFJQ2dXZnM4UVYyR0RmdTYzNzBDTWc_ZT1ISFhySUY=' },
                 { icon: 'fa-link', text: '📷 Cumbria →☁️', url: 'https://onedrive.live.com/?cid=7cdc5f6b199a606e&id=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&resid=7CDC5F6B199A606E%21s33321a5fa9ef4c26bccc1511d85168ad&ithint=folder&e=9yGzl6&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VsOGFNalB2cVNaTXZNd1ZFZGhSYUswQlhQRXBPZ1ZmWmpZMV9oQk1YSFlRRHc_ZT05eUd6bDY&v=validatepermission' },
-                { icon: 'fa-link', text: '🎥 Video manuales y tutoriales→☁️', url: 'https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VoYlBLUm5XXzlSUHZCSDMyY3ZUZXRrQkgyYmpmYWZseTVaUXcyY2x2R3Z6WkE%5FZT1DTWdyYm4&id=7CDC5F6B199A606E%21s1929cf16ffd64fd4bc11f7d9cbd37ad9&cid=7CDC5F6B199A606E' },
-                { icon: 'fa-lock', text: 'Acceso Restringido (Menú Cóctel)', url: 'https://nataliogc.github.io/menus-cocteles/' }
+                { icon: 'fa-link', text: '🎥 Video manuales y tutoriales→☁️', url: 'https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL2YvYy83Y2RjNWY2YjE5OWE2MDZlL0VoYlBLUm5XXzlSUHZCSDMyY3ZUZXRrQkgyYmpmYWZseTVaUXcyY2x2R3Z6WkE%5FZT1DTWdyYm4&id=7CDC5F6B199A606E%21s1929cf16ffd64fd4bc11f7d9cbd37ad9&cid=7CDC5F6B199A606E' }
             ]
         }
     };
@@ -2970,7 +2973,7 @@ function saveToServer(protocolsData, navData, homeData) {
     }
 
     const payload = {
-        protocols: protocolsData || (typeof protocols_data !== 'undefined' ? protocols_data : []),
+        protocols: protocolsData !== undefined ? protocolsData : undefined,
         navConfig: finalNav,
         homeConfig: finalHome,
         channelsConfig: (typeof window.channels_config !== 'undefined') ? window.channels_config : undefined,
@@ -4520,19 +4523,8 @@ function renderSpaMenusManager() {
     const cfg = ensureSpaMenusConfig();
 
     container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#f0f9ff; border:1px solid #bae6fd; padding:14px 18px; border-radius:10px;">
-            <div>
-                <strong style="color:#0369a1; font-size:0.95rem;"><i class="fas fa-spa"></i> Menús y Subcarpetas del Portal Spa (spa.html)</strong>
-                <div style="font-size:0.82rem; color:#475569;">Configura los menús superiores del Spa, sus subcarpetas internas, protocolos asignados y enlaces externos.</div>
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button type="button" class="btn-secondary" onclick="window.__spaMenuAdd()" style="background:#0a6aa1; color:white; border-color:#0a6aa1;">
-                    <i class="fas fa-plus"></i> Añadir Menú Spa
-                </button>
-                <button type="button" class="btn-primary" onclick="window.__spaMenuSave()" style="background:#27ae60;">
-                    <i class="fas fa-save"></i> Guardar Menús Spa
-                </button>
-            </div>
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; padding:10px 16px; border-radius:10px; font-size:0.84rem; color:#0369a1;">
+            <strong><i class="fas fa-spa"></i> Menús y Subcarpetas del Portal Spa (spa.html):</strong> Usa los botones superiores <strong>+ Añadir Menú Spa</strong> y <strong>Guardar Menús</strong> para aplicar cambios.
         </div>
         ${cfg.map((menu, mIdx) => {
             const subs = Array.isArray(menu.subfolders) ? menu.subfolders : [];
@@ -4635,17 +4627,20 @@ window.__spaMenuRemoveLink = (mIdx, lIdx) => {
     renderSpaMenusManager();
 };
 window.__spaMenuSave = () => {
-    saveToServer(adminProtocols);
+    saveToServer(undefined);
 };
 
 window.__filterMenusScope = function (scope) {
+    window.__currentMenusScope = scope;
     const btns = document.querySelectorAll('#menus-scope-filter button');
     btns.forEach(b => {
         const active = b.dataset.scope === scope;
-        b.style.background = active ? '#0a6aa1' : '';
-        b.style.color = active ? 'white' : '';
-        b.style.borderColor = active ? '#0a6aa1' : '';
+        b.style.background = active ? '#0a6aa1' : 'transparent';
+        b.style.color = active ? 'white' : '#334155';
     });
+
+    const addLabel = document.getElementById('btn-add-menu-label');
+    if (addLabel) addLabel.textContent = scope === 'spa' ? 'Añadir Menú Spa' : 'Añadir Sección';
 
     const hotelsCont = document.getElementById('menus-container');
     const spaCont = document.getElementById('spa-menus-container');
@@ -4663,17 +4658,89 @@ window.__filterMenusScope = function (scope) {
 
     document.querySelectorAll('#menus-container .menu-row').forEach(menuRow => {
         const subRows = Array.from(menuRow.querySelectorAll('.sub-row'));
-        if (scope === 'all') {
-            menuRow.style.display = 'flex';
-            subRows.forEach(sr => sr.style.display = 'flex');
-        } else if (scope === 'hotels') {
-            menuRow.style.display = 'flex';
-            subRows.forEach(sr => {
-                sr.style.display = sr.dataset.scope === 'spa' ? 'none' : 'flex';
-            });
-        }
+        menuRow.style.display = 'flex';
+        subRows.forEach(sr => {
+            sr.style.display = sr.dataset.scope === 'spa' ? 'none' : 'flex';
+        });
     });
 };
+
+// --- Detector en tiempo real de cambios sin sincronizar (data.js) o sin publicar (GitHub) ---
+(function initRepoAndSyncStatusWatcher() {
+    let baselineDataJsMtime = 0;
+
+    async function checkStatus() {
+        const btnSync = document.getElementById('btn-sync');
+        const btnPublish = document.getElementById('btn-publish');
+        if (!btnSync && !btnPublish) return;
+
+        try {
+            const baseUrl = window.location.protocol === 'file:' ? 'http://localhost:3001' : window.location.origin;
+            const res = await fetch(`${baseUrl}/api/repo-status?t=${Date.now()}`, { cache: 'no-store' });
+            if (!res.ok) return;
+            const st = await res.json();
+            if (!st || !st.success) return;
+
+            if (!baselineDataJsMtime && st.dataJsMtime) {
+                baselineDataJsMtime = st.dataJsMtime;
+            } else if (st.dataJsMtime && baselineDataJsMtime && st.dataJsMtime > baselineDataJsMtime + 1500) {
+                if (btnSync) {
+                    btnSync.style.background = '#d97706';
+                    btnSync.style.boxShadow = '0 0 0 2px rgba(245,158,11,0.45)';
+                    btnSync.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ¡Cambios sin sincronizar!';
+                    btnSync.title = 'data.js ha cambiado en disco. Pulsa para recargar antes de guardar o publicar.';
+                }
+            } else if (btnSync) {
+                btnSync.style.background = '#10b981';
+                btnSync.style.boxShadow = 'none';
+                btnSync.innerHTML = '<i class="fas fa-sync-alt"></i> Sincronizado';
+                btnSync.title = 'En sintonía con data.js local';
+            }
+
+            if (btnPublish && !btnPublish.disabled) {
+                if (st.needsPublish) {
+                    const totalPending = (st.uncommittedCount || 0) + (st.unpushedCount || 0);
+                    btnPublish.style.background = '#1f2937';
+                    btnPublish.style.border = '1.5px solid #f59e0b';
+                    btnPublish.innerHTML = `<i class="fab fa-github"></i> Publicar en GitHub <span style="background:#f59e0b; color:#111827; padding:1px 7px; border-radius:999px; font-size:0.72rem; font-weight:800; margin-left:4px;">Pendiente (${totalPending})</span>`;
+                    btnPublish.title = `Hay cambios locales o commits pendientes de subir a GitHub (${totalPending})`;
+                } else {
+                    btnPublish.style.background = '#24292e';
+                    btnPublish.style.border = '1px solid rgba(255,255,255,0.2)';
+                    btnPublish.innerHTML = '<i class="fab fa-github"></i> Publicado en GitHub ✓';
+                    btnPublish.title = 'Todo sincronizado con GitHub';
+                }
+            }
+        } catch (e) {}
+    }
+
+    // Actualizar baseline cuando el propio admin guarda cambios
+    const origFetch = window.fetch;
+    window.fetch = async function (...args) {
+        const resp = await origFetch.apply(this, args);
+        try {
+            const url = String(args[0] || '');
+            if (url.includes('/api/save') || url.includes('/api/publish')) {
+                setTimeout(async () => {
+                    try {
+                        const baseUrl = window.location.protocol === 'file:' ? 'http://localhost:3001' : window.location.origin;
+                        const r = await origFetch(`${baseUrl}/api/repo-status?t=${Date.now()}`, { cache: 'no-store' });
+                        const d = await r.json();
+                        if (d && d.dataJsMtime) baselineDataJsMtime = d.dataJsMtime;
+                        checkStatus();
+                    } catch (e) {}
+                }, 400);
+            }
+        } catch (e) {}
+        return resp;
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(checkStatus, 600);
+        setInterval(checkStatus, 6000);
+        window.addEventListener('focus', checkStatus);
+    });
+})();
 
 // --- Inicialización de Advertencias ---
 document.addEventListener('DOMContentLoaded', () => {

@@ -216,7 +216,7 @@
                 return;
             }
 
-            const cleanTitle = (t) => String(t || '').replace(/\{.*?\}/g, '').trim();
+            const cleanTitle = (t) => String(t || '').replace(/\{.*?\}/g, '').replace(/\s*[–-]\s*Procedimiento obligatorio.*$/i, '').trim();
 
             function formatSpaDate(dateStr) {
                 if (!dateStr) return 'Reciente';

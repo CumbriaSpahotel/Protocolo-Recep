@@ -51,6 +51,33 @@ function loadEnv() {
 loadEnv();
 
 // Define API routes FIRST, then static files to avoid path collisions
+app.get('/api/repo-status', (req, res) => {
+    try {
+        const { execSync } = require('child_process');
+        const dataFilePath = path.join(__dirname, 'data.js');
+        const dataJsMtime = fs.existsSync(dataFilePath) ? Math.floor(fs.statSync(dataFilePath).mtimeMs) : 0;
+        let uncommittedCount = 0;
+        let unpushedCount = 0;
+        try {
+            const porcelain = execSync('git status --porcelain', { cwd: __dirname, timeout: 4000 }).toString('utf8').trim();
+            uncommittedCount = porcelain ? porcelain.split(/\r?\n/).filter(Boolean).length : 0;
+        } catch (e) {}
+        try {
+            const ahead = execSync('git rev-list --count @{u}..HEAD', { cwd: __dirname, timeout: 4000 }).toString('utf8').trim();
+            unpushedCount = parseInt(ahead, 10) || 0;
+        } catch (e) {}
+        res.json({
+            success: true,
+            dataJsMtime,
+            uncommittedCount,
+            unpushedCount,
+            needsPublish: (uncommittedCount + unpushedCount) > 0
+        });
+    } catch (e) {
+        res.json({ success: false, message: e.message });
+    }
+});
+
 app.post('/api/save', (req, res) => {
     try {
         const data = req.body;
