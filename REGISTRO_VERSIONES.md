@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.68`** | **16/11/2026** | En producción |
+| **`v1.2.69`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.69] — 16/11/2026
+- **Módulos Afectados:** Bonos Externos (data.js), Cabecera Admin (admin.html)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Restauradas las fichas 5.2.11 (Smartbox), 5.2.12 (Wonderbox) y 5.2.13 (Ego Experiencias) en protocols_data y movidos los botones Sincronizar y Publicar en GitHub a la barra negra superior de admin.html
 
 ### [v1.2.68] — 16/11/2026
 - **Módulos Afectados:** Manuales Spa (data.js), Panel Admin (admin.html)
