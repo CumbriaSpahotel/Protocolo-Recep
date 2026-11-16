@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.67`** | **16/11/2026** | En producción |
+| **`v1.2.68`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.68] — 16/11/2026
+- **Módulos Afectados:** Manuales Spa (data.js), Panel Admin (admin.html)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Restauradas todas las mejoras en data.js (5.2.2, 5.2.5-5.2.9, 5.2.11-5.2.13, spa_navigation_config) y añadidos los botones Sincronizar y Publicar en GitHub en la barra superior de admin.html
 
 ### [v1.2.67] — 16/11/2026
 - **Módulos Afectados:** Gestión de Bonos Regalo (data.js)

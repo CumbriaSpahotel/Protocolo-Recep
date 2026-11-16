@@ -21,7 +21,7 @@
                 <img src="Imagenes/Logo.png" alt="Logo" style="height: 35px; background: white; padding: 3px; border-radius: 4px;">
                 <h1>MÍNIMOS RECEPCIÓN - GUADIANA & CUMBRIA</h1>
                 <span style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(56,189,248,0.18); border: 1px solid rgba(56,189,248,0.45); color: #bae6fd; letter-spacing: 0.04em; text-transform: uppercase;"><i class="fas fa-user-shield" style="margin-right: 5px;"></i>Panel de Administración</span>
-                <span id="app-version-badge" title="Versión actual del sistema" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: #e2e8f0; letter-spacing: 0.04em;">v1.2.67</span>
+                <span id="app-version-badge" title="Versión actual del sistema" style="font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: #e2e8f0; letter-spacing: 0.04em;">v1.2.68</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <button id="admin-access" class="admin-btn" aria-label="Acceso administrador" style="background: none; border: none; color: inherit; font-size: 1rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; opacity: 0.6; transition: opacity 0.3s;">
@@ -41,14 +41,20 @@
     </nav>
 
     <div class="admin-tabs">
-        <div class="tab-container">
-            <button class="tab-btn active" data-tab="listado"><i class="fas fa-file-alt"></i> Protocolos</button>
-            <button class="tab-btn" data-tab="spa"><i class="fas fa-spa"></i> Gestión Spa</button>
-            <button class="tab-btn" data-tab="menus"><i class="fas fa-list-ul"></i> Gestión de Menús</button>
-            <button class="tab-btn" data-tab="inicio"><i class="fas fa-home"></i> Gestión Inicio</button>
-            <button class="tab-btn" data-tab="canales"><i class="fas fa-satellite-dish"></i> Canales</button>
-            <button class="tab-btn" data-tab="comentarios"><i class="fas fa-comments"></i> Comentarios <span id="pending-comments-badge" class="badge" style="display:none; background:#ffc107; color:black;">0</span></button>
-            <button class="tab-btn" data-tab="seguridad"><i class="fas fa-shield-alt"></i> Seguridad y Accesos</button>
+        <div class="tab-container" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                <button class="tab-btn active" data-tab="listado"><i class="fas fa-file-alt"></i> Protocolos</button>
+                <button class="tab-btn" data-tab="spa"><i class="fas fa-spa"></i> Gestión Spa</button>
+                <button class="tab-btn" data-tab="menus"><i class="fas fa-list-ul"></i> Gestión de Menús</button>
+                <button class="tab-btn" data-tab="inicio"><i class="fas fa-home"></i> Gestión Inicio</button>
+                <button class="tab-btn" data-tab="canales"><i class="fas fa-satellite-dish"></i> Canales</button>
+                <button class="tab-btn" data-tab="comentarios"><i class="fas fa-comments"></i> Comentarios <span id="pending-comments-badge" class="badge" style="display:none; background:#ffc107; color:black;">0</span></button>
+                <button class="tab-btn" data-tab="seguridad"><i class="fas fa-shield-alt"></i> Seguridad y Accesos</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <button type="button" id="btn-sync-top" class="btn-secondary" style="background: #10b981; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('btn-sync')?.click()"><i class="fas fa-sync-alt"></i> Sincronizar</button>
+                <button type="button" id="btn-publish-top" class="btn-primary" style="background: #24292e; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('btn-publish')?.click()"><i class="fab fa-github"></i> Publicar en GitHub</button>
+            </div>
         </div>
     </div>
 
