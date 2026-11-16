@@ -11,11 +11,65 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.56`** | **16/11/2026** | En producción |
+| **`v1.2.65`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.65] — 16/11/2026
+- **Módulos Afectados:** Estilos Portal Spa (spa.html)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Mejora visual global de todo el manual en spa.html: secciones en tarjeta, cabeceras con acento lateral, imágenes ajustadas sin franjas grises ni deformación, badges de código y alineación vertical centrada
+
+### [v1.2.64] — 16/11/2026
+- **Módulos Afectados:** Manuales Gest-Spa Bloques 1-5 (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Corregida la asignación de contenido entre 5.2.7 y 5.2.8 y eliminadas las alturas fijas (180px) en todo el manual Gest-Spa para que todas las imágenes se integren con su texto sin franjas grises ni bloques aislados
+
+### [v1.2.63] — 16/11/2026
+- **Módulos Afectados:** Manual Gest-Spa Bloque 4 Bonos (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Actualizada la sección 4.4 con la nueva regla de Gest-Spa: bloqueo de canje manual y campo Sesiones Usadas de solo lectura
+
+### [v1.2.62] — 16/11/2026
+- **Módulos Afectados:** Datos y Navegación Spa (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Restaurada la estructura completa de data.js (bloques 5.2.9-5.2.13 y spa_navigation_config) conservando todas las mejoras de Bonos (4.1-4.4) y Visión 15d (5.3) para que GEST-SPA / ZENITH aparezca únicamente bajo Manuales
+
+### [v1.2.61] — 16/11/2026
+- **Módulos Afectados:** Manual Gest-Spa Bloque 4 Bonos (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Reforzada la norma estricta en 4.4 sobre la trazabilidad obligatoria de canjes en el Historial de Reservas
+
+### [v1.2.60] — 16/11/2026
+- **Módulos Afectados:** Manual Gest-Spa Bloque 4 Bonos (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadida sección 4.4 Regla de Oro de canje de bonos con captura real de bono mal canjeado, explicando no editar Usadas manualmente y el flujo automático por reservas
+
+### [v1.2.59] — 16/11/2026
+- **Módulos Afectados:** Manual Gest-Spa Bloque 4 Bonos (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadida guía completa paso a paso de canje de bonos (4.3) con 8 capturas reales: búsqueda por código/teléfono/nombre, Alojamiento (PMS Hotel), Restaurante (Mesachef) y Spa (calendario pre-rellenado)
+
+### [v1.2.58] — 16/11/2026
+- **Módulos Afectados:** Manual Gest-Spa Bloque 4 Bonos (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Añadido el flujo paso a paso con 4 capturas reales de Nueva Venta Local en el Bloque 4 (5.2.8), diferencia entre Bono Regalo y Reserva Directa, validez de 1 año y sección 4.3 integrada
+
+### [v1.2.57] — 16/11/2026
+- **Módulos Afectados:** Manuales Gest-Spa Bloques 4 y 5 (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Integradas en 2 columnas las imágenes restantes de Bloque 4 (4.1 Panel de Bonos) y Bloque 5 (5.3 Visión 15d) junto a sus explicaciones
 
 ### [v1.2.56] — 16/11/2026
 - **Módulos Afectados:** Manuales Gest-Spa Bloques 1, 2 y 3 (data.js)

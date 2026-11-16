@@ -60,6 +60,53 @@
         .top-nav .dropdown-content {
             max-width: calc(100vw - 24px);
         }
+        /* Mejora visual global para todos los manuales y bloques del Portal Spa */
+        .protocol-full-body > div > section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px 22px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.035);
+            margin-bottom: 20px !important;
+        }
+        .protocol-full-body section > h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-left: 12px !important;
+            border-left: 4px solid #0284c7;
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 16px !important;
+            color: #0f172a !important;
+        }
+        .protocol-full-body img[onclick*="__openImgZoom"] {
+            width: auto !important;
+            max-width: 100% !important;
+            height: auto !important;
+            max-height: 290px !important;
+            margin: 0 auto !important;
+            display: block;
+            border-radius: 10px !important;
+            background: transparent !important;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .protocol-full-body img[onclick*="__openImgZoom"]:hover {
+            transform: scale(1.015);
+            box-shadow: 0 8px 22px rgba(10, 106, 161, 0.16);
+        }
+        .protocol-full-body code {
+            background: #f1f5f9;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .protocol-full-body [style*="align-items:stretch"] {
+            align-items: center !important;
+        }
     </style>
 </head>
 <body>
