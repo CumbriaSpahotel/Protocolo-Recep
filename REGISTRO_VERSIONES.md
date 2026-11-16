@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.71`** | **16/11/2026** | En producción |
+| **`v1.2.72`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.72] — 16/11/2026
+- **Módulos Afectados:** Editor de Protocolos Spa (admin.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - El selector de categoría principal en protocolos de Spa muestra ahora los menús reales del Portal Spa (Procedimientos Spa, Bonos, BONOS EXTERNOS, Manuales, GEST-SPA / ZENITH) y asigna automáticamente el protocolo al guardar
 
 ### [v1.2.71] — 16/11/2026
 - **Módulos Afectados:** Panel Admin (admin.html, admin.js, server.js), Visor General (app.js), Portal Spa (spa.html)

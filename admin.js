@@ -1735,6 +1735,22 @@ function toggleVisibility(index) {
     showToast(newState ? '🙈 Protocolo ocultado de la web pública' : '👁️ Protocolo visible en la web pública');
 }
 
+function findSpaCategoryValueForSection(sec) {
+    const s = String(sec || '').trim();
+    const menus = typeof ensureSpaMenusConfig === 'function' ? ensureSpaMenusConfig() : [];
+    for (const m of menus) {
+        for (const sf of (m.subfolders || [])) {
+            if ((sf.sections || []).map(String).includes(s)) {
+                return `spa-sub:${m.id}:${sf.id}`;
+            }
+        }
+        if ((m.sections || []).map(String).includes(s)) {
+            return `spa-menu:${m.id}`;
+        }
+    }
+    return menus[0] ? `spa-menu:${menus[0].id}` : '5.2';
+}
+
 function populateCategories() {
     const select = document.getElementById('edit-category');
     const prevVal = select.value;
@@ -1742,6 +1758,33 @@ function populateCategories() {
     const isSpaOnly = sourceVal === 'Cumbria Bienestar';
 
     select.innerHTML = isSpaOnly ? '' : '<option value="">Sin Sección</option>';
+
+    if (isSpaOnly && typeof ensureSpaMenusConfig === 'function') {
+        const spaMenus = ensureSpaMenusConfig();
+        const iconEmoji = (ic) => ic === 'fa-ticket-alt' ? '🎟️' : (ic === 'fa-book' ? '📖' : '🪷');
+        spaMenus.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = `spa-menu:${m.id}`;
+            opt.textContent = `${iconEmoji(m.icon)} ${m.name}`;
+            opt.style.fontWeight = '700';
+            select.appendChild(opt);
+
+            (m.subfolders || []).forEach(sf => {
+                const subOpt = document.createElement('option');
+                subOpt.value = `spa-sub:${m.id}:${sf.id}`;
+                subOpt.textContent = `\u00A0\u00A0\u2514 📁 ${m.name} › ${sf.name}`;
+                subOpt.style.color = '#0a6aa1';
+                select.appendChild(subOpt);
+            });
+        });
+
+        if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) {
+            select.value = prevVal;
+        } else if (select.options.length > 0) {
+            select.value = select.options[0].value;
+        }
+        return;
+    }
     
     let navConf = typeof navigation_config !== 'undefined' ? navigation_config : {};
     try {
@@ -1785,23 +1828,14 @@ function populateCategories() {
         });
     }
 
-    if (isSpaOnly && !Array.from(select.options).some(o => o.value === '5.2')) {
-        const spaOpt = document.createElement('option');
-        spaOpt.value = '5.2';
-        spaOpt.textContent = '5.2. 💧 Cumbria Bienestar (Spa)';
-        spaOpt.style.color = '#0a6aa1';
-        select.appendChild(spaOpt);
-    }
-
     if (prevVal && Array.from(select.options).some(o => o.value === prevVal)) {
         select.value = prevVal;
-    } else if (isSpaOnly && Array.from(select.options).some(o => o.value === '5.2')) {
-        select.value = '5.2';
     }
 }
 
 function updateParentSections(selectedParent = '') {
-    const categoryId = document.getElementById('edit-category').value;
+    const rawCat = document.getElementById('edit-category').value;
+    const categoryId = (rawCat && (rawCat.startsWith('spa-menu:') || rawCat.startsWith('spa-sub:'))) ? '5.2' : rawCat;
     const parentSelect = document.getElementById('edit-parent-section');
     parentSelect.innerHTML = '<option value="">-- Es apartado principal --</option>';
     
@@ -1842,7 +1876,8 @@ function updateParentSections(selectedParent = '') {
 }
 
 function generateNextId(force = false) {
-    const categoryId = document.getElementById('edit-category').value.trim();
+    const rawCat = document.getElementById('edit-category').value.trim();
+    const categoryId = (rawCat.startsWith('spa-menu:') || rawCat.startsWith('spa-sub:')) ? '5.2' : rawCat;
     const parentSection = document.getElementById('edit-parent-section').value.trim();
     const sectionInput = document.getElementById('edit-section');
     
@@ -2037,8 +2072,14 @@ function openEditor(index = -1, options = null) {
             let parentId = '';
             
             const categorySelect = document.getElementById('edit-category');
+            const isSpaProto = (p.source === 'Cumbria Bienestar') || String(p.section).startsWith('5.2.');
             
-            if (parts.length >= 2) {
+            if (isSpaProto && Array.from(categorySelect.options).some(o => o.value.startsWith('spa-'))) {
+                catId = findSpaCategoryValueForSection(p.section);
+                if (parts.length > 3) {
+                    parentId = parts.slice(0, -1).join('.');
+                }
+            } else if (parts.length >= 2) {
                 const possibleSubCat = `${parts[0]}.${parts[1]}`;
                 const hasSubCat = Array.from(categorySelect.options).some(opt => opt.value === possibleSubCat);
                 
@@ -2923,6 +2964,35 @@ function saveProtocol() {
         adminProtocols.unshift(p);
     } else {
         adminProtocols[editingIndex] = p;
+    }
+
+    // Si es un protocolo del Spa y se ha elegido un menú/subcarpeta de Spa en #edit-category, asignarlo en spa_navigation_config
+    const rawCatVal = document.getElementById('edit-category') ? document.getElementById('edit-category').value : '';
+    if (section && (rawCatVal.startsWith('spa-menu:') || rawCatVal.startsWith('spa-sub:')) && typeof ensureSpaMenusConfig === 'function') {
+        const spaCfg = ensureSpaMenusConfig();
+        const secStr = String(section).trim();
+        spaCfg.forEach(m => {
+            m.sections = (m.sections || []).map(String).filter(s => s !== secStr);
+            (m.subfolders || []).forEach(sf => {
+                sf.sections = (sf.sections || []).map(String).filter(s => s !== secStr);
+            });
+        });
+        if (rawCatVal.startsWith('spa-menu:')) {
+            const mId = rawCatVal.slice('spa-menu:'.length);
+            const targetMenu = spaCfg.find(m => m.id === mId);
+            if (targetMenu) {
+                if (!Array.isArray(targetMenu.sections)) targetMenu.sections = [];
+                targetMenu.sections.push(secStr);
+            }
+        } else if (rawCatVal.startsWith('spa-sub:')) {
+            const [, mId, sfId] = rawCatVal.split(':');
+            const targetMenu = spaCfg.find(m => m.id === mId);
+            const targetSub = targetMenu && (targetMenu.subfolders || []).find(sf => sf.id === sfId);
+            if (targetSub) {
+                if (!Array.isArray(targetSub.sections)) targetSub.sections = [];
+                targetSub.sections.push(secStr);
+            }
+        }
     }
 
     // Process alerts sync to home_config
