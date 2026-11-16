@@ -1289,3 +1289,60 @@ var security_config = {
   "guestPasses": []
 };
 
+var spa_navigation_config = [
+  {
+    "id": "procedimientos",
+    "name": "Procedimientos Spa",
+    "icon": "fa-spa",
+    "sections": [
+      "5.2.1"
+    ],
+    "subfolders": [],
+    "links": []
+  },
+  {
+    "id": "bonos",
+    "name": "Bonos",
+    "icon": "fa-ticket-alt",
+    "sections": [
+      "5.2.2"
+    ],
+    "subfolders": [
+      {
+        "id": "bonos-externos",
+        "name": "BONOS EXTERNOS",
+        "sections": [
+          "5.2.3",
+          "5.2.11",
+          "5.2.12",
+          "5.2.13"
+        ]
+      }
+    ],
+    "links": []
+  },
+  {
+    "id": "manuales",
+    "name": "Manuales",
+    "icon": "fa-book",
+    "sections": [
+      "5.2.4"
+    ],
+    "subfolders": [
+      {
+        "id": "gest-spa-zenith",
+        "name": "GEST-SPA / ZENITH",
+        "sections": [
+          "5.2.5",
+          "5.2.6",
+          "5.2.7",
+          "5.2.8",
+          "5.2.9",
+          "5.2.10"
+        ]
+      }
+    ],
+    "links": []
+  }
+];
+

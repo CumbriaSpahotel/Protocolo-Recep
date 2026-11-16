@@ -11,11 +11,26 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.65`** | **16/11/2026** | En producción |
+| **`v1.2.67`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.67] — 16/11/2026
+- **Módulos Afectados:** Gestión de Bonos Regalo (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Sustituido el formato correo antiguo de Gestión de Bonos Regalo (5.2.2) por el manual estructurado sin firma de correo ni pasos 2-3
+
+### [v1.2.66] — 16/11/2026
+- **Módulos Afectados:** Portal Spa (spa.html), Datos (data.js), Backend (server.js), Panel Admin (admin.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Corregida la ubicación de los manuales de GEST-SPA (1 a 6) para que figuren exclusivamente bajo el menú Manuales y no en el desplegable de Procedimientos Spa.
+  - Restaurada la estructura completa de navegación del Spa (`spa_navigation_config`) y las secciones de bonos externos (5.2.11 Smartbox, 5.2.12 Wonderbox, 5.2.13 Ego Experiencias) que habían sido eliminadas accidentalmente en data.js tras un guardado desde el panel de administración.
+  - Blindado el backend (`server.js`) con parser seguro tolerante a comas finales (`vm.runInNewContext`), preservación automática de protocolos existentes y fallback íntegro de menús de Spa para evitar que futuros guardados borren `spa_navigation_config` o secciones no enviadas por el navegador.
+  - Actualizado el fallback por defecto de `getSpaMenusConfig()` en `spa.html` y `admin.js` para asegurar que ningún manual quede nunca desasignado ni caiga en el desplegable de Procedimientos Spa.
 
 ### [v1.2.65] — 16/11/2026
 - **Módulos Afectados:** Estilos Portal Spa (spa.html)

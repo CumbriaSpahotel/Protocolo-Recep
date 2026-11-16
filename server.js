@@ -73,7 +73,9 @@ app.post('/api/save', (req, res) => {
                     const regex = new RegExp(`(?:var|const|let)\\s+${varName}\\s*=\\s*([\\s\\S]*?);\\s*(?:(?:var|const|let)\\s|$)`, 'm');
                     const match = fileContent.match(regex);
                     if (match && match[1]) {
-                        try { return JSON.parse(match[1].trim()); } catch(e) { return null; }
+                        try { return JSON.parse(match[1].trim()); } catch(e) {
+                            try { return require('vm').runInNewContext('(' + match[1].trim() + ')'); } catch(e2) { return null; }
+                        }
                     }
                     return null;
                 };
@@ -90,14 +92,30 @@ app.post('/api/save', (req, res) => {
             }
         }
         
+        const defaultSpaNav = [
+            { id: "procedimientos", name: "Procedimientos Spa", icon: "fa-spa", sections: ["5.2.1"], subfolders: [], links: [] },
+            { id: "bonos", name: "Bonos", icon: "fa-ticket-alt", sections: ["5.2.2"], subfolders: [{ id: "bonos-externos", name: "BONOS EXTERNOS", sections: ["5.2.3", "5.2.11", "5.2.12", "5.2.13"] }], links: [] },
+            { id: "manuales", name: "Manuales", icon: "fa-book", sections: ["5.2.4"], subfolders: [{ id: "gest-spa-zenith", name: "GEST-SPA / ZENITH", sections: ["5.2.5", "5.2.6", "5.2.7", "5.2.8", "5.2.9", "5.2.10"] }], links: [] }
+        ];
+
         const isSet = (val) => val !== undefined && val !== null;
         const channels = isSet(data.channelsConfig) ? data.channelsConfig : existing.channels;
-        const protocols = isSet(data.protocols) ? data.protocols : existing.protocols;
+        let protocols = isSet(data.protocols) ? data.protocols : existing.protocols;
+        if (Array.isArray(existing.protocols) && existing.protocols.length > 0 && Array.isArray(protocols)) {
+            const incomingSections = new Set(protocols.map(p => String(p.section)));
+            const missing = existing.protocols.filter(p => !incomingSections.has(String(p.section)));
+            if (missing.length > 0) {
+                console.warn(`🛡️ Preservando ${missing.length} protocolos existentes ausentes en la petición:`, missing.map(m => m.section));
+                protocols = [...protocols, ...missing];
+            }
+        }
         const nav = isSet(data.navConfig) ? data.navConfig : existing.nav;
         const home = isSet(data.homeConfig) ? data.homeConfig : existing.home;
         const menus = isSet(data.menusConfig) ? data.menusConfig : existing.menus;
         const security = isSet(data.securityConfig) ? data.securityConfig : existing.security;
-        const spaNav = isSet(data.spaNavConfig) ? data.spaNavConfig : existing.spaNav;
+        const spaNav = (isSet(data.spaNavConfig) && Array.isArray(data.spaNavConfig) && data.spaNavConfig.length > 0)
+            ? data.spaNavConfig
+            : ((Array.isArray(existing.spaNav) && existing.spaNav.length > 0) ? existing.spaNav : defaultSpaNav);
         
         // Cloud config merge
         const cloud = { ...existing.cloud };
