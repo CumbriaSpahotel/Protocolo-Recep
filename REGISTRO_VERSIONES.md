@@ -11,11 +11,17 @@ Este documento mantiene el historial de versión unificada, fechas de actualizac
 
 | Versión Global | Fecha de Actualización | Estado General |
 | :---: | :---: | :---: |
-| **`v1.2.69`** | **16/11/2026** | En producción |
+| **`v1.2.70`** | **16/11/2026** | En producción |
 
 ---
 
 ## 📝 Historial de Modificaciones del Sistema
+
+### [v1.2.70] — 16/11/2026
+- **Módulos Afectados:** Manuales Gest-Spa Bloques 1, 2 y 3 (data.js)
+- **Tipo de Cambio:** Mejora / Corrección
+- **Detalle de Cambios:**
+  - Eliminada captura aislada en domingo en el Bloque 3 (5.2.7), corregidos los títulos de las pestañas 1 y 2 (5.2.5 y 5.2.6) y restaurado el desglose completo de los 8 Orígenes en el Bloque 2
 
 ### [v1.2.69] — 16/11/2026
 - **Módulos Afectados:** Bonos Externos (data.js), Cabecera Admin (admin.html)
